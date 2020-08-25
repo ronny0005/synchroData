@@ -1,0 +1,4 @@
+Manifest-Version: 1.0
+Main-Class: BackupData
+Class-Path: mssql-jdbc-8.2.2.jre8.jar
+
