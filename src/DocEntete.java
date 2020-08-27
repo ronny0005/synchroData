@@ -8,85 +8,10 @@ public class DocEntete extends Table {
     public static String tableName = "F_DOCENTETE";
     public static String configList = "listDocEntete";
 
-    public static String list()
-    {
-        return "SELECT \n" +
-                "\t[DO_Domaine], [DO_Type], [DO_Date], [DO_Ref]\n" +
-                "\t, [DO_Tiers], [CO_No], [DO_Period], [DO_Devise]\n" +
-                "\t, [DO_Cours], [DE_No], [LI_No]\n" +
-                "\t, [CT_NumPayeur], [DO_Expedit], [DO_NbFacture], [DO_BLFact]\n" +
-                "\t, [DO_TxEscompte], [DO_Reliquat], [DO_Imprim], [CA_Num]\n" +
-                "\t, [DO_Coord01], [DO_Coord02], [DO_Coord03], [DO_Coord04]\n" +
-                "\t, [DO_Souche], [DO_DateLivr], [DO_Condition], [DO_Tarif]\n" +
-                "\t, [DO_Colisage], [DO_TypeColis], [DO_Transaction], [DO_Langue]\n" +
-                "\t, [DO_Ecart], [DO_Regime], [N_CatCompta], [DO_Ventile]\n" +
-                "\t, [AB_No], [DO_DebutAbo], [DO_FinAbo], [DO_DebutPeriod]\n" +
-                "\t, [DO_FinPeriod], [CG_Num], [DO_Statut], [DO_Heure]\n" +
-                "\t, [CA_No], [CO_NoCaissier]\n" +
-                "\t, [DO_Transfere], [DO_Cloture], [DO_NoWeb], [DO_Attente]\n" +
-                "\t, [DO_Provenance], [CA_NumIFRS], [MR_No], [DO_TypeFrais]\n" +
-                "\t, [DO_ValFrais], [DO_TypeLigneFrais], [DO_TypeFranco], [DO_ValFranco]\n" +
-                "\t\t, [DO_TypeLigneFranco], [DO_Taxe1], [DO_TypeTaux1], [DO_TypeTaxe1]\n" +
-                "\t\t, [DO_Taxe2], [DO_TypeTaux2], [DO_TypeTaxe2], [DO_Taxe3]\n" +
-                "\t\t, [DO_TypeTaux3], [DO_TypeTaxe3], [DO_MajCpta], [DO_Motif]\n" +
-                "\t\t\t, [CT_NumCentrale], [DO_Contact], [DO_FactureElec], [DO_TypeTransac]\n" +
-                "\t\t\t, [cbProt], [cbCreateur], [cbModification], [cbReplication]\n" +
-                "\t\t\t, [cbFlag],[DO_Piece], cbMarqSource = cbMarq\n" +
-                "\t\t,[DataBaseSource] = '" + dbSource + "' \n" +
-                "FROM [dbo].[F_DOCENTETE] " +
-                "WHERE cbModification>= ISNULL((SELECT LastSynchro FROM config.SelectTable WHERE tableName = 'F_DOCENTETE'),'1900-01-01')";
-    }
-
     public static String insert()
     {
         return "BEGIN TRY " +
                 " SET DATEFORMAT ymd;\n" +
-                "UPDATE F_DOCENTETE \n" +
-                "SET [DO_Domaine] = F_DOCENTETE_DEST.DO_Domaine,[DO_Type] = F_DOCENTETE_DEST.DO_Type\n" +
-                "      ,[DO_Piece] = F_DOCENTETE_DEST.DO_Piece,[DO_Date] = F_DOCENTETE_DEST.DO_Date\n" +
-                "      ,[DO_Ref] = LEFT(F_DOCENTETE_DEST.DO_Ref,17),[DO_Tiers] = F_DOCENTETE_DEST.DO_Tiers\n" +
-                "      ,[CO_No] = F_DOCENTETE_DEST.CO_No,[DO_Period] = F_DOCENTETE_DEST.DO_Period\n" +
-                "      ,[DO_Devise] = F_DOCENTETE_DEST.DO_Devise,[DO_Cours] = F_DOCENTETE_DEST.DO_Cours\n" +
-                "      ,[DE_No] = F_DOCENTETE_DEST.DE_No,[LI_No] = F_DOCENTETE_DEST.LI_No\n" +
-                "      ,[CT_NumPayeur] = F_DOCENTETE_DEST.CT_NumPayeur,[DO_Expedit] = F_DOCENTETE_DEST.DO_Expedit\n" +
-                "      ,[DO_NbFacture] = F_DOCENTETE_DEST.DO_NbFacture,[DO_BLFact] = F_DOCENTETE_DEST.DO_BLFact\n" +
-                "      ,[DO_TxEscompte] = F_DOCENTETE_DEST.DO_TxEscompte,[DO_Reliquat] = F_DOCENTETE_DEST.DO_Reliquat\n" +
-                "      ,[DO_Imprim] = F_DOCENTETE_DEST.DO_Imprim,[CA_Num] = F_DOCENTETE_DEST.CA_Num\n" +
-                "      ,[DO_Coord01] = F_DOCENTETE_DEST.DO_Coord01,[DO_Coord02] = F_DOCENTETE_DEST.DO_Coord02\n" +
-                "      ,[DO_Coord03] = F_DOCENTETE_DEST.DO_Coord03,[DO_Coord04] = F_DOCENTETE_DEST.DO_Coord04\n" +
-                "      ,[DO_Souche] = F_DOCENTETE_DEST.DO_Souche,[DO_DateLivr] = F_DOCENTETE_DEST.DO_DateLivr\n" +
-                "      ,[DO_Condition] = F_DOCENTETE_DEST.DO_Condition,[DO_Tarif] = F_DOCENTETE_DEST.DO_Tarif\n" +
-                "      ,[DO_Colisage] = F_DOCENTETE_DEST.DO_Colisage,[DO_TypeColis] = F_DOCENTETE_DEST.DO_TypeColis\n" +
-                "      ,[DO_Transaction] = F_DOCENTETE_DEST.DO_Transaction,[DO_Langue] = F_DOCENTETE_DEST.DO_Langue\n" +
-                "      ,[DO_Ecart] = F_DOCENTETE_DEST.DO_Ecart,[DO_Regime] = F_DOCENTETE_DEST.DO_Regime\n" +
-                "      ,[N_CatCompta] = F_DOCENTETE_DEST.N_CatCompta,[DO_Ventile] = F_DOCENTETE_DEST.DO_Ventile\n" +
-                "      ,[AB_No] = F_DOCENTETE_DEST.AB_No,[DO_DebutAbo] = F_DOCENTETE_DEST.DO_DebutAbo\n" +
-                "      ,[DO_FinAbo] = F_DOCENTETE_DEST.DO_FinAbo,[DO_DebutPeriod] = F_DOCENTETE_DEST.DO_DebutPeriod\n" +
-                "      ,[DO_FinPeriod] = F_DOCENTETE_DEST.DO_FinPeriod,[CG_Num] = F_DOCENTETE_DEST.CG_Num\n" +
-                "      ,[DO_Statut] = F_DOCENTETE_DEST.DO_Statut,[DO_Heure] = F_DOCENTETE_DEST.DO_Heure\n" +
-                "      ,[CA_No] = F_DOCENTETE_DEST.CA_No,[CO_NoCaissier] = F_DOCENTETE_DEST.CO_NoCaissier\n" +
-                "      ,[DO_Transfere] = F_DOCENTETE_DEST.DO_Transfere,[DO_Cloture] = F_DOCENTETE_DEST.DO_Cloture\n" +
-                "      ,[DO_NoWeb] = F_DOCENTETE_DEST.DO_NoWeb,[DO_Attente] = F_DOCENTETE_DEST.DO_Attente\n" +
-                "      ,[DO_Provenance] = F_DOCENTETE_DEST.DO_Provenance,[CA_NumIFRS] = F_DOCENTETE_DEST.CA_NumIFRS\n" +
-                "      ,[MR_No] = F_DOCENTETE_DEST.MR_No,[DO_TypeFrais] = F_DOCENTETE_DEST.DO_TypeFrais\n" +
-                "      ,[DO_ValFrais] = F_DOCENTETE_DEST.DO_ValFrais,[DO_TypeLigneFrais] = F_DOCENTETE_DEST.DO_TypeLigneFrais\n" +
-                "      ,[DO_TypeFranco] = F_DOCENTETE_DEST.DO_TypeFranco,[DO_ValFranco] = F_DOCENTETE_DEST.DO_ValFranco\n" +
-                "      ,[DO_TypeLigneFranco] = F_DOCENTETE_DEST.DO_TypeLigneFranco,[DO_Taxe1] = F_DOCENTETE_DEST.DO_Taxe1\n" +
-                "      ,[DO_TypeTaux1] = F_DOCENTETE_DEST.DO_TypeTaux1,[DO_TypeTaxe1] = F_DOCENTETE_DEST.DO_TypeTaxe1\n" +
-                "      ,[DO_Taxe2] = F_DOCENTETE_DEST.DO_Taxe2,[DO_TypeTaux2] = F_DOCENTETE_DEST.DO_TypeTaux2\n" +
-                "      ,[DO_TypeTaxe2] = F_DOCENTETE_DEST.DO_TypeTaxe2,[DO_Taxe3] = F_DOCENTETE_DEST.DO_Taxe3\n" +
-                "      ,[DO_TypeTaux3] = F_DOCENTETE_DEST.DO_TypeTaux3,[DO_TypeTaxe3] = F_DOCENTETE_DEST.DO_TypeTaxe3\n" +
-                "      ,[DO_MajCpta] = F_DOCENTETE_DEST.DO_MajCpta,[DO_Motif] = F_DOCENTETE_DEST.DO_Motif\n" +
-                "      ,[CT_NumCentrale] = F_DOCENTETE_DEST.CT_NumCentrale,[DO_Contact] = F_DOCENTETE_DEST.DO_Contact\n" +
-                "      ,[DO_FactureElec] = F_DOCENTETE_DEST.DO_FactureElec,[DO_TypeTransac] = F_DOCENTETE_DEST.DO_TypeTransac\n" +
-                "      ,[cbProt] = F_DOCENTETE_DEST.cbProt,[cbCreateur] = F_DOCENTETE_DEST.cbCreateur\n" +
-                "      ,[cbModification] = F_DOCENTETE_DEST.cbModification,[cbReplication] = F_DOCENTETE_DEST.cbReplication\n" +
-                "      ,[cbFlag] = F_DOCENTETE_DEST.cbFlag\n" +
-                "FROM F_DOCENTETE_DEST\n" +
-                "WHERE\tF_DOCENTETE.DO_Domaine = F_DOCENTETE_DEST.DO_Domaine\n" +
-                "\tAND\tF_DOCENTETE.DO_Type = F_DOCENTETE_DEST.DO_Type\n" +
-                "\tAND\tF_DOCENTETE.DO_Piece = F_DOCENTETE_DEST.DO_Piece\n" +
-                "\tAND\tF_DOCENTETE.DataBaseSource = F_DOCENTETE_DEST.DataBaseSource;\n" +
                 " INSERT INTO F_DOCENTETE (\n" +
                 "[DO_Domaine], [DO_Type], [DO_Date], [DO_Ref]\n" +
                 "\t, [DO_Tiers], [CO_No], [DO_Period], [DO_Devise]\n" +
@@ -151,6 +76,7 @@ public class DocEntete extends Table {
                 "   ERROR_LINE(),\n" +
                 "   ERROR_PROCEDURE(),\n" +
                 "   ERROR_MESSAGE(),\n" +
+                "   'Insert',\n" +
                 "   'F_DOCENTETE',\n" +
                 "   GETDATE());\n" +
                 "END CATCH";
@@ -158,45 +84,20 @@ public class DocEntete extends Table {
     public static void sendDataElement(Connection sqlCon, String path,String database)
     {
         dbSource = database;
-
         readOnFile(path,file,tableName+"_DEST",sqlCon);
         readOnFile(path,"deleteList"+file,tableName+"_SUPPR",sqlCon);
-        executeQuery(sqlCon,updateTableDest( "AR_Ref",tableName,tableName+"_DEST"));
-        sendData(sqlCon, path, file,selectSourceTable(tableName,"BOUMKO")/*, insert()*/);
-        /*
-        readOnFile(path,file,"F_DOCENTETE_DEST",sqlCon);
-        readOnFile(path,"deleteList"+file,"F_DOCENTETE_SUPPR",sqlCon);
-        sendData(sqlCon, path, file, insert());
+        executeQuery(sqlCon,updateTableDest( "DO_Domaine,DO_Type,DO_Piece,DataBaseSource","'DO_Domaine','DO_Type','DO_Piece','DataBaseSource'",tableName,tableName+"_DEST"));
+        sendData(sqlCon, path, file,insert());
 
-         */
-        deleteTempTable(sqlCon);
+        deleteTempTable(sqlCon,tableName);
         deleteDocEntete(sqlCon, path);
     }
     public static void getDataElement(Connection sqlCon, String path,String database)
     {
         dbSource = database;
-        initTableParam(sqlCon,tableName,configList,"AR_Ref,AC_Categorie");//initTable(sqlCon);
-        getData(sqlCon, selectSourceTable(tableName,"BOUMKO")/*list()*/, tableName, path, file);
-        listDeleteAllInfo(sqlCon, path, "deleteList" + file,tableName,configList);
-        /*initTable(sqlCon);
-        getData(sqlCon, list(), "F_DOCENTETE", path, file);
-        listDeleteDocEntete(sqlCon, path, "deleteList" + file);
-
-         */
-    }
-    public static void initTable(Connection sqlCon)
-    {
-        String query = " IF NOT EXISTS (SELECT 1 FROM config.SelectTable WHERE tableName='F_DOCENTETE') " +
-                " INSERT INTO config.ListDocEntete " +
-                " SELECT DO_Domaine,DO_Type,DO_Piece,DataBaseSource = '" + dbSource + "',cbMarq " +
-                " FROM F_DOCENTETE ";
-        executeQuery(sqlCon, query);
-    }
-    public static void deleteTempTable(Connection sqlCon)
-    {
-        String query = "IF OBJECT_ID('F_DOCENTETE_DEST') IS NOT NULL \n" +
-                "\tDROP TABLE F_DOCENTETE_DEST;";
-        executeQuery(sqlCon, query);
+        initTableParam(sqlCon,tableName,configList,"DO_Domaine,DO_Type,DO_Piece,DatabaseSource");
+        getData(sqlCon, selectSourceTable(tableName,database), tableName, path, file);
+        listDeleteAllInfo(sqlCon, path, "deleteList" + file,tableName,configList,database);
     }
     public static void deleteDocEntete(Connection sqlCon, String path)
     {
@@ -211,22 +112,5 @@ public class DocEntete extends Table {
             executeQuery(sqlCon, query);
             archiveDocument(path + "\\archive", path, "deleteList" + file);
         }
-    }
-    public static void listDeleteDocEntete(Connection sqlCon, String path, String file)
-    {
-        String query = " SELECT lart.DO_Domaine,lart.DO_Type,lart.DO_Piece,lart.DataBaseSource,lart.cbMarq " +
-                " FROM config.ListDocEntete lart " +
-                " LEFT JOIN dbo.F_DOCENTETE fart " +
-                "    ON lart.cbMarq = fart.cbMarq " +
-                " WHERE fart.cbMarq IS NULL " +
-                ";";
-
-        writeOnFile(path + "\\" + file, query, sqlCon);
-
-        query = " DELETE FROM config.ListDocEntete " +
-                " WHERE NOT EXISTS(SELECT 1 " +
-                "                  FROM F_DOCENTETE " +
-                "                  WHERE dbo.F_DOCENTETE.cbMarq = config.ListDocEntete.cbMarq);";
-        executeQuery(sqlCon, query);
     }
 }

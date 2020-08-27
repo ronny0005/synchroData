@@ -5,7 +5,7 @@ public class ArticleRessource extends Table {
 
     public static String file ="articleressource.csv";
     public static String tableName = "F_ARTICLERESSOURCE";
-    public static String configList = "listArtRessource";
+    public static String configList = "ListArticleRessource";
     public static String list()
     {
         return "SELECT\t[AR_Ref],[RP_Code],[cbProt],[cbMarq]\n" +
@@ -19,16 +19,6 @@ public class ArticleRessource extends Table {
     {
         return "BEGIN TRY" +
                 " SET DATEFORMAT ymd;\n" +
-                "\tUPDATE F_ARTICLERESSOURCE \n" +
-                "\tSET  [cbProt] = F_ARTICLERESSOURCE_DEST.cbProt\n" +
-                "      ,[cbCreateur] = F_ARTICLERESSOURCE_DEST.cbCreateur\n" +
-                "      ,[cbModification] = F_ARTICLERESSOURCE_DEST.cbModification\n" +
-                "      ,[cbReplication] = F_ARTICLERESSOURCE_DEST.cbReplication\n" +
-                "      ,[cbFlag] = F_ARTICLERESSOURCE_DEST.cbFlag\n" +
-                "\tFROM F_ARTICLERESSOURCE_DEST\n" +
-                "\tWHERE F_ARTICLERESSOURCE.AR_Ref = F_ARTICLERESSOURCE_DEST.AR_Ref\n" +
-                "\t\tAND F_ARTICLERESSOURCE.RP_Code = F_ARTICLERESSOURCE_DEST.RP_Code\n" +
-                "                                \n" +
                 "\tINSERT INTO F_ARTICLERESSOURCE (\n" +
                 "\t[AR_Ref],[RP_Code],[cbProt]\n" +
                 "\t\t\t,[cbCreateur],[cbModification],[cbReplication],[cbFlag])\n" +
@@ -51,6 +41,7 @@ public class ArticleRessource extends Table {
                 "   ERROR_LINE(),\n" +
                 "   ERROR_PROCEDURE(),\n" +
                 "   ERROR_MESSAGE(),\n" +
+                "   'insert',\n" +
                 "   'F_ARTICLERESSOURCE',\n" +
                 "   GETDATE());\n" +
                 "END CATCH";
@@ -58,35 +49,20 @@ public class ArticleRessource extends Table {
 
     public static void sendDataElement(Connection sqlCon, String path,String database)
     {
-
         readOnFile(path,file,tableName+"_DEST",sqlCon);
         readOnFile(path,"deleteList"+file,tableName+"_SUPPR",sqlCon);
-        executeQuery(sqlCon,updateTableDest( "AR_Ref",tableName,tableName+"_DEST"));
-        sendData(sqlCon, path, file,selectSourceTable(tableName,"BOUMKO")/*, insert()*/);
-        /*readOnFile(path,file,"F_ARTICLERESSOURCE_DEST",sqlCon);
-        readOnFile(path,"deleteList"+file,"F_ARTICLERESSOURCE_SUPPR",sqlCon);
-        sendData(sqlCon, path, file, insert());
+        executeQuery(sqlCon,updateTableDest( "RP_Code,AR_Ref","'RP_Code'",tableName,tableName+"_DEST"));
+        sendData(sqlCon, path, file,insert());
 
-         */
         deleteArticleRessource(sqlCon, path);
     }
     public static void getDataElement(Connection sqlCon, String path,String database)
     {
-        initTableParam(sqlCon,tableName,configList,"AR_Ref,AC_Categorie");//initTable(sqlCon);
-        getData(sqlCon, selectSourceTable(tableName,"BOUMKO")/*list()*/, tableName, path, file);
-        listDeleteAllInfo(sqlCon, path, "deleteList" + file,tableName,configList);
-        /*initTable(sqlCon);
-        getData(sqlCon, list(), "F_ARTICLERESSOURCE", path, file);
-        listDeleteArticleRessource(sqlCon, path);*/
+        initTableParam(sqlCon,tableName,configList,"RP_Code,AR_Ref");//initTable(sqlCon);
+        getData(sqlCon, selectSourceTable(tableName,database), tableName, path, file);
+        listDeleteAllInfo(sqlCon, path, "deleteList" + file,tableName,configList,database);
     }
-    public static void initTable(Connection sqlCon)
-    {
-        String query = " IF NOT EXISTS (SELECT 1 FROM config.SelectTable WHERE tableName='F_ARTICLERESSOURCE') " +
-                " INSERT INTO config.ListArticleRessource " +
-                " SELECT RP_Code,AR_Ref,cbMarq " +
-                " FROM F_ARTICLERESSOURCE ";
-        executeQuery(sqlCon, query);
-    }
+
     public static void deleteArticleRessource(Connection sqlCon, String path)
     {
         String query =
@@ -102,21 +78,4 @@ public class ArticleRessource extends Table {
         }
     }
 
-    public static void listDeleteArticleRessource(Connection sqlCon, String path)
-    {
-        String query = " SELECT lart.RP_Code,lart.AR_Ref,lart.cbMarq " +
-                " FROM config.ListArticleRessource lart " +
-                " LEFT JOIN dbo.F_ARTICLERESSOURCE fart " +
-                "    ON lart.cbMarq = fart.cbMarq " +
-                " WHERE fart.cbMarq IS NULL " +
-                ";";
-
-        writeOnFile(path + "\\deleteList" + file, query, sqlCon);
-
-        query = " DELETE FROM config.ListArticleRessource " +
-                " WHERE NOT EXISTS(SELECT 1 " +
-                "                  FROM F_ARTICLERESSOURCE " +
-                "                  WHERE dbo.F_ARTICLERESSOURCE.cbMarq = config.ListArticleRessource.cbMarq);";
-        executeQuery(sqlCon, query);
-    }
 }

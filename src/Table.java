@@ -28,7 +28,8 @@ public class Table {
                 "INNER JOIN sys.columns col\n" +
                 "\tON tab.object_id = col.object_id\n" +
                 "WHERE tab.name = @TableName\n" +
-                "AND col.name NOT LIKE 'cb%'\n" +
+                "AND col.name NOT LIKE 'cb%'" +
+                "AND col.name NOT IN ('DataBaseSource','cbMarqSource')\n" +
                 "\n" +
                 "OPEN @getid\n" +
                 "FETCH NEXT\n" +
@@ -53,9 +54,9 @@ public class Table {
     }
 
 
-    public static void listDeleteAllInfo(Connection sqlCon, String path, String file,String table,String listTable)
+    public static void listDeleteAllInfo(Connection sqlCon, String path, String file,String table,String listTable,String database)
     {
-        String query = listDelete(table,listTable);
+        String query = listDelete(table,listTable,database);
 
         writeOnFile(path + "\\" + file, query, sqlCon);
 
@@ -70,6 +71,12 @@ public class Table {
                 "                  WHERE dbo."+table+".cbMarq = config."+listTable+".cbMarq);";
     }
 
+    public static void deleteTempTable(Connection sqlCon,String table)
+    {
+        String query = "IF OBJECT_ID('"+table+"_DEST') IS NOT NULL \n" +
+                "\tDROP TABLE "+table+"_DEST;";
+        executeQuery(sqlCon, query);
+    }
 
     public static void deleteRows(Connection sqlCon, String path,String file,String table,String isDataSource)
     {
@@ -100,6 +107,7 @@ public class Table {
                         "\t\tERROR_PROCEDURE(),\n" +
                         "\t\tERROR_MESSAGE(),\n" +
                         "\t\t@TableName,\n" +
+                        "\t\t@MonSQL,\n" +
                         "\t\tGETDATE()\n" +
                         "\t);\n" +
                         "END CATCH\n";
@@ -143,6 +151,7 @@ public class Table {
                         "\t\tERROR_PROCEDURE(),\n" +
                         "\t\tERROR_MESSAGE(),\n" +
                         "\t\t@TableName,\n" +
+                        "\t\t@MonSQL,\n" +
                         "\t\tGETDATE()\n" +
                         "\t);\n" +
                         "END CATCH\n";
@@ -153,7 +162,7 @@ public class Table {
         }
     }
 
-    public static String listDelete(String table,String listTable){
+    public static String listDelete(String table,String listTable,String database){
         return  "BEGIN TRY\n" +
                 "DECLARE @MaColonne AS VARCHAR(250);\n" +
                 "DECLARE @MonSQL AS VARCHAR(MAX)=''; \n" +
@@ -173,9 +182,12 @@ public class Table {
                 "FROM @getid INTO @MaColonne\n" +
                 "WHILE @@FETCH_STATUS = 0\n" +
                 "BEGIN\n" +
-                " SELECT @MonSQL = @MonSQL+ ',lart.' + @MaColonne \n" +
+                " IF @MaColonne ='DataBaseSource' \n"+
+                " SELECT @MonSQL = @MonSQL+ ',DataBaseSource = ''"+database+"'' ' \n" +
+                " ELSE \n" +
+                "   SELECT @MonSQL = @MonSQL+ ',lart.' + @MaColonne \n" +
                 " FETCH NEXT\n" +
-                "    FROM @getid INTO @MaColonne --, @name\n" +
+                "    FROM @getid INTO @MaColonne \n" +
                 "END\n" +
                 "CLOSE @getid\n" +
                 "DEALLOCATE @getid\n" +
@@ -197,17 +209,19 @@ public class Table {
                 "\t\tERROR_PROCEDURE(),\n" +
                 "\t\tERROR_MESSAGE(),\n" +
                 "\t\t@TableName,\n" +
+                "\t\t@MonSQL,\n" +
                 "\t\tGETDATE()\n" +
                 "\t);\n" +
                 "END CATCH\n";
     }
-    public static String updateTableDest(String key,String tableName,String tableNameDest){
-        return "\n" +
+    public static String updateTableDest(String key,String exclude,String tableName,String tableNameDest){
+        String[] keys = key.split(",");
+        String sql =  "\n" +
                 "BEGIN TRY\n" +
                 "DECLARE @MaColonne AS VARCHAR(250);\n" +
-                "DECLARE @MonSQL AS VARCHAR(MAX)=''; \n" +
-                "DECLARE @isKey AS INT=0; \n" +
-                "DECLARE @Key AS NVARCHAR(250)='"+key+"'; \n" +
+                "DECLARE @MonSQL AS VARCHAR(MAX) = ''; \n" +
+                "DECLARE @isKey AS INT=CASE WHEN '"+ key +"' = '' THEN 0 ELSE 1 END; \n" +
+                "DECLARE @Key AS NVARCHAR(250) = '"+key+"'; \n" +
                 "DECLARE @TableName AS VARCHAR(100) = '"+tableName+"'; \n" +
                 "DECLARE @TableNameDest AS VARCHAR(100) = '"+tableNameDest+"'; \n" +
                 "DECLARE @getid CURSOR\n" +
@@ -219,7 +233,7 @@ public class Table {
                 "\tON tab.object_id = col.object_id\n" +
                 "WHERE tab.name = @TableName\n" +
                 "AND col.name NOT LIKE 'cb%'\n" +
-                "AND col.name NOT IN ('AG_No1','AG_No2','DL_No')\n" +
+                "AND col.name NOT IN ("+ exclude +")\n" +
                 "\n" +
                 "OPEN @getid\n" +
                 "FETCH NEXT\n" +
@@ -228,16 +242,25 @@ public class Table {
                 "BEGIN\n" +
                 " SELECT @MonSQL = @MonSQL+ ',' + @MaColonne +' = ' + @TableNameDest + '.' + @MaColonne \n" +
                 " FETCH NEXT\n" +
-                "    FROM @getid INTO @MaColonne --, @name\n" +
+                "    FROM @getid INTO @MaColonne \n" +
                 "END\n" +
                 "CLOSE @getid\n" +
                 "DEALLOCATE @getid\n" +
-                "SELECT @MonSQL = 'UPDATE '+@TableName+' SET '+ SUBSTRING(@MonSQL,2,LEN(@MonSQL));\n" +
+                " SELECT @MonSQL = 'UPDATE '+@TableName+' SET '+ SUBSTRING(@MonSQL,2,LEN(@MonSQL));\n" +
+                " SELECT @MonSQL = @MonSQL + ' FROM ' + @TableNameDest  +' WHERE '\n" +
                 "IF @isKey = 0 \n" +
-                "\tSELECT @MonSQL = @MonSQL +' WHERE '+@TableName + '.cbMarqSource = '+ @TableNameDest+'.cbMarqSource'\n" +
-                "\t\t\t\t\t\t+' AND '+@TableName + '.DataBaseSource = '+ @TableNameDest+'.DataBaseSource'\n" +
-                "ELSE \n" +
-                "\tSELECT @MonSQL = @MonSQL +' WHERE '+@TableName + '.'+@Key+' = '+ @TableNameDest+ '.'+@Key\n" +
+                "\tSELECT @MonSQL = @MonSQL + @TableName + '.cbMarqSource = '+ @TableNameDest+'.cbMarqSource '\n" +
+                "\t\t\t\t\t\t+' AND '+@TableName + '.DataBaseSource = '+ @TableNameDest+'.DataBaseSource '\n" +
+                "ELSE \n" ;
+        for (int i = 0;i< keys.length;i++) {
+            if(i== 0 ) {
+                sql = sql + " SELECT @MonSQL = @MonSQL ";
+                sql = sql + "+ @TableName + '." + keys[i] + " = '+ @TableNameDest+'." + keys[i] + " '";
+            }
+            if(i>0)
+                sql = sql + "+' AND '+@TableName + '."+keys[i]+" = '+ @TableNameDest+'."+keys[i]+" '";
+        }
+        sql =  sql +
                 "\n" +
                 "EXEC (@MonSQL) \n" +
                 "\n" +
@@ -254,9 +277,11 @@ public class Table {
                 "\t\tERROR_PROCEDURE(),\n" +
                 "\t\tERROR_MESSAGE(),\n" +
                 "\t\t@TableName,\n" +
+                "\t\t@MonSQL,\n" +
                 "\t\tGETDATE()\n" +
                 "\t);\n" +
                 "END CATCH";
+        return sql;
     }
     public static void archiveDocument(String archive, String source,String file)
     {
@@ -501,6 +526,7 @@ public class Table {
                 "\t\tERROR_PROCEDURE(),\n" +
                 "\t\tERROR_MESSAGE(),\n" +
                 "\t\t@TableName,\n" +
+                "\t\t@MonSQL,\n" +
                 "\t\tGETDATE()\n" +
                 "\t);\n" +
                 "END CATCH\n";

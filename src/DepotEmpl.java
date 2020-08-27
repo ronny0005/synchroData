@@ -6,14 +6,6 @@ public class DepotEmpl extends Table {
     public static String file = "depotEmpl.csv";
     public static String tableName = "F_DEPOTEMPL";
     public static String configList = "listDepotEmpl";
-    public static String list()
-    {
-        return "SELECT\t[DE_No],[DP_No],[DP_Code],[DP_Intitule],[DP_Zone],[DP_Type]\n" +
-                "\t\t,[cbProt],[cbCreateur],[cbModification],[cbReplication],[cbFlag]\n" +
-                ", cbMarqSource = cbMarq  \n" +
-                "FROM\t[F_DEPOTEMPL]\n" +
-                "WHERE cbModification >= ISNULL((SELECT LastSynchro FROM config.SelectTable WHERE tableName='F_DEPOTEMPL'),'1900-01-01')\n";
-    }
 
     public static String insert()
     {
@@ -55,49 +47,28 @@ public class DepotEmpl extends Table {
                         "   ERROR_LINE(),\n" +
                         "   ERROR_PROCEDURE(),\n" +
                         "   ERROR_MESSAGE(),\n" +
+                        "   'insert',\n" +
                         "   'F_DEPOTEMPL',\n" +
                         "   GETDATE());\n" +
                         "END CATCH";
     }
 
-    public static void deleteTempTable(Connection sqlCon)
-    {
-        String query = "IF OBJECT_ID('F_DEPOTEMPL_DEST') IS NOT NULL \n" +
-                "\tDROP TABLE F_DEPOTEMPL_DEST;";
-        executeQuery(sqlCon, query);
-    }
     public static void sendDataElement(Connection sqlCon, String path,String database)
     {
 
         readOnFile(path,file,tableName+"_DEST",sqlCon);
         readOnFile(path,"deleteList"+file,tableName+"_SUPPR",sqlCon);
-        executeQuery(sqlCon,updateTableDest( "AR_Ref",tableName,tableName+"_DEST"));
-        sendData(sqlCon, path, file,selectSourceTable(tableName,"BOUMKO")/*, insert()*/);
-        /*readOnFile(path,file,"F_DEPOTEMPL_DEST",sqlCon);
-        readOnFile(path,"deleteList"+file,"F_DEPOTEMPL_SUPPR",sqlCon);
-        sendData(sqlCon, path, file, insert());
+        executeQuery(sqlCon,updateTableDest( "DP_No","'DP_No','DE_No'",tableName,tableName+"_DEST"));
+        sendData(sqlCon, path, file,insert());
 
-         */
-        deleteTempTable(sqlCon);
+        deleteTempTable(sqlCon,tableName);
         deleteDepot(sqlCon, path);
     }
     public static void getDataElement(Connection sqlCon, String path,String database)
     {
-        initTableParam(sqlCon,tableName,configList,"AR_Ref,AC_Categorie");//initTable(sqlCon);
-        getData(sqlCon, selectSourceTable(tableName,"BOUMKO")/*list()*/, tableName, path, file);
-        listDeleteAllInfo(sqlCon, path, "deleteList" + file,tableName,configList);
-        /*initTable(sqlCon);
-        getData(sqlCon, list(), "F_DEPOTEMPL", path, file);
-        listDeleteDepot(sqlCon, path);
-         */
-    }
-    public static void initTable(Connection sqlCon)
-    {
-        String query = " IF NOT EXISTS (SELECT 1 FROM config.SelectTable WHERE tableName='F_DEPOTEMPL') \n" +
-                "     INSERT INTO config.ListDepot\n" +
-                "     SELECT DP_No,cbMarq \n" +
-                "     FROM F_DEPOTEMPL";
-        executeQuery(sqlCon, query);
+        initTableParam(sqlCon,tableName,configList,"DP_No");
+        getData(sqlCon, selectSourceTable(tableName,database), tableName, path, file);
+        listDeleteAllInfo(sqlCon, path, "deleteList" + file,tableName,configList,database);
     }
     public static void deleteDepot(Connection sqlCon, String path)
     {
@@ -113,23 +84,5 @@ public class DepotEmpl extends Table {
             executeQuery(sqlCon, query);
             archiveDocument(path + "\\archive", path, "deleteList" + file);
         }
-    }
-
-    public static void listDeleteDepot(Connection sqlCon, String path)
-    {
-        String query = " SELECT lart.DP_No,lart.cbMarq " +
-                " FROM config.ListDepotEmpl lart " +
-                " LEFT JOIN dbo.F_DEPOTEMPL fart " +
-                "    ON lart.cbMarq = fart.cbMarq " +
-                " WHERE fart.cbMarq IS NULL " +
-                ";";
-
-        writeOnFile(path + "\\deleteList" + file, query, sqlCon);
-
-        query = " DELETE FROM config.ListDepotEmpl " +
-                " WHERE NOT EXISTS(SELECT 1 " +
-                "                  FROM F_DEPOTEMPL " +
-                "                  WHERE dbo.F_DEPOTEMPL.cbMarq = config.ListDepotEmpl.cbMarq);";
-        executeQuery(sqlCon, query);
     }
 }

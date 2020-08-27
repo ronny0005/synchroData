@@ -25,8 +25,8 @@ public class BackupData {
             Connection sqlCon = DriverManager.getConnection(dbURL, properties);
 
             sqlCon.setAutoCommit(true);
-            Article.getDataElement(sqlCon, path,list.get(1));
-/*
+//            ReglEch.getDataElement(sqlCon, path,list.get(1));
+
             if(list.get(7).equals("1"))
                 Depot.getDataElement(sqlCon, path,list.get(1));
             if(list.get(12).equals("1"))
@@ -56,7 +56,7 @@ public class BackupData {
             if(list.get(15).equals("1")) {
                 EcritureA.getDataElement(sqlCon, path,list.get(1));
             }
-*/
+
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         }

@@ -29,8 +29,8 @@ public class UpdateData {
             Connection sqlCon = DriverManager.getConnection(dbURL, properties);
 
             sqlCon.setAutoCommit(true);
-            Article.sendDataElement(sqlCon, path,list.get(1));
-/*
+//            DocLigne.sendDataElement(sqlCon, path,list.get(1));
+
             if(list.get(7).equals("1"))
                 Depot.sendDataElement(sqlCon, path,list.get(1));
             if(list.get(12).equals("1"))
@@ -61,7 +61,7 @@ public class UpdateData {
             if(list.get(15).equals("1")) {
                 EcritureA.sendDataElement(sqlCon, path,list.get(1));
             }
-*/
+
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         }

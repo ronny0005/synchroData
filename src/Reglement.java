@@ -6,7 +6,7 @@ public class Reglement extends Table {
 
     public static String file = "Reglement.csv";
     public static String dbSource = "BIJOU";
-    public static String tableName = "F_REGLEMENT";
+    public static String tableName = "F_CREGLEMENT";
     public static String configList = "listReglement";
     public static String list()
     {
@@ -105,6 +105,7 @@ public class Reglement extends Table {
                 "   ERROR_LINE(),\n" +
                 "   ERROR_PROCEDURE(),\n" +
                 "   ERROR_MESSAGE(),\n" +
+                "   'insert',\n" +
                 "   'F_REGLEMENT',\n" +
                 "   GETDATE());\n" +
                 "END CATCH";
@@ -114,49 +115,20 @@ public class Reglement extends Table {
         dbSource = database;
         readOnFile(path,file,tableName+"_DEST",sqlCon);
         readOnFile(path,"deleteList"+file,tableName+"_SUPPR",sqlCon);
-        executeQuery(sqlCon,updateTableDest( "AR_Ref",tableName,tableName+"_DEST"));
-        sendData(sqlCon, path, file,selectSourceTable(tableName,"BOUMKO")/*, insert()*/);
-        /*readOnFile(path,file,"F_CREGLEMENT_DEST",sqlCon);
-        readOnFile(path,"deleteList"+file,"F_CREGLEMENT_SUPPR",sqlCon);
-        sendData(sqlCon, path, file, insert());
+        executeQuery(sqlCon,updateTableDest( "","'RG_No'",tableName,tableName+"_DEST"));
+        sendData(sqlCon, path, file,insert());
 
-         */
-        deleteTempTable(sqlCon);
+        deleteTempTable(sqlCon,tableName);
         deleteReglement(sqlCon, path);
     }
     public static void getDataElement(Connection sqlCon, String path,String database)
     {
         dbSource = database;
-        initTableParam(sqlCon,tableName,configList,"AR_Ref,AC_Categorie");//initTable(sqlCon);
-        getData(sqlCon, selectSourceTable(tableName,"BOUMKO")/*list()*/, tableName, path, file);
-        listDeleteAllInfo(sqlCon, path, "deleteList" + file,tableName,configList);
-        /*initTable(sqlCon);
-        getData(sqlCon, list(), "F_CREGLEMENT", path, file);
-        listDeleteReglement(sqlCon, path, "deleteList" + file);
+        initTableParam(sqlCon,tableName,configList,"RG_No,DatabaseSource");
+        getData(sqlCon, selectSourceTable(tableName,database), tableName, path, file);
+        listDeleteAllInfo(sqlCon, path, "deleteList" + file,tableName,configList,database);
+    }
 
-         */
-    }
-    public static void initTable(Connection sqlCon)
-    {
-        String query = " IF NOT EXISTS (SELECT 1 FROM config.SelectTable WHERE tableName='F_CREGLEMENT') " +
-                " INSERT INTO config.ListReglement " +
-                " SELECT RG_No,DataBaseSource = '" + dbSource + "',cbMarq " +
-                " FROM F_CREGLEMENT " +
-                " ELSE " +
-                "    BEGIN " +
-                "        INSERT INTO config.ListReglement" +
-                " SELECT RG_No,DataBaseSource = '" + dbSource + "',cbMarq " +
-                " FROM F_CREGLEMENT " +
-                " WHERE cbMarq > (SELECT Max(cbMarq) FROM config.ListReglement)" +
-                "END ";
-        executeQuery(sqlCon, query);
-    }
-    public static void deleteTempTable(Connection sqlCon)
-    {
-        String query = "IF OBJECT_ID('F_CREGLEMENT_DEST') IS NOT NULL \n" +
-                "\tDROP TABLE F_CREGLEMENT_DEST;";
-        executeQuery(sqlCon, query);
-    }
     public static void deleteReglement(Connection sqlCon, String path)
     {
         String query =
@@ -171,21 +143,5 @@ public class Reglement extends Table {
             archiveDocument(path + "\\archive", path, "deleteList" + file);
         }
     }
-    public static void listDeleteReglement(Connection sqlCon, String path, String file)
-    {
-        String query = " SELECT lart.RG_No,[DataBaseSource] = '" + dbSource + "',lart.cbMarq " +
-                " FROM config.ListReglement lart " +
-                " LEFT JOIN dbo.F_CREGLEMENT fart " +
-                "    ON lart.cbMarq = fart.cbMarq " +
-                " WHERE fart.cbMarq IS NULL " +
-                ";";
 
-        writeOnFile(path + "\\" + file, query, sqlCon);
-
-        query = " DELETE FROM config.ListReglement " +
-                " WHERE NOT EXISTS(SELECT 1 " +
-                "                  FROM F_CREGLEMENT " +
-                "                  WHERE dbo.F_CREGLEMENT.cbMarq = config.ListReglement.cbMarq);";
-        executeQuery(sqlCon, query);
-    }
 }

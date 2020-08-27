@@ -9,17 +9,6 @@ public class DocRegl extends Table {
     public static String tableName = "F_DOCREGL";
     public static String configList = "listDocRegl";
 
-    public static String list()
-    {
-        return  "SELECT\t[DR_No],[DO_Domaine],[DO_Type],[DO_Piece],[DR_TypeRegl],[DR_Date]\n" +
-                "\t\t,[DR_Libelle],[DR_Pourcent],[DR_Montant],[DR_MontantDev],[DR_Equil],[EC_No],[DR_Regle]\n" +
-                "\t\t,[N_Reglement],[cbProt],[cbMarq],[cbCreateur],[cbModification],[cbReplication],[cbFlag]" +
-                ", cbMarqSource = cbMarq\n" +
-                "\t\t,[DataBaseSource] = '" + dbSource + "' \n" +
-                "FROM\t[F_DOCREGL]\n" +
-                "WHERE\tcbModification>= ISNULL((SELECT LastSynchro FROM config.SelectTable WHERE tableName = 'F_DOCREGL'),'1900-01-01')";
-    }
-
     public static String insert()
     {
         return  "BEGIN TRY " +
@@ -78,6 +67,7 @@ public class DocRegl extends Table {
                 "   ERROR_LINE(),\n" +
                 "   ERROR_PROCEDURE(),\n" +
                 "   ERROR_MESSAGE(),\n" +
+                "   'insert',\n" +
                 "   'F_DOCREGL',\n" +
                 "   GETDATE());\n" +
                 "END CATCH";
@@ -87,49 +77,21 @@ public class DocRegl extends Table {
         dbSource = database;
         readOnFile(path,file,tableName+"_DEST",sqlCon);
         readOnFile(path,"deleteList"+file,tableName+"_SUPPR",sqlCon);
-        executeQuery(sqlCon,updateTableDest( "AR_Ref",tableName,tableName+"_DEST"));
-        sendData(sqlCon, path, file,selectSourceTable(tableName,"BOUMKO")/*, insert()*/);
-        /*readOnFile(path,file,"F_DOCREGL_DEST",sqlCon);
-        readOnFile(path,"deleteList"+file,"F_DOCREGL_SUPPR",sqlCon);
-        sendData(sqlCon, path, file, insert());
+        executeQuery(sqlCon,updateTableDest( "","'DR_No'",tableName,tableName+"_DEST"));
+        sendData(sqlCon, path, file,insert());
+        deleteTempTable(sqlCon,tableName);
 
-         */
-        deleteTempTable(sqlCon);
         deleteDocRegl(sqlCon, path);
     }
     public static void getDataElement(Connection sqlCon, String path,String database)
     {
         dbSource = database;
-        initTableParam(sqlCon,tableName,configList,"AR_Ref,AC_Categorie");//initTable(sqlCon);
-        getData(sqlCon, selectSourceTable(tableName,"BOUMKO")/*list()*/, tableName, path, file);
-        listDeleteAllInfo(sqlCon, path, "deleteList" + file,tableName,configList);
-        /*initTable(sqlCon);
-        getData(sqlCon, list(), "F_DOCREGL", path, file);
-        listDeleteDocRegl(sqlCon, path, "deleteList" + file);
+        initTableParam(sqlCon,tableName,configList,"DO_Domaine,DO_Type,DO_Piece,DR_No,DatabaseSource");
+        getData(sqlCon, selectSourceTable(tableName,database), tableName, path, file);
+        listDeleteAllInfo(sqlCon, path, "deleteList" + file,tableName,configList,database);
 
-         */
     }
-    public static void initTable(Connection sqlCon)
-    {
-        String query = " IF NOT EXISTS (SELECT 1 FROM config.SelectTable WHERE tableName='F_DOCREGL') " +
-                " INSERT INTO config.ListDocRegl " +
-                " SELECT DO_Domaine,DO_Type,DO_Piece,DR_No,DataBaseSource ='" + dbSource + "',cbMarq " +
-                " FROM F_DOCREGL "+
-                " ELSE " +
-                "    BEGIN " +
-                "        INSERT INTO config.ListDocRegl" +
-                " SELECT DO_Domaine,DO_Type,DO_Piece,DR_No,DataBaseSource = '" + dbSource + "',cbMarq " +
-                " FROM F_DOCREGL " +
-                " WHERE cbMarq > (SELECT Max(cbMarq) FROM config.ListDocRegl)" +
-                "END ";
-        executeQuery(sqlCon, query);
-    }
-    public static void deleteTempTable(Connection sqlCon)
-    {
-        String query = "IF OBJECT_ID('F_DOCREGL_DEST') IS NOT NULL \n" +
-                "\tDROP TABLE F_DOCREGL_DEST;";
-        executeQuery(sqlCon, query);
-    }
+
     public static void deleteDocRegl(Connection sqlCon, String path)
     {
         String query =
@@ -144,21 +106,5 @@ public class DocRegl extends Table {
             archiveDocument(path + "\\archive", path, "deleteList" + file);
         }
     }
-    public static void listDeleteDocRegl(Connection sqlCon, String path, String file)
-    {
-        String query = " SELECT lart.DO_Domaine,lart.DO_Type,lart.DO_Piece,lart.DR_No,lart.DataBaseSource,lart.cbMarq " +
-                " FROM config.ListDocRegl lart " +
-                " LEFT JOIN dbo.F_DOCREGL fart " +
-                "    ON lart.cbMarq = fart.cbMarq " +
-                " WHERE fart.cbMarq IS NULL " +
-                ";";
 
-        writeOnFile(path + "\\" + file, query, sqlCon);
-
-        query = " DELETE FROM config.ListDocRegl " +
-                " WHERE NOT EXISTS(SELECT 1 " +
-                "                  FROM F_DOCREGL " +
-                "                  WHERE dbo.F_DOCREGL.cbMarq = config.ListDocRegl.cbMarq);";
-        executeQuery(sqlCon, query);
-    }
 }

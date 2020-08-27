@@ -7,46 +7,10 @@ public class Depot extends Table{
     public static String tableName = "F_DEPOT";
     public static String configList = "listDepot";
 
-    public static String list()
-    {
-        return "SELECT\t[DE_No],[DE_Intitule],[DE_Adresse],[DE_Complement],[DE_CodePostal],[DE_Ville]\n" +
-                "\t\t,[DE_Contact],[DE_Principal],[DE_CatCompta],[DE_Region],[DE_Pays],[DE_EMail]\n" +
-                "\t\t,[DE_Code],[DE_Telephone],[DE_Telecopie],[DE_Replication],[DP_NoDefaut],[cbProt]\n" +
-                "\t\t,[cbCreateur],[cbModification],[cbReplication],[cbFlag]\n" +
-                ", cbMarqSource = cbMarq \n" +
-                "FROM\t[F_DEPOT]\n" +
-                "WHERE cbModification >= ISNULL((SELECT LastSynchro FROM config.SelectTable WHERE tableName='F_DEPOT'),'1900-01-01')";
-    }
-
     public static String insert()
     {
         return          "BEGIN TRY " +
                         " SET DATEFORMAT ymd;\n" +
-                        "   UPDATE [dbo].[F_DEPOT] \n" +
-                        "   SET [DE_Intitule] = [F_DEPOT_DEST].DE_Intitule\n" +
-                        "      ,[DE_Adresse] = [F_DEPOT_DEST].DE_Adresse\n" +
-                        "      ,[DE_Complement] = [F_DEPOT_DEST].DE_Complement\n" +
-                        "      ,[DE_CodePostal] = [F_DEPOT_DEST].DE_CodePostal\n" +
-                        "      ,[DE_Ville] = [F_DEPOT_DEST].DE_Ville\n" +
-                        "      ,[DE_Contact] = [F_DEPOT_DEST].DE_Contact\n" +
-                        "      ,[DE_Principal] = [F_DEPOT_DEST].DE_Principal\n" +
-                        "      ,[DE_CatCompta] = [F_DEPOT_DEST].DE_CatCompta\n" +
-                        "      ,[DE_Region] = [F_DEPOT_DEST].DE_Region\n" +
-                        "      ,[DE_Pays] = [F_DEPOT_DEST].DE_Pays\n" +
-                        "      ,[DE_EMail] = [F_DEPOT_DEST].DE_EMail\n" +
-                        "      ,[DE_Code] = [F_DEPOT_DEST].DE_Code\n" +
-                        "      ,[DE_Telephone] = [F_DEPOT_DEST].DE_Telephone\n" +
-                        "      ,[DE_Telecopie] = [F_DEPOT_DEST].DE_Telecopie\n" +
-                        "      ,[DE_Replication] = [F_DEPOT_DEST].DE_Replication\n" +
-                        //"      ,[DP_NoDefaut] = [F_DEPOT_DEST].DP_NoDefaut\n" +
-                        "      ,[cbProt] = [F_DEPOT_DEST].cbProt\n" +
-                        "      ,[cbCreateur] = [F_DEPOT_DEST].cbCreateur\n" +
-                        "      ,[cbModification] = [F_DEPOT_DEST].cbModification\n" +
-                        "      ,[cbReplication] = [F_DEPOT_DEST].cbReplication\n" +
-                        "      ,[cbFlag] = [F_DEPOT_DEST].cbFlag\n" +
-                        "FROM F_DEPOT_DEST      \n" +
-                        "  WHERE F_DEPOT.DE_No = F_DEPOT_DEST.DE_No\n" +
-                        " \n" +
                         "  INSERT INTO [dbo].[F_DEPOT]    \n" +
                         "  ([DE_No],[DE_Intitule],[DE_Adresse],[DE_Complement],[DE_CodePostal],[DE_Ville]\n" +
                         "\t\t,[DE_Contact],[DE_Principal],[DE_CatCompta],[DE_Region],[DE_Pays],[DE_EMail]\n" +
@@ -72,17 +36,12 @@ public class Depot extends Table{
                         "   ERROR_LINE(),\n" +
                         "   ERROR_PROCEDURE(),\n" +
                         "   ERROR_MESSAGE(),\n" +
+                        "   'insert',\n" +
                         "   'F_DEPOT',\n" +
                         "   GETDATE());\n" +
                         "END CATCH";
     }
 
-    public static void deleteTempTable(Connection sqlCon)
-    {
-        String query = "IF OBJECT_ID('F_DEPOT_DEST') IS NOT NULL \n" +
-                "\tDROP TABLE F_DEPOT_DEST;";
-        executeQuery(sqlCon, query);
-    }
     public static void linkDepot(Connection sqlCon)
     {
         String query = "UPDATE F_DEPOT \n" +
@@ -100,37 +59,23 @@ public class Depot extends Table{
 
         readOnFile(path,file,tableName+"_DEST",sqlCon);
         readOnFile(path,"deleteList"+file,tableName+"_SUPPR",sqlCon);
-        executeQuery(sqlCon,updateTableDest( "AR_Ref",tableName,tableName+"_DEST"));
-        sendData(sqlCon, path, file,selectSourceTable(tableName,"BOUMKO")/*, insert()*/);
-        /*readOnFile(path,file,"F_DEPOT_DEST",sqlCon);
-        readOnFile(path,"deleteList"+file,"F_DEPOT_SUPPR",sqlCon);
-        sendData(sqlCon, path, file, insert());
+        executeQuery(sqlCon,updateTableDest( "DE_No","'DE_No','DP_NoDefaut'",tableName,tableName+"_DEST"));
+        sendData(sqlCon, path, file,insert());
 
-         */
         DepotEmpl.sendDataElement(sqlCon, path,database);
         linkDepot(sqlCon);
-        deleteTempTable(sqlCon);
+
+        deleteTempTable(sqlCon,tableName);
+
         deleteDepot(sqlCon, path);
     }
     public static void getDataElement(Connection sqlCon, String path,String database)
     {
-        initTableParam(sqlCon,tableName,configList,"AR_Ref,AC_Categorie");//initTable(sqlCon);
-        getData(sqlCon, selectSourceTable(tableName,"BOUMKO")/*list()*/, tableName, path, file);
-        listDeleteAllInfo(sqlCon, path, "deleteList" + file,tableName,configList);
-        /*initTable(sqlCon);
-        getData(sqlCon, list(), "F_DEPOT", path, file);
-        listDeleteDepot(sqlCon, path);
+        initTableParam(sqlCon,tableName,configList,"DE_No");
+        getData(sqlCon, selectSourceTable(tableName,database), tableName, path, file);
+        listDeleteAllInfo(sqlCon, path, "deleteList" + file,tableName,configList,database);
 
-         */
         DepotEmpl.getDataElement(sqlCon, path,database);
-    }
-    public static void initTable(Connection sqlCon)
-    {
-        String query = " IF NOT EXISTS (SELECT 1 FROM config.SelectTable WHERE tableName='F_DEPOT') \n" +
-                "     INSERT INTO config.ListDepot\n" +
-                "     SELECT DE_No,cbMarq \n" +
-                "     FROM F_DEPOT";
-        executeQuery(sqlCon, query);
     }
     public static void deleteDepot(Connection sqlCon, String path)
     {
@@ -146,23 +91,5 @@ public class Depot extends Table{
             executeQuery(sqlCon, query);
             archiveDocument(path + "\\archive", path, "deleteList" + file);
         }
-    }
-
-    public static void listDeleteDepot(Connection sqlCon, String path)
-    {
-        String query = " SELECT lart.DE_No,lart.cbMarq " +
-                " FROM config.ListDepot lart " +
-                " LEFT JOIN dbo.F_DEPOT fart " +
-                "    ON lart.cbMarq = fart.cbMarq " +
-                " WHERE fart.cbMarq IS NULL " +
-                ";";
-
-        writeOnFile(path + "\\deleteList" + file, query, sqlCon);
-
-        query = " DELETE FROM config.ListDepot " +
-                " WHERE NOT EXISTS(SELECT 1 " +
-                "                  FROM F_DEPOT " +
-                "                  WHERE dbo.F_DEPOT.cbMarq = config.ListDepot.cbMarq);";
-        executeQuery(sqlCon, query);
     }
 }
