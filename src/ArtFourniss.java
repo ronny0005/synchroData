@@ -1,9 +1,10 @@
 import java.io.File;
+import java.io.FilenameFilter;
 import java.sql.Connection;
 
 public class ArtFourniss extends Table {
 
-    public static String file ="ArtFourniss.csv";
+    public static String file ="ArtFourniss_";
     public static String tableName = "F_ARTFOURNISS";
     public static String configList = "listArtFourniss";
 
@@ -50,21 +51,35 @@ public class ArtFourniss extends Table {
 
     public static void sendDataElement(Connection sqlCon, String path,String database)
     {
+        File dir = new File(path);
+        FilenameFilter filter = new FilenameFilter() {
+            public boolean accept(File dir, String name) {
+                return name.startsWith(file);
+            }
+        };
+        String[] children = dir.list(filter);
+        if (children == null) {
+            System.out.println("Either dir does not exist or is not a directory");
+        } else {
+            for (int i = 0; i < children.length; i++) {
+                String filename = children[i];
+                readOnFile(path, filename, tableName + "_DEST", sqlCon);
+                readOnFile(path, "deleteList" + filename, tableName + "_SUPPR", sqlCon);
+                executeQuery(sqlCon, updateTableDest("AR_Ref,CT_Num", "'AR_Ref','CT_Num'", tableName, tableName + "_DEST"));
+                sendData(sqlCon, path, filename, insert());
 
-        readOnFile(path,file,tableName+"_DEST",sqlCon);
-        readOnFile(path,"deleteList"+file,tableName+"_SUPPR",sqlCon);
-        executeQuery(sqlCon,updateTableDest( "AR_Ref,CT_Num","'AR_Ref','CT_Num'",tableName,tableName+"_DEST"));
-        sendData(sqlCon, path, file,insert());
-
-        deleteTempTable(sqlCon,tableName);
-        deleteArtFourniss(sqlCon, path);
+                deleteTempTable(sqlCon, tableName);
+                deleteArtFourniss(sqlCon, path,filename);
+            }
+        }
     }
 
-    public static void getDataElement(Connection sqlCon, String path,String database)
+    public static void getDataElement(Connection sqlCon, String path,String database,String time)
     {
+        String filename =  file+time+".csv";
         initTableParam(sqlCon,tableName,configList,"AR_Ref,CT_Num");//initTable(sqlCon);
-        getData(sqlCon, selectSourceTable(tableName,database)/*list()*/, tableName, path, file);
-        listDeleteAllInfo(sqlCon, path, "deleteList" + file,tableName,configList,database);
+        getData(sqlCon, selectSourceTable(tableName,database)/*list()*/, tableName, path, filename);
+        listDeleteAllInfo(sqlCon, path, "deleteList" + filename,tableName,configList,database);
     }
 
     public static void initTable(Connection sqlCon)
@@ -76,7 +91,7 @@ public class ArtFourniss extends Table {
         executeQuery(sqlCon, query);
     }
 
-    public static void deleteArtFourniss(Connection sqlCon, String path)
+    public static void deleteArtFourniss(Connection sqlCon, String path,String filename)
     {
         String query =
                 " DELETE FROM F_ARTFOURNISS  \n" +
@@ -85,10 +100,10 @@ public class ArtFourniss extends Table {
                 "  \n" +
                 " IF OBJECT_ID('F_ARTFOURNISS_SUPPR') IS NOT NULL  \n" +
                 " DROP TABLE F_ARTFOURNISS_SUPPR ;";
-        if ((new File(path + "\\deleteList" + file)).exists())
+        if ((new File(path + "\\deleteList" + filename)).exists())
         {
             executeQuery(sqlCon, query);
-            archiveDocument(path + "\\archive", path, "deleteList" + file);
+            archiveDocument(path + "\\archive", path, "deleteList" + filename);
         }
     }
 

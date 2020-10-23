@@ -1,11 +1,14 @@
 import java.io.File;
+import java.io.FilenameFilter;
 import java.sql.Connection;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 public class Depot extends Table{
 
-    public static String file ="depot.csv";
     public static String tableName = "F_DEPOT";
     public static String configList = "listDepot";
+    public static String file ="depot_";
 
     public static String insert()
     {
@@ -57,27 +60,44 @@ public class Depot extends Table{
     public static void sendDataElement(Connection sqlCon, String path,String database)
     {
 
-        readOnFile(path,file,tableName+"_DEST",sqlCon);
-        readOnFile(path,"deleteList"+file,tableName+"_SUPPR",sqlCon);
-        executeQuery(sqlCon,updateTableDest( "DE_No","'DE_No','DP_NoDefaut'",tableName,tableName+"_DEST"));
-        sendData(sqlCon, path, file,insert());
+        File dir = new File(path);
+        FilenameFilter filter = new FilenameFilter() {
+            public boolean accept (File dir, String name) {
+                return name.startsWith(file);
+            }
+        };
+        String[] children = dir.list(filter);
+        if (children == null) {
+            System.out.println("Either dir does not exist or is not a directory");
+        } else {
+            for (int i = 0; i< children.length; i++) {
+                String filename = children[i];
+                readOnFile(path,filename,tableName+"_DEST",sqlCon);
+                readOnFile(path,"deleteList"+filename,tableName+"_SUPPR",sqlCon);
+                executeQuery(sqlCon,updateTableDest( "DE_No","'DE_No','DP_NoDefaut'",tableName,tableName+"_DEST"));
+                sendData(sqlCon, path, filename,insert());
 
-        DepotEmpl.sendDataElement(sqlCon, path,database);
-        linkDepot(sqlCon);
+                DepotEmpl.sendDataElement(sqlCon, path,database);
+                linkDepot(sqlCon);
 
-        deleteTempTable(sqlCon,tableName);
+                deleteTempTable(sqlCon,tableName);
 
-        deleteDepot(sqlCon, path);
+                deleteDepot(sqlCon, path,filename);
+            }
+        }
+
     }
-    public static void getDataElement(Connection sqlCon, String path,String database)
+    public static void getDataElement(Connection sqlCon, String path,String database,String time)
     {
+        String filename =  file+time+".csv";
         initTableParam(sqlCon,tableName,configList,"DE_No");
-        getData(sqlCon, selectSourceTable(tableName,database), tableName, path, file);
-        listDeleteAllInfo(sqlCon, path, "deleteList" + file,tableName,configList,database);
+        getData(sqlCon, selectSourceTable(tableName,database), tableName, path, filename);
+        listDeleteAllInfo(sqlCon, path, "deleteList" + filename,tableName,configList,database);
 
-        DepotEmpl.getDataElement(sqlCon, path,database);
+        DepotEmpl.getDataElement(sqlCon, path,database, time);
     }
-    public static void deleteDepot(Connection sqlCon, String path)
+
+    public static void deleteDepot(Connection sqlCon, String path,String filename)
     {
         String query =
                 " DELETE FROM F_DEPOT  \n" +
@@ -86,10 +106,10 @@ public class Depot extends Table{
                 "  \n" +
                 " IF OBJECT_ID('F_DEPOT_SUPPR') IS NOT NULL  \n" +
                 " DROP TABLE F_DEPOT_SUPPR ;";
-        if ((new File(path + "\\deleteList" + file)).exists())
+        if ((new File(path + "\\deleteList" + filename)).exists())
         {
             executeQuery(sqlCon, query);
-            archiveDocument(path + "\\archive", path, "deleteList" + file);
+            archiveDocument(path + "\\archive", path, "deleteList" + filename);
         }
     }
 }

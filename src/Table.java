@@ -14,7 +14,7 @@ public class Table {
     private static BufferedWriter fileWriter;
     private static String DATE_FORMAT = "yyyy-MM-dd HH:mm:ss.s";
     private static Statement stmt;
-
+    private static SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyyMMddHHmmssSSS");
     public static String selectSourceTable(String table,String dataSource){
         return "BEGIN \n" +
                 "DECLARE @MaColonne AS VARCHAR(250);\n" +
@@ -285,16 +285,13 @@ public class Table {
     }
     public static void archiveDocument(String archive, String source,String file)
     {
-        Date date = new Date();
-        SimpleDateFormat df = new SimpleDateFormat("yyyyMMddHHmmss");
-
         File filePath = new File(archive);
         if(!filePath.exists())
         {
             filePath.mkdir();
         }
         try {
-            Files.move(Paths.get(source+"\\"+file),Paths.get(archive + "\\" + df.format(date) + "_" + file));
+            Files.move(Paths.get(source+"\\"+file),Paths.get(archive + "\\" + file));
         } catch (IOException e) {
             e.printStackTrace();
         }

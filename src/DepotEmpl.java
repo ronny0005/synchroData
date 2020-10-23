@@ -1,9 +1,10 @@
 import java.io.File;
+import java.io.FilenameFilter;
 import java.sql.Connection;
 
 public class DepotEmpl extends Table {
 
-    public static String file = "depotEmpl.csv";
+    public static String file = "depotEmpl_";
     public static String tableName = "F_DEPOTEMPL";
     public static String configList = "listDepotEmpl";
 
@@ -55,22 +56,36 @@ public class DepotEmpl extends Table {
 
     public static void sendDataElement(Connection sqlCon, String path,String database)
     {
+        File dir = new File(path);
+        FilenameFilter filter = new FilenameFilter() {
+            public boolean accept(File dir, String name) {
+                return name.startsWith(file);
+            }
+        };
+        String[] children = dir.list(filter);
+        if (children == null) {
+            System.out.println("Either dir does not exist or is not a directory");
+        } else {
+            for (int i = 0; i < children.length; i++) {
+                String filename = children[i];
+                readOnFile(path, filename, tableName + "_DEST", sqlCon);
+                readOnFile(path, "deleteList" + filename, tableName + "_SUPPR", sqlCon);
+                executeQuery(sqlCon, updateTableDest("DP_No", "'DP_No','DE_No'", tableName, tableName + "_DEST"));
+                sendData(sqlCon, path, filename, insert());
 
-        readOnFile(path,file,tableName+"_DEST",sqlCon);
-        readOnFile(path,"deleteList"+file,tableName+"_SUPPR",sqlCon);
-        executeQuery(sqlCon,updateTableDest( "DP_No","'DP_No','DE_No'",tableName,tableName+"_DEST"));
-        sendData(sqlCon, path, file,insert());
-
-        deleteTempTable(sqlCon,tableName);
-        deleteDepot(sqlCon, path);
+                deleteTempTable(sqlCon, tableName);
+                deleteDepot(sqlCon, path,filename);
+            }
+        }
     }
-    public static void getDataElement(Connection sqlCon, String path,String database)
+    public static void getDataElement(Connection sqlCon, String path,String database,String time)
     {
+        String filename =  file+time+".csv";
         initTableParam(sqlCon,tableName,configList,"DP_No");
-        getData(sqlCon, selectSourceTable(tableName,database), tableName, path, file);
-        listDeleteAllInfo(sqlCon, path, "deleteList" + file,tableName,configList,database);
+        getData(sqlCon, selectSourceTable(tableName,database), tableName, path, filename);
+        listDeleteAllInfo(sqlCon, path, "deleteList" + filename,tableName,configList,database);
     }
-    public static void deleteDepot(Connection sqlCon, String path)
+    public static void deleteDepot(Connection sqlCon, String path,String filename)
     {
         String query =
                 " DELETE FROM F_DEPOTEMPL  \n" +
@@ -79,10 +94,10 @@ public class DepotEmpl extends Table {
                 "  \n" +
                 " IF OBJECT_ID('F_DEPOTEMPL_SUPPR') IS NOT NULL  \n" +
                 " DROP TABLE F_DEPOTEMPL_SUPPR ;";
-        if ((new File(path + "\\deleteList" + file)).exists())
+        if ((new File(path + "\\deleteList" + filename)).exists())
         {
             executeQuery(sqlCon, query);
-            archiveDocument(path + "\\archive", path, "deleteList" + file);
+            archiveDocument(path + "\\archive", path, "deleteList" + filename);
         }
     }
 }

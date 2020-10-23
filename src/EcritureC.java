@@ -1,9 +1,10 @@
 import java.io.File;
+import java.io.FilenameFilter;
 import java.sql.Connection;
 
 public class EcritureC extends Table {
 
-    public static String file = "EcritureC.csv";
+    public static String file = "EcritureC_";
     public static String dbSource = "BIJOU";
     public static String tableName = "F_ECRITUREC";
     public static String configList = "listEcritureC";
@@ -64,26 +65,41 @@ public class EcritureC extends Table {
 
     public static void sendDataElement(Connection  sqlCon, String path,String database)
     {
-        dbSource = database;
+        File dir = new File(path);
+        FilenameFilter filter = new FilenameFilter() {
+            public boolean accept(File dir, String name) {
+                return name.startsWith(file);
+            }
+        };
+        String[] children = dir.list(filter);
+        if (children == null) {
+            System.out.println("Either dir does not exist or is not a directory");
+        } else {
+            for (int i = 0; i < children.length; i++) {
+                String filename = children[i];
+                dbSource = database;
 
-        readOnFile(path,file,tableName+"_DEST",sqlCon);
-        readOnFile(path,"deleteList"+file,tableName+"_SUPPR",sqlCon);
-        executeQuery(sqlCon,updateTableDest( "","'EC_No','JM_Date','JO_Num','EC_CType'",tableName,tableName+"_DEST"));
-        sendData(sqlCon, path, file,insert());
-        deleteTempTable(sqlCon,tableName);
+                readOnFile(path, filename, tableName + "_DEST", sqlCon);
+                readOnFile(path, "deleteList" + filename, tableName + "_SUPPR", sqlCon);
+                executeQuery(sqlCon, updateTableDest("", "'EC_No','JM_Date','JO_Num','EC_CType'", tableName, tableName + "_DEST"));
+                sendData(sqlCon, path, filename, insert());
+                deleteTempTable(sqlCon, tableName);
 
-        deleteEcritureC(sqlCon, path);
+                deleteEcritureC(sqlCon, path,filename);
+            }
+        }
     }
-    public static void getDataElement(Connection  sqlCon, String path,String database)
+    public static void getDataElement(Connection  sqlCon, String path,String database,String time)
     {
+        String filename =  file+time+".csv";
         dbSource = database;
         initTableParam(sqlCon,tableName,configList,"EC_No,DatabaseSource");
-        getData(sqlCon, selectSourceTable(tableName,database), tableName, path, file);
-        listDeleteAllInfo(sqlCon, path, "deleteList" + file,tableName,configList,database);
+        getData(sqlCon, selectSourceTable(tableName,database), tableName, path, filename);
+        listDeleteAllInfo(sqlCon, path, "deleteList" + filename,tableName,configList,database);
 
     }
 
-    public static void deleteEcritureC(Connection sqlCon, String path)
+    public static void deleteEcritureC(Connection sqlCon, String path,String filename)
     {
         String query =
                 " DELETE FROM F_ECRITUREC \n" +
@@ -91,10 +107,10 @@ public class EcritureC extends Table {
                 "  \n" +
                 " IF OBJECT_ID('F_ECRITUREC_SUPPR') IS NOT NULL  \n" +
                 " DROP TABLE F_ECRITUREC_SUPPR ;";
-        if ((new File(path + "\\deleteList" + file)).exists())
+        if ((new File(path + "\\deleteList" + filename)).exists())
         {
             executeQuery(sqlCon, query);
-            archiveDocument(path + "\\archive", path, "deleteList" + file);
+            archiveDocument(path + "\\archive", path, "deleteList" + filename);
         }
     }
 
