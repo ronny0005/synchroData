@@ -60,6 +60,9 @@ public class BackupData {
             if(list.get(15).equals("1")) {
                 EcritureA.getDataElement(sqlCon, path,list.get(1),simpleDateFormat.format(new Date()));
             }
+            if(list.get(16).equals("1")) {
+                Compteg.getDataElement(sqlCon, path,list.get(1),simpleDateFormat.format(new Date()));
+            }
 
         } catch (SQLException throwables) {
             throwables.printStackTrace();

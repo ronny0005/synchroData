@@ -218,6 +218,14 @@
                   <text value="Règlement"/>
                 </properties>
               </component>
+              <component id="79e28" class="javax.swing.JCheckBox" binding="SrcCompteGeneralCheckBox">
+                <constraints>
+                  <grid row="5" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                </constraints>
+                <properties>
+                  <text value="Compte Général"/>
+                </properties>
+              </component>
             </children>
           </grid>
           <grid id="85a56" layout-manager="GridLayoutManager" row-count="6" column-count="2" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
@@ -412,6 +420,14 @@
                 </constraints>
                 <properties>
                   <text value="Règlement"/>
+                </properties>
+              </component>
+              <component id="837ac" class="javax.swing.JCheckBox" binding="DestCompteGeneralCheckBox">
+                <constraints>
+                  <grid row="5" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                </constraints>
+                <properties>
+                  <text value="Compte Général"/>
                 </properties>
               </component>
             </children>

@@ -27,38 +27,60 @@ public class UpdateData {
             properties.put("user", list.get(2));
             properties.put("password", list.get(3));
             Connection sqlCon = DriverManager.getConnection(dbURL, properties);
-
             sqlCon.setAutoCommit(true);
-//            DocLigne.sendDataElement(sqlCon, path,list.get(1));
+            System.out.println("--Démarrage Application--");
+            System.out.println("Base de données : "+list.get(1)+"\n Chemin : "+path+"\n");
 
-            if(list.get(7).equals("1"))
+//            DocLigne.sendDataElement(sqlCon, path,list.get(1));
+            if(list.get(16).equals("1")) {
+                System.out.println("--Chargement Compte Général--");
+                Compteg.sendDataElement(sqlCon, path,list.get(1));
+            }
+            if(list.get(7).equals("1")) {
+                System.out.println("--Chargement Depot--");
                 Depot.sendDataElement(sqlCon, path,list.get(1));
-            if(list.get(12).equals("1"))
-                Famille.sendDataElement(sqlCon, path,list.get(1));
-            if(list.get(6).equals("1"))
-                Comptet.sendDataElement(sqlCon, path,list.get(1));
-            if(list.get(8).equals("1"))
-                Livraison.sendDataElement(sqlCon, path,list.get(1));
-            if(list.get(5).equals("1"))
-                Article.sendDataElement(sqlCon, path,list.get(1));
+            }
+            if(list.get(12).equals("1")) {
+                System.out.println("--Chargement Famille--");
+                Famille.sendDataElement(sqlCon, path, list.get(1));
+            }
+            if(list.get(6).equals("1")) {
+                System.out.println("--Chargement Compte Tiers--");
+                Comptet.sendDataElement(sqlCon, path, list.get(1));
+            }
+            if(list.get(8).equals("1")) {
+                System.out.println("--Chargement Livraison--");
+                Livraison.sendDataElement(sqlCon, path, list.get(1));
+            }
+            if(list.get(5).equals("1")) {
+                System.out.println("--Chargement Article--");
+                Article.sendDataElement(sqlCon, path, list.get(1));
+            }
             if(list.get(9).equals("1")) {
+                System.out.println("--Chargement Entete--");
                 DocEntete.sendDataElement(sqlCon, path,list.get(1));
                 DocRegl.sendDataElement(sqlCon, path,list.get(1));
             }
-            if(list.get(10).equals("1"))
-                DocLigne.sendDataElement(sqlCon, path,list.get(1));
+            if(list.get(10).equals("1")) {
+                System.out.println("--Chargement Ligne--");
+                DocLigne.sendDataElement(sqlCon, path, list.get(1));
+            }
             if(list.get(11).equals("1")) {
+                System.out.println("--Chargement Reglement--");
                 Reglement.sendDataElement(sqlCon, path,list.get(1));
                 ReglEch.sendDataElement(sqlCon, path,list.get(1));
             }
 
             if(list.get(13).equals("1")) {
+                System.out.println("--Chargement ArtStock--");
                 ArtStock.sendDataElement(sqlCon, path,list.get(1));
             }
             if(list.get(14).equals("1")) {
+                System.out.println("--Chargement Ecriture Comptable--");
                 EcritureC.sendDataElement(sqlCon, path,list.get(1));
             }
             if(list.get(15).equals("1")) {
+                System.out.println("--Chargement Ecriture Analytique--");
                 EcritureA.sendDataElement(sqlCon, path,list.get(1));
             }
 

@@ -1,5 +1,4 @@
 import javax.swing.*;
-import javax.xml.crypto.Data;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
@@ -39,6 +38,8 @@ public class ConfigFile {
     private JCheckBox DestEcritureCCheckBox;
     private JCheckBox DestEcritureACheckBox;
     private JCheckBox SrcEcritureACheckBox;
+    private JCheckBox SrcCompteGeneralCheckBox;
+    private JCheckBox DestCompteGeneralCheckBox;
     private String databaseSourceFile = "resource/databaseSource.csv";
     private String databaseDestFile = "resource/databaseDest.csv";
     private ArrayList<String> infoSource = DataBase.getInfoConnexion(databaseSourceFile);
@@ -76,6 +77,7 @@ public class ConfigFile {
         checkBox(Integer.valueOf(infoDest.get(13)),DestArtStockCheckBox);
         checkBox(Integer.valueOf(infoDest.get(14)),DestEcritureCCheckBox);
         checkBox(Integer.valueOf(infoDest.get(15)),DestEcritureACheckBox);
+        checkBox(Integer.valueOf(infoDest.get(16)), DestCompteGeneralCheckBox);
 
         SrcServerName.setText(infoSource.get(0));
         SrcBaseDeDonnees.setText(infoSource.get(1));
@@ -93,6 +95,7 @@ public class ConfigFile {
         checkBox(Integer.valueOf(infoSource.get(13)),SrcArtStockCheckBox);
         checkBox(Integer.valueOf(infoSource.get(14)),SrcEcritureCCheckBox);
         checkBox(Integer.valueOf(infoSource.get(15)),SrcEcritureACheckBox);
+        checkBox(Integer.valueOf(infoSource.get(16)), SrcCompteGeneralCheckBox);
 
     }
 
@@ -113,6 +116,7 @@ public class ConfigFile {
         infoDest.set(13,setCheckBox(DestArtStockCheckBox));
         infoDest.set(14,setCheckBox(DestEcritureCCheckBox));
         infoDest.set(15,setCheckBox(DestEcritureACheckBox));
+        infoDest.set(16,setCheckBox(DestCompteGeneralCheckBox));
 
         infoSource.set(0,SrcServerName.getText());
         infoSource.set(1,SrcBaseDeDonnees.getText());
@@ -130,6 +134,7 @@ public class ConfigFile {
         infoSource.set(13,setCheckBox(SrcArtStockCheckBox));
         infoSource.set(14,setCheckBox(SrcEcritureCCheckBox));
         infoSource.set(15,setCheckBox(SrcEcritureACheckBox));
+        infoSource.set(16,setCheckBox(SrcCompteGeneralCheckBox));
     }
 
     public ConfigFile(){
