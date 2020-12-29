@@ -52,7 +52,9 @@ public class UploadFileFTP {
             for(ChannelSftp.LsEntry entry : listFiles) {
                 if(!(dir).isDirectory())
                     dir.mkdir();
-                sftpChannel.get(entry.getFilename(), dir.getAbsolutePath()+ entry.getFilename());
+                System.out.println(dir.getAbsolutePath()+"\\"+ entry.getFilename());
+                sftpChannel.get(entry.getFilename(), dir.getAbsolutePath()+"\\"+ entry.getFilename());
+                sftpChannel.rm(entry.getFilename());
             }
             sftpChannel.exit();
             session.disconnect();

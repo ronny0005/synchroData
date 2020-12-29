@@ -1,3 +1,4 @@
 Manifest-Version: 1.0
-Main-Class: UploadFileFTP
+Main-Class: SendFileFTP
+Class-Path: jsch-0.1.55.jar
 

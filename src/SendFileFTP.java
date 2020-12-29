@@ -65,7 +65,7 @@ public class SendFileFTP {
             if (directoryListing != null) {
                 for (File child : directoryListing) {
                     if(child.isFile()) {
-                        sftpChannel.put(child.getAbsolutePath(), "/" + list.get(1) + "/" + child.getName());
+                        sftpChannel.put(child.getAbsolutePath(), "/" + list.get(18) + "/" + child.getName());
                     }
                     // Do something with child
                 }

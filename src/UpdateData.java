@@ -29,6 +29,7 @@ public class UpdateData {
             sqlCon.setAutoCommit(true);
             System.out.println("--Démarrage Application--");
             System.out.println("Base de données : "+list.get(1)+"\n Chemin : "+path+"\n");
+            System.out.println("Serveur : "+list.get(0));
 
 //            DocLigne.sendDataElement(sqlCon, path,list.get(1));
             if(list.get(16).equals("1")) {
