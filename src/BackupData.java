@@ -55,6 +55,7 @@ public class BackupData {
                 ArtStock.getDataElement(sqlCon, path,list.get(1),simpleDateFormat.format(new Date()));
             }
             if(list.get(14).equals("1")) {
+                JMouv.getDataElement(sqlCon, path,list.get(1),simpleDateFormat.format(new Date()));
                 EcritureC.getDataElement(sqlCon, path,list.get(1),simpleDateFormat.format(new Date()));
             }
             if(list.get(15).equals("1")) {

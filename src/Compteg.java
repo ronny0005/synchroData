@@ -85,7 +85,7 @@ public class Compteg extends Table {
     {
         String query =
                 " DELETE FROM F_COMPTEG \n" +
-                " WHERE CG_Num IN(SELECT CT_Num FROM F_COMPTEG_SUPPR) \n" +
+                " WHERE CG_Num IN(SELECT CG_Num FROM F_COMPTEG_SUPPR) \n" +
                 " \n" +
                 " IF OBJECT_ID('F_COMPTEG_SUPPR') IS NOT NULL \n" +
                 " DROP TABLE F_COMPTEG_SUPPR \n";
