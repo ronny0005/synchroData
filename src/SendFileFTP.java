@@ -54,7 +54,7 @@ public class SendFileFTP {
             File dir = new File(list.get(4));
             File[] directoryListing = dir.listFiles();
             try {
-                sftpChannel.mkdir(list.get(1));
+                sftpChannel.mkdir(list.get(18));
             } catch (SftpException e) {
                 System.out.println(e.id); // Prints "Failure"
                 System.out.println(e.getMessage()); // Prints "null"

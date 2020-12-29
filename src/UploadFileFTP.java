@@ -46,7 +46,7 @@ public class UploadFileFTP {
             channel.connect();
             ChannelSftp sftpChannel = (ChannelSftp) channel;
             File dir = new File(list.get(4));
-            sftpChannel.cd(list.get(1));
+            sftpChannel.cd(list.get(18));
 
             Vector<ChannelSftp.LsEntry> listFiles = sftpChannel.ls("*.csv");
             for(ChannelSftp.LsEntry entry : listFiles) {
