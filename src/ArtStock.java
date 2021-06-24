@@ -75,6 +75,14 @@ public class ArtStock extends Table {
         listDeleteAllInfo(sqlCon, path, "deleteList" + filename,tableName,configList,database);
     }
 
+    public static void getDataElementFilterAgency(Connection  sqlCon, String path,String database,String time,String agency)
+    {
+        String filename =  file+time+".csv";
+        initTableParam(sqlCon,tableName,configList,"AR_Ref,DE_No");
+        getData(sqlCon, selectSourceTableFilterAgency(tableName,database,agency,"DE_No"), tableName, path, filename);
+        listDeleteAllInfo(sqlCon, path, "deleteList" + filename,tableName,configList,database);
+    }
+
     public static void deleteArtStock(Connection sqlCon, String path,String filename)
     {
         String query =

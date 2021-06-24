@@ -86,6 +86,15 @@ public class ReglEch extends Table {
         listDeleteAllInfo(sqlCon, path, "deleteList" + filename,tableName,configList,database);
 
     }
+    public static void getDataElementFilterAgency(Connection sqlCon, String path,String database,String time,String agency)
+    {
+        String filename =  file+time+".csv";
+        dbSource = database;
+        initTableParam(sqlCon,tableName,configList,"DO_Domaine,DO_Type,DO_Piece,DR_No,RG_No,DataBaseSource");
+        getData(sqlCon, selectSourceTableFilterAgencyEnteteLink(tableName,database,agency), tableName, path, filename);
+        listDeleteAllInfo(sqlCon, path, "deleteList" + filename,tableName,configList,database);
+
+    }
 
     public static void deleteTempTable(Connection sqlCon)
     {

@@ -136,12 +136,22 @@ public class Reglement extends Table {
             }
         }
     }
+
     public static void getDataElement(Connection sqlCon, String path,String database,String time)
     {
         String filename =  file+time+".csv";
         dbSource = database;
         initTableParam(sqlCon,tableName,configList,"RG_No,DatabaseSource");
         getData(sqlCon, selectSourceTable(tableName,database), tableName, path, filename);
+        listDeleteAllInfo(sqlCon, path, "deleteList" + filename,tableName,configList,database);
+    }
+
+    public static void getDataElementFilterAgency(Connection sqlCon, String path,String database,String time,String agency)
+    {
+        String filename =  file+time+".csv";
+        dbSource = database;
+        initTableParam(sqlCon,tableName,configList,"RG_No,DatabaseSource");
+        getData(sqlCon, selectSourceTableFilterAgencyRegltLink(tableName,database,agency), tableName, path, filename);
         listDeleteAllInfo(sqlCon, path, "deleteList" + filename,tableName,configList,database);
     }
 

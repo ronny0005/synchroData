@@ -93,6 +93,14 @@ public class DocLigne extends Table {
         getData(sqlCon, selectSourceTable(tableName,database), tableName, path, filename);
         listDeleteAllInfo(sqlCon, path, "deleteList" + filename,tableName,configList,database);
     }
+    public static void getDataElementFilterAgency(Connection sqlCon, String path,String database,String time,String agency)
+    {
+        String filename =  file+time+".csv";
+        dbSource = database;
+        initTableParam(sqlCon,tableName,configList,"DO_Domaine,DO_Type,DO_Piece,DatabaseSource");
+        getData(sqlCon, selectSourceTableFilterAgencyEnteteLink(tableName,database,agency), tableName, path, filename);
+        listDeleteAllInfo(sqlCon, path, "deleteList" + filename,tableName,configList,database);
+    }
     public static void initTable(Connection sqlCon)
     {
         String query =  " IF NOT EXISTS (SELECT 1 FROM config.SelectTable WHERE tableName='F_DOCLIGNE') " +

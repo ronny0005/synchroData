@@ -115,6 +115,16 @@ public class DocEntete extends Table {
         getData(sqlCon, selectSourceTable(tableName,database), tableName, path, filename);
         listDeleteAllInfo(sqlCon, path, "deleteList" + filename,tableName,configList,database);
     }
+
+    public static void getDataElementFilterAgency(Connection sqlCon, String path,String database,String time,String agency)
+    {
+        String filename =  file+time+".csv";
+        dbSource = database;
+        initTableParam(sqlCon,tableName,configList,"DO_Domaine,DO_Type,DO_Piece,DatabaseSource");
+        getData(sqlCon, selectSourceTableFilterAgency(tableName,database,agency,"DE_No"), tableName, path, filename);
+        listDeleteAllInfo(sqlCon, path, "deleteList" + filename,tableName,configList,database);
+    }
+
     public static void deleteDocEntete(Connection sqlCon, String path,String filename)
     {
         String query =

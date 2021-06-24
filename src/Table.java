@@ -53,6 +53,138 @@ public class Table {
                 "END";
     }
 
+    public static String selectSourceTableFilterAgency(String table,String dataSource,String agency,String agencyColumn){
+        return "BEGIN \n" +
+                "DECLARE @MaColonne AS VARCHAR(250);\n" +
+                "DECLARE @MonSQL AS VARCHAR(MAX)=''; \n" +
+                "DECLARE @TableName AS VARCHAR(100) = '"+table+"'; \n" +
+                "DECLARE @getid CURSOR\n" +
+                "\n" +
+                "SET @getid = CURSOR FOR\n" +
+                "SELECT col.name\n" +
+                "FROM sys.tables tab\n" +
+                "INNER JOIN sys.columns col\n" +
+                "\tON tab.object_id = col.object_id\n" +
+                "WHERE tab.name = @TableName\n" +
+                "AND col.name NOT LIKE 'cb%'" +
+                "AND col.name NOT IN ('DataBaseSource','cbMarqSource')\n" +
+                "\n" +
+                "OPEN @getid\n" +
+                "FETCH NEXT\n" +
+                "FROM @getid INTO @MaColonne\n" +
+                "WHILE @@FETCH_STATUS = 0\n" +
+                "BEGIN\n" +
+                " SELECT @MonSQL = @MonSQL+ ',' + @MaColonne \n" +
+                "\n" +
+                " FETCH NEXT\n" +
+                "    FROM @getid INTO @MaColonne --, @name\n" +
+                "END\n" +
+                "CLOSE @getid\n" +
+                "DEALLOCATE @getid\n" +
+                "SELECT @MonSQL = SUBSTRING(@MonSQL,2,LEN(@MonSQL)) \n" +
+                "\n" +
+                "SELECT @MonSQL = 'SELECT ' + @MonSQL + ',[cbProt],[cbCreateur],[cbModification],[cbReplication],[cbFlag],cbMarqSource = [cbMarq],[DataBaseSource] = ''"+dataSource+"''  FROM '+ @TableName " +
+                "+ ' WHERE  cbModification >= ISNULL((SELECT LastSynchro FROM config.SelectTable WHERE tableName='''+ @TableName +'''),''1900-01-01'')' " +
+                "+ ' AND    "+agencyColumn+" IN (SELECT DE_No FROM F_DEPOT WHERE DE_CodePostal = ''"+agency+"'')'   \n" +
+                "\n" +
+                "EXEC(@MonSQL)\n" +
+                "\n" +
+                "END";
+    }
+
+    public static String selectSourceTableFilterAgencyEnteteLink(String table,String dataSource,String agency){
+        return "BEGIN \n" +
+                "DECLARE @MaColonne AS VARCHAR(250);\n" +
+                "DECLARE @MonSQL AS VARCHAR(MAX)=''; \n" +
+                "DECLARE @TableName AS VARCHAR(100) = '"+table+"'; \n" +
+                "DECLARE @getid CURSOR\n" +
+                "\n" +
+                "SET @getid = CURSOR FOR\n" +
+                "SELECT col.name\n" +
+                "FROM sys.tables tab\n" +
+                "INNER JOIN sys.columns col\n" +
+                "\tON tab.object_id = col.object_id\n" +
+                "WHERE tab.name = @TableName\n" +
+                "AND col.name NOT LIKE 'cb%'" +
+                "AND col.name NOT IN ('DataBaseSource','cbMarqSource')\n" +
+                "\n" +
+                "OPEN @getid\n" +
+                "FETCH NEXT\n" +
+                "FROM @getid INTO @MaColonne\n" +
+                "WHILE @@FETCH_STATUS = 0\n" +
+                "BEGIN\n" +
+                " SELECT @MonSQL = @MonSQL+ ',' + @MaColonne \n" +
+                "\n" +
+                " FETCH NEXT\n" +
+                "    FROM @getid INTO @MaColonne --, @name\n" +
+                "END\n" +
+                "CLOSE @getid\n" +
+                "DEALLOCATE @getid\n" +
+                "SELECT @MonSQL = SUBSTRING(@MonSQL,2,LEN(@MonSQL)) \n" +
+                "\n" +
+                "SELECT @MonSQL = 'SELECT ' + @MonSQL + ',[cbProt],[cbCreateur],[cbModification],[cbReplication],[cbFlag],cbMarqSource = [cbMarq],[DataBaseSource] = ''"+dataSource+
+                "''  FROM '+ @TableName " +
+                "+ ' WHERE  cbModification >= ISNULL((SELECT LastSynchro FROM config.SelectTable WHERE tableName='''+ @TableName +'''),''1900-01-01'')' " +
+                "+ ' AND    EXISTS (SELECT  F_DOCENTETE.DO_Domaine,F_DOCENTETE.DO_Piece,F_DOCENTETE.DO_Type " +
+                "                   FROM    F_DOCENTETE " +
+                "                   WHERE   DE_No IN (SELECT DE_No FROM F_DEPOT WHERE DE_CodePostal = ''"+agency+"'')" +
+                "                   AND '+ @TableName +'.DO_Domaine = F_DOCENTETE.DO_Domaine " +
+                "                   AND '+ @TableName +'.DO_Type = F_DOCENTETE.DO_Type" +
+                "                   AND '+ @TableName +'.DO_Piece = F_DOCENTETE.DO_Piece)'   \n" +
+                "\n" +
+                "EXEC(@MonSQL)\n" +
+                "\n" +
+                "END";
+    }
+
+    public static String selectSourceTableFilterAgencyRegltLink(String table,String dataSource,String agency){
+        return "BEGIN \n" +
+                "DECLARE @MaColonne AS VARCHAR(250);\n" +
+                "DECLARE @MonSQL AS VARCHAR(MAX)=''; \n" +
+                "DECLARE @TableName AS VARCHAR(100) = '"+table+"'; \n" +
+                "DECLARE @getid CURSOR\n" +
+                "\n" +
+                "SET @getid = CURSOR FOR\n" +
+                "SELECT col.name\n" +
+                "FROM sys.tables tab\n" +
+                "INNER JOIN sys.columns col\n" +
+                "\tON tab.object_id = col.object_id\n" +
+                "WHERE tab.name = @TableName\n" +
+                "AND col.name NOT LIKE 'cb%'" +
+                "AND col.name NOT IN ('DataBaseSource','cbMarqSource')\n" +
+                "\n" +
+                "OPEN @getid\n" +
+                "FETCH NEXT\n" +
+                "FROM @getid INTO @MaColonne\n" +
+                "WHILE @@FETCH_STATUS = 0\n" +
+                "BEGIN\n" +
+                " SELECT @MonSQL = @MonSQL+ ',' + @MaColonne \n" +
+                "\n" +
+                " FETCH NEXT\n" +
+                "    FROM @getid INTO @MaColonne --, @name\n" +
+                "END\n" +
+                "CLOSE @getid\n" +
+                "DEALLOCATE @getid\n" +
+                "SELECT @MonSQL = SUBSTRING(@MonSQL,2,LEN(@MonSQL)) \n" +
+                "\n" +
+                "SELECT @MonSQL = 'SELECT ' + @MonSQL + ',[cbProt],[cbCreateur],[cbModification],[cbReplication],[cbFlag],cbMarqSource = [cbMarq],[DataBaseSource] = ''"+dataSource+
+                "''  FROM '+ @TableName " +
+                "+ ' WHERE  cbModification >= ISNULL((SELECT LastSynchro FROM config.SelectTable WHERE tableName='''+ @TableName +'''),''1900-01-01'')' " +
+                "+ ' AND    EXISTS (SELECT  F_DOCENTETE.DO_Domaine,F_DOCENTETE.DO_Piece,F_DOCENTETE.DO_Type " +
+                "                   FROM    F_DOCENTETE" +
+                "                   INNER JOIN F_REGLECH" +
+                "                       ON  F_REGLECH.DO_Domaine = F_DOCENTETE.DO_Domaine" +
+                "                       AND F_REGLECH.DO_Type = F_DOCENTETE.DO_Type" +
+                "                       AND F_REGLECH.DO_Piece = F_DOCENTETE.DO_Piece    " +
+                "                   INNER JOIN F_CREGLEMENT " +
+                "                       ON  F_REGLECH.RG_No = F_CREGLEMENT.RG_No" +
+                "                   WHERE   DE_No IN (SELECT DE_No FROM F_DEPOT WHERE DE_CodePostal = ''"+agency+"'')" +
+                "                   AND '+ @TableName +'.RG_No = F_CREGLEMENT.RG_No )'   \n" +
+                "\n" +
+                "EXEC(@MonSQL)\n" +
+                "\n" +
+                "END";
+    }
 
     public static void listDeleteAllInfo(Connection sqlCon, String path, String file,String table,String listTable,String database)
     {

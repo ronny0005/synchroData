@@ -96,7 +96,15 @@ public class Depot extends Table{
 
         DepotEmpl.getDataElement(sqlCon, path,database, time);
     }
+    public static void getDataElementFilterAgency(Connection sqlCon, String path,String database,String time,String agency)
+    {
+        String filename =  file+time+".csv";
+        initTableParam(sqlCon,tableName,configList,"DE_No");
+        getData(sqlCon, selectSourceTableFilterAgency(tableName,database,agency,"DE_No"), tableName, path, filename);
+        listDeleteAllInfo(sqlCon, path, "deleteList" + filename,tableName,configList,database);
 
+        DepotEmpl.getDataElement(sqlCon, path,database, time);
+    }
     public static void deleteDepot(Connection sqlCon, String path,String filename)
     {
         String query =
