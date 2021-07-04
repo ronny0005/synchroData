@@ -40,7 +40,7 @@ public class BackupDataFilterAgency {
             if(list.get(8).equals("1"))
                 Livraison.getDataElement(sqlCon, path,list.get(1),simpleDateFormat.format(new Date()));
             if(list.get(5).equals("1"))
-                Article.getDataElement(sqlCon, path,list.get(1),simpleDateFormat.format(new Date()));
+                Article.getDataElementFilterAgency(sqlCon, path,list.get(1),simpleDateFormat.format(new Date()),agency);
             if(list.get(9).equals("1")) {
                 DocEntete.getDataElementFilterAgency(sqlCon, path, list.get(1),simpleDateFormat.format(new Date()),agency);
                 DocRegl.getDataElementFilterAgency(sqlCon, path, list.get(1),simpleDateFormat.format(new Date()),agency);

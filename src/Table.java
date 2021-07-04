@@ -92,6 +92,54 @@ public class Table {
                 "END";
     }
 
+    public static String selectSourceTableFilterAgencyArticle(String table,String dataSource,String agency){
+        return "BEGIN \n" +
+                "DECLARE @MaColonne AS VARCHAR(250);\n" +
+                "DECLARE @MonSQL AS VARCHAR(MAX)=''; \n" +
+                "DECLARE @TableName AS VARCHAR(100) = '"+table+"'; \n" +
+                "DECLARE @getid CURSOR\n" +
+                "\n" +
+                "SET @getid = CURSOR FOR\n" +
+                "SELECT col.name\n" +
+                "FROM sys.tables tab\n" +
+                "INNER JOIN sys.columns col\n" +
+                "\tON tab.object_id = col.object_id\n" +
+                "WHERE tab.name = @TableName\n" +
+                "AND CASE WHEN col.name LIKE 'cb%' THEN 0 " +
+                " WHEN (col.name LIKE '%_P_MIN' AND LEFT(col.name ,LEN('"+agency+"')) <> '"+agency+"') THEN 0 \n " +
+                " WHEN (col.name LIKE '%_QTE_MIN_DG' AND LEFT(col.name ,LEN('"+agency+"')) <>  '"+agency+"') THEN 0 \n " +
+                " WHEN (col.name LIKE '%_P_MAX' AND LEFT(col.name ,LEN('"+agency+"')) <>  '"+agency+"') THEN 0 \n " +
+                " WHEN (col.name LIKE '%_P_GROSSISTES' AND LEFT(col.name ,LEN('"+agency+"')) <>  '"+agency+"') THEN 0 \n " +
+                " WHEN (col.name LIKE '%_QTE_MIN_G' AND LEFT(col.name ,LEN('"+agency+"')) <>  '"+agency+"') THEN 0 \n " +
+                " WHEN (col.name LIKE '%_SUPER_PRIX' AND LEFT(col.name ,LEN('"+agency+"')) <>  '"+agency+"') THEN 0 \n " +
+                " WHEN (col.name LIKE '%_QTE_MIN_SUPERPRIX' AND LEFT(col.name ,LEN('"+agency+"')) <>  '"+agency+"') THEN 0 \n " +
+                " WHEN (col.name LIKE '%_COMMENTAIRES' AND LEFT(col.name ,LEN('"+agency+"')) <>  '"+agency+"') THEN 0 \n " +
+                " WHEN col.name IN ('DataBaseSource','cbMarqSource') THEN 0 \n" +
+                " ELSE 1 END = 1 " +
+                "\n" +
+                "OPEN @getid\n" +
+                "FETCH NEXT\n" +
+                "FROM @getid INTO @MaColonne\n" +
+                "WHILE @@FETCH_STATUS = 0\n" +
+                "BEGIN\n" +
+                " SELECT @MonSQL = @MonSQL+ ',' + @MaColonne \n" +
+                "\n" +
+                " FETCH NEXT\n" +
+                "    FROM @getid INTO @MaColonne --, @name\n" +
+                "END\n" +
+                "CLOSE @getid\n" +
+                "DEALLOCATE @getid\n" +
+                "SELECT @MonSQL = SUBSTRING(@MonSQL,2,LEN(@MonSQL)) \n" +
+                "\n" +
+                "SELECT @MonSQL = 'SELECT ' + @MonSQL + ',[cbProt],[cbCreateur],[cbModification],[cbReplication],[cbFlag],cbMarqSource = [cbMarq],[DataBaseSource] = ''"+dataSource+"''  FROM '+ @TableName " +
+                "+ ' WHERE  cbModification >= ISNULL((SELECT LastSynchro FROM config.SelectTable WHERE tableName='''+ @TableName +'''),''1900-01-01'')' " +
+                "+ ''   \n" +
+                "\n" +
+                "EXEC(@MonSQL)\n" +
+                "\n" +
+                "END";
+    }
+
     public static String selectSourceTableFilterAgencyEnteteLink(String table,String dataSource,String agency){
         return "BEGIN \n" +
                 "DECLARE @MaColonne AS VARCHAR(250);\n" +
