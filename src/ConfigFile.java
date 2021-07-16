@@ -40,6 +40,8 @@ public class ConfigFile {
     private JCheckBox SrcEcritureACheckBox;
     private JCheckBox SrcCompteGeneralCheckBox;
     private JCheckBox DestCompteGeneralCheckBox;
+    private JTextField dossierFTP;
+    private JTextField codeAgence;
     private String databaseSourceFile = "resource/databaseSource.csv";
     private String databaseDestFile = "resource/databaseDest.csv";
     private ArrayList<String> infoSource = DataBase.getInfoConnexion(databaseSourceFile);
@@ -66,6 +68,8 @@ public class ConfigFile {
         DestLogin.setText(infoDest.get(2));
         DestMotDePasse.setText(infoDest.get(3));
         DestRepertoire.setText(infoDest.get(4));
+        dossierFTP.setText(infoDest.get(18));
+        codeAgence.setText(infoDest.get(19));
         checkBox(Integer.valueOf(infoDest.get(5)),DestArticlesCheckBox);
         checkBox(Integer.valueOf(infoDest.get(6)),DestTiersCheckBox);
         checkBox(Integer.valueOf(infoDest.get(7)),DestDepotCheckBox);
@@ -105,6 +109,8 @@ public class ConfigFile {
         infoDest.set(2,DestLogin.getText());
         infoDest.set(3,DestMotDePasse.getText());
         infoDest.set(4,DestRepertoire.getText());
+        infoDest.set(18,dossierFTP.getText());
+        infoDest.set(19,codeAgence.getText());
         infoDest.set(5,setCheckBox(DestArticlesCheckBox));
         infoDest.set(6,setCheckBox(DestTiersCheckBox));
         infoDest.set(7,setCheckBox(DestDepotCheckBox));
@@ -123,6 +129,8 @@ public class ConfigFile {
         infoSource.set(2,SrcLogin.getText());
         infoSource.set(3,SrcMotDePasse.getText());
         infoSource.set(4,SrcRepertoire.getText());
+        infoSource.set(18,dossierFTP.getText());
+        infoSource.set(19,codeAgence.getText());
         infoSource.set(5,setCheckBox(SrcArticlesCheckBox));
         infoSource.set(6,setCheckBox(SrcTiersCheckBox));
         infoSource.set(7,setCheckBox(SrcDepotCheckBox));
