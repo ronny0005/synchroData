@@ -18,12 +18,12 @@ public class Depot extends Table{
                         "  ([DE_No],[DE_Intitule],[DE_Adresse],[DE_Complement],[DE_CodePostal],[DE_Ville]\n" +
                         "\t\t,[DE_Contact],[DE_Principal],[DE_CatCompta],[DE_Region],[DE_Pays],[DE_EMail]\n" +
                         "\t\t,[DE_Code],[DE_Telephone],[DE_Telecopie],[DE_Replication],[DP_NoDefaut],[cbProt]\n" +
-                        "\t\t,[cbCreateur],[cbModification],[cbReplication],[cbFlag])    \n" +
+                        "\t\t,[cbCreateur],[cbModification],[cbReplication],[cbFlag],DE_NoSource,DatabaseSource)    \n" +
                         "    \n" +
-                        "  SELECT dest.[DE_No],[DE_Intitule],[DE_Adresse],[DE_Complement],[DE_CodePostal],[DE_Ville]\n" +
+                        "  SELECT ISNULL((SELECT Max(DE_No) FROM F_DEPOT),0)  + ROW_NUMBER() OVER(ORDER BY dest.DE_No),[DE_Intitule],[DE_Adresse],[DE_Complement],[DE_CodePostal],[DE_Ville]\n" +
                         "\t\t,[DE_Contact],[DE_Principal],[DE_CatCompta],[DE_Region],[DE_Pays],[DE_EMail]\n" +
                         "\t\t,[DE_Code],[DE_Telephone],[DE_Telecopie],[DE_Replication],null/*[DP_NoDefaut]*/,[cbProt]\n" +
-                        "\t\t,[cbCreateur],[cbModification],[cbReplication],[cbFlag] \n" +
+                        "\t\t,[cbCreateur],[cbModification],[cbReplication],[cbFlag],DE_NoSource,DatabaseSource \n" +
                         "  FROM F_DEPOT_DEST dest      \n" +
                         "  LEFT JOIN (SELECT [DE_No] FROM F_DEPOT) src      \n" +
                         "  ON dest.DE_No = src.DE_No      \n" +
@@ -50,7 +50,7 @@ public class Depot extends Table{
         String query = "UPDATE F_DEPOT \n" +
                 "     SET DP_NoDefaut = F_DEPOT_DEST.DP_NoDefaut \n" +
                 " FROM F_DEPOT_DEST \n" +
-                " WHERE F_DEPOT_DEST.DE_No = F_DEPOT.DE_No \n";
+                " WHERE F_DEPOT_DEST.DE_No = ISNULL(F_DEPOT.DE_NoSource,F_DEPOT.DE_No) \n";
         //                           " UPDATE F_DEPOTEMPL \n" +
         //                           "     SET DE_No = F_DEPOTEMPL_DEST.DE_No \n" +
         //" FROM F_DEPOTEMPL_DEST \n" +
@@ -90,7 +90,7 @@ public class Depot extends Table{
     public static void getDataElement(Connection sqlCon, String path,String database,String time)
     {
         String filename =  file+time+".csv";
-        initTableParam(sqlCon,tableName,configList,"DE_No");
+        initTableParam(sqlCon,tableName,configList,"DE_No,DatabaseSource");
         getData(sqlCon, selectSourceTable(tableName,database), tableName, path, filename);
         listDeleteAllInfo(sqlCon, path, "deleteList" + filename,tableName,configList,database);
 
@@ -99,8 +99,8 @@ public class Depot extends Table{
     public static void getDataElementFilterAgency(Connection sqlCon, String path,String database,String time,String agency)
     {
         String filename =  file+time+".csv";
-        initTableParam(sqlCon,tableName,configList,"DE_No");
-        getData(sqlCon, selectSourceTableFilterAgency(tableName,database,agency,"DE_No"), tableName, path, filename);
+        initTableParam(sqlCon,tableName,configList,"DE_No,DatabaseSource");
+        getData(sqlCon, selectSourceTableFilterAgency(tableName,database,agency,"DE_No,DatabaseSource"), tableName, path, filename);
         listDeleteAllInfo(sqlCon, path, "deleteList" + filename,tableName,configList,database);
 
         DepotEmpl.getDataElement(sqlCon, path,database, time);
@@ -109,7 +109,7 @@ public class Depot extends Table{
     {
         String query =
                 " DELETE FROM F_DEPOT  \n" +
-                " WHERE EXISTS (SELECT 1 FROM F_DEPOT_SUPPR WHERE F_DEPOT_SUPPR.DE_No = F_DEPOT.DE_No" +
+                " WHERE EXISTS (SELECT 1 FROM F_DEPOT_SUPPR WHERE F_DEPOT_SUPPR.DE_No = F_DEPOT.DE_NoSource AND F_DEPOT.DataBaseSource = F_DEPOT_SUPPR.DataBaseSource" +
                 "   )  \n" +
                 "  \n" +
                 " IF OBJECT_ID('F_DEPOT_SUPPR') IS NOT NULL  \n" +
