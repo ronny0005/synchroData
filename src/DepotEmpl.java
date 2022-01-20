@@ -27,13 +27,15 @@ public class DepotEmpl extends Table {
                         "  \n" +
                         "  INSERT INTO [dbo].[F_DEPOTEMPL]     \n" +
                         "  ([DE_No],[DP_No],[DP_Code],[DP_Intitule],[DP_Zone],[DP_Type],[cbProt]\n" +
-                        "      ,[cbCreateur],[cbModification],[cbReplication],[cbFlag])     \n" +
+                        "      ,[cbCreateur],[cbModification],[cbReplication],[cbFlag],DP_NoSource,DataBaseSource)     \n" +
                         "     \n" +
-                        "  SELECT dest.[DP_No],[DE_No],[DP_Code],[DP_Intitule],[DP_Zone],[DP_Type],[cbProt]\n" +
-                        "      ,[cbCreateur],[cbModification],[cbReplication],[cbFlag] \n" +
+                        "  SELECT ISNULL((SELECT Max(DP_No) FROM F_DEPOTEMPL),0)  + ROW_NUMBER() OVER(ORDER BY dest.DP_No),ISNULL([DE_NoSource],[DE_No]),[DP_Code],[DP_Intitule],[DP_Zone],[DP_Type],[cbProt]\n" +
+                        "      ,[cbCreateur],[cbModification],[cbReplication],[cbFlag],DP_No,DataBaseSource \n" +
                         "  FROM F_DEPOTEMPL_DEST dest       \n" +
                         "  LEFT JOIN (SELECT DP_No FROM F_DEPOTEMPL) src       \n" +
                         "  ON dest.DP_No = src.DP_No\n" +
+                        "  LEFT JOIN (SELECT DatabaseSource,DE_NoSource FROM F_DEPOT) srcDep       \n" +
+                        "  ON dest.DE_No = srcDep.DE_NoSource\n" +
                         "  WHERE src.DP_No IS NULL ;     \n" +
                         "  IF OBJECT_ID('F_DEPOTEMPL_DEST') IS NOT NULL     \n" +
                         "  DROP TABLE F_DEPOTEMPL_DEST;" +
@@ -70,7 +72,7 @@ public class DepotEmpl extends Table {
                 String filename = children[i];
                 readOnFile(path, filename, tableName + "_DEST", sqlCon);
                 readOnFile(path, "deleteList" + filename, tableName + "_SUPPR", sqlCon);
-                executeQuery(sqlCon, updateTableDest("DP_No", "'DP_No','DE_No'", tableName, tableName + "_DEST"));
+                executeQuery(sqlCon, updateTableDest("DP_No", "'DP_No','DE_No','DP_NoSource'", tableName, tableName + "_DEST"));
                 sendData(sqlCon, path, filename, insert());
 
                 deleteTempTable(sqlCon, tableName);
@@ -89,7 +91,7 @@ public class DepotEmpl extends Table {
     {
         String query =
                 " DELETE FROM F_DEPOTEMPL  \n" +
-                " WHERE EXISTS (SELECT 1 FROM F_DEPOTEMPL_SUPPR WHERE F_DEPOTEMPL_SUPPR.DP_No = F_DEPOTEMPL.DP_No" +
+                " WHERE EXISTS (SELECT 1 FROM F_DEPOTEMPL_SUPPR WHERE F_DEPOTEMPL_SUPPR.DP_No = F_DEPOTEMPL.DP_NoSource AND F_DEPOTEMPL_SUPPR.DataBaseSource = F_DEPOTEMPL.DataBaseSource" +
                 "   )  \n" +
                 "  \n" +
                 " IF OBJECT_ID('F_DEPOTEMPL_SUPPR') IS NOT NULL  \n" +
