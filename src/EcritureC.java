@@ -140,7 +140,7 @@ public class EcritureC extends Table {
     {
         String query =
                 " DELETE FROM F_ECRITUREC \n" +
-                " WHERE EXISTS (SELECT 1 FROM F_ECRITUREC_SUPPR WHERE F_ECRITUREC_SUPPR.EC_No = F_ECRITUREC.EC_No)  \n" +
+                " WHERE EXISTS (SELECT 1 FROM F_ECRITUREC_SUPPR WHERE F_ECRITUREC_SUPPR.EC_No = F_ECRITUREC.EC_NoSource AND F_ECRITUREC_SUPPR.DatabaseSource = F_ECRITUREC.DatabaseSource)  \n" +
                 "  \n" +
                 " IF OBJECT_ID('F_ECRITUREC_SUPPR') IS NOT NULL  \n" +
                 " DROP TABLE F_ECRITUREC_SUPPR ;";
