@@ -1,4 +1,5 @@
 Manifest-Version: 1.0
 Main-Class: UpdateData
-Class-Path: mssql-jdbc-8.2.2.jre8.jar jsch-0.1.55.jar
+Class-Path: mssql-jdbc-8.2.2.jre8.jar jsch-0.1.55.jar json-simple-1.1.1.
+ jar
 
