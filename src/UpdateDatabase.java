@@ -1,3 +1,5 @@
+import org.json.simple.JSONObject;
+
 import java.io.*;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -28,19 +30,19 @@ public class UpdateDatabase {
     public static void main(String[] args){
 
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyyMMddHHmmssSSS");
-        String databaseSourceFile = "resource/databaseSource.csv";
+        String databaseSourceFile = "resource/databaseSource.json";
         try {
             Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
         }
-        ArrayList<String> list = DataBase.getInfoConnexion(databaseSourceFile);
-        String path = list.get(4);
+        JSONObject list = DataBase.getInfoConnexion(databaseSourceFile);
+        String path = (String)list.get("path");
         try {
             String dbURL = "jdbc:sqlserver://"+list.get(0)+";databaseName="+list.get(1);
             Properties properties = new Properties();
-            properties.put("user", list.get(2));
-            properties.put("password", list.get(3));
+            properties.put("user", (String)list.get("username"));
+            properties.put("password", (String)list.get("password"));
             Connection sqlCon = DriverManager.getConnection(dbURL, properties);
             executeSQL(new File("resource/configListTable.sql"),sqlCon);
         } catch (SQLException throwables) {

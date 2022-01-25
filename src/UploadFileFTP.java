@@ -1,4 +1,5 @@
 import com.jcraft.jsch.*;
+import org.json.simple.JSONObject;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -34,8 +35,8 @@ public class UploadFileFTP {
     public static void main(String[] args){
         JSch jsch = new JSch();
         Session session = null;
-        String databaseSourceFile = "resource/databaseDest.csv";
-        ArrayList<String> list = DataBase.getInfoConnexion(databaseSourceFile);
+        String databaseSourceFile = "resource/databaseDest.json";
+        JSONObject list = DataBase.getInfoConnexion(databaseSourceFile);
         try {
             session = jsch.getSession("u85460117-upload", "home631778145.1and1-data.host", 22);
             session.setConfig("StrictHostKeyChecking", "no");
@@ -45,8 +46,8 @@ public class UploadFileFTP {
             Channel channel = session.openChannel("sftp");
             channel.connect();
             ChannelSftp sftpChannel = (ChannelSftp) channel;
-            File dir = new File(list.get(4));
-            sftpChannel.cd(list.get(18));
+            File dir = new File((String)list.get("path"));
+            sftpChannel.cd((String)list.get("folderftp"));
 
             Vector<ChannelSftp.LsEntry> listFiles = sftpChannel.ls("*.csv");
             for(ChannelSftp.LsEntry entry : listFiles) {

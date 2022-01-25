@@ -47,7 +47,12 @@ public class Table {
                 "\n" +
                 "SELECT @MonSQL = 'SELECT ' + @MonSQL + ',[cbProt],[cbCreateur],[cbModification],[cbReplication],[cbFlag],cbMarqSource = [cbMarq],[DataBaseSource] = ''"+dataSource+"''  FROM '+ @TableName " +
                 "+ ' WHERE cbModification >= ISNULL((SELECT LastSynchro FROM config.SelectTable WHERE tableName='''+ @TableName +'''),''1900-01-01'')' \n" +
-                "\n" +
+                "IF EXISTS (\tSELECT\tcol.name  \n" +
+                "\t\t\tFROM\tsys.tables tab  \n" +
+                "\t\t\tINNER JOIN sys.columns col\tON\ttab.object_id = col.object_id  \n" +
+                "\t\t\tWHERE\ttab.name = @TableName  \n" +
+                "\t\t\tAND\t\tcol.name = 'DataBaseSource') \n" +
+                "\t SELECT @MonSQL = @MonSQL + ' AND ISNULL(DataBaseSource,''"+dataSource+"'') = ''"+dataSource+"''' \n" +
                 "EXEC(@MonSQL)\n" +
                 "\n" +
                 "END";
@@ -398,6 +403,7 @@ public class Table {
         String[] keys = key.split(",");
         String sql =  "\n" +
                 "BEGIN TRY\n" +
+                "SET DATEFORMAT ymd;\n" +
                 "DECLARE @MaColonne AS VARCHAR(250);\n" +
                 "DECLARE @MonSQL AS VARCHAR(MAX) = ''; \n" +
                 "DECLARE @isKey AS INT=CASE WHEN '"+ key +"' = '' THEN 0 ELSE 1 END; \n" +

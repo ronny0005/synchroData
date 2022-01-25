@@ -23,20 +23,24 @@ public class DepotEmpl extends Table {
                         "      ,[cbReplication] = F_DEPOTEMPL_DEST.cbReplication\n" +
                         "      ,[cbFlag] = F_DEPOTEMPL_DEST.cbFlag\n" +
                         "FROM F_DEPOTEMPL_DEST       \n" +
-                        "  WHERE F_DEPOTEMPL.DE_No = F_DEPOTEMPL_DEST.DE_No \n" +
+                        "  WHERE F_DEPOTEMPL.DP_NoSource = F_DEPOTEMPL_DEST.DP_No \n" +
+                        "  AND\tF_DEPOTEMPL.DataBaseSource = F_DEPOTEMPL_DEST.DataBaseSource \n" +
                         "  \n" +
                         "  INSERT INTO [dbo].[F_DEPOTEMPL]     \n" +
-                        "  ([DE_No],[DP_No],[DP_Code],[DP_Intitule],[DP_Zone],[DP_Type],[cbProt]\n" +
-                        "      ,[cbCreateur],[cbModification],[cbReplication],[cbFlag],DP_NoSource,DataBaseSource)     \n" +
+                        "  ([DP_No],[DE_No],[DP_Code],[DP_Intitule],[DP_Zone],[DP_Type],[cbProt]\n" +
+                        "      ,[cbCreateur],[cbModification],[cbReplication],[cbFlag],DP_NoSource,cbMarqSource,DataBaseSource)     \n" +
                         "     \n" +
-                        "  SELECT ISNULL((SELECT Max(DP_No) FROM F_DEPOTEMPL),0)  + ROW_NUMBER() OVER(ORDER BY dest.DP_No),ISNULL([DE_NoSource],[DE_No]),[DP_Code],[DP_Intitule],[DP_Zone],[DP_Type],[cbProt]\n" +
-                        "      ,[cbCreateur],[cbModification],[cbReplication],[cbFlag],DP_No,DataBaseSource \n" +
+                        "  SELECT ISNULL((SELECT Max(DP_No) FROM F_DEPOTEMPL),0)  + ROW_NUMBER() OVER(ORDER BY dest.DP_No),srcDep.[DE_No],[DP_Code],[DP_Intitule],[DP_Zone],[DP_Type],[cbProt]\n" +
+                        "      ,[cbCreateur],[cbModification],[cbReplication],[cbFlag],dest.DP_No,dest.cbMarqSource,dest.DataBaseSource \n" +
                         "  FROM F_DEPOTEMPL_DEST dest       \n" +
-                        "  LEFT JOIN (SELECT DP_No FROM F_DEPOTEMPL) src       \n" +
-                        "  ON dest.DP_No = src.DP_No\n" +
-                        "  LEFT JOIN (SELECT DatabaseSource,DE_NoSource FROM F_DEPOT) srcDep       \n" +
-                        "  ON dest.DE_No = srcDep.DE_NoSource\n" +
-                        "  WHERE src.DP_No IS NULL ;     \n" +
+                        "  LEFT JOIN (SELECT DP_NoSource,DataBaseSource FROM F_DEPOTEMPL) src       \n" +
+                        "  ON dest.DP_No = src.DP_NoSource\n" +
+                        "  AND dest.DataBaseSource = src.DataBaseSource\n" +
+                        "  LEFT JOIN (SELECT DatabaseSource,DE_NoSource,DE_No FROM F_DEPOT) srcDep       \n" +
+                        "  ON\tdest.DE_No = srcDep.DE_NoSource\n" +
+                        "  AND\tdest.DataBaseSource = srcDep.DataBaseSource\n" +
+                        "  WHERE src.DP_NoSource IS NULL \n" +
+                        "  AND\tsrcDep.DE_No IS NOT NULL;   " +
                         "  IF OBJECT_ID('F_DEPOTEMPL_DEST') IS NOT NULL     \n" +
                         "  DROP TABLE F_DEPOTEMPL_DEST;" +
                         " END TRY\n" +
@@ -72,7 +76,7 @@ public class DepotEmpl extends Table {
                 String filename = children[i];
                 readOnFile(path, filename, tableName + "_DEST", sqlCon);
                 readOnFile(path, "deleteList" + filename, tableName + "_SUPPR", sqlCon);
-                executeQuery(sqlCon, updateTableDest("DP_No", "'DP_No','DE_No','DP_NoSource'", tableName, tableName + "_DEST"));
+                executeQuery(sqlCon, updateTableDest("", "'DP_No','DE_No','DP_NoSource'", tableName, tableName + "_DEST"));
                 sendData(sqlCon, path, filename, insert());
 
                 deleteTempTable(sqlCon, tableName);
@@ -83,7 +87,7 @@ public class DepotEmpl extends Table {
     public static void getDataElement(Connection sqlCon, String path,String database,String time)
     {
         String filename =  file+time+".csv";
-        initTableParam(sqlCon,tableName,configList,"DP_No");
+        initTableParam(sqlCon,tableName,configList,"DP_No,DatabaseSource");
         getData(sqlCon, selectSourceTable(tableName,database), tableName, path, filename);
         listDeleteAllInfo(sqlCon, path, "deleteList" + filename,tableName,configList,database);
     }
@@ -91,7 +95,10 @@ public class DepotEmpl extends Table {
     {
         String query =
                 " DELETE FROM F_DEPOTEMPL  \n" +
-                " WHERE EXISTS (SELECT 1 FROM F_DEPOTEMPL_SUPPR WHERE F_DEPOTEMPL_SUPPR.DP_No = F_DEPOTEMPL.DP_NoSource AND F_DEPOTEMPL_SUPPR.DataBaseSource = F_DEPOTEMPL.DataBaseSource" +
+                " WHERE EXISTS (SELECT 1 " +
+                "               FROM F_DEPOTEMPL_SUPPR emplSuppr" +
+                "               WHERE emplSuppr.DP_No = F_DEPOTEMPL.DP_NoSource " +
+                "               AND emplSuppr.DataBaseSource = F_DEPOTEMPL.DataBaseSource" +
                 "   )  \n" +
                 "  \n" +
                 " IF OBJECT_ID('F_DEPOTEMPL_SUPPR') IS NOT NULL  \n" +

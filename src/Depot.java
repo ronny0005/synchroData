@@ -14,20 +14,24 @@ public class Depot extends Table{
     {
         return          "BEGIN TRY " +
                         " SET DATEFORMAT ymd;\n" +
+                        "  DISABLE TRIGGER [TG_INS_F_DEPOT] ON dbo.F_DEPOT; \n" +
                         "  INSERT INTO [dbo].[F_DEPOT]    \n" +
                         "  ([DE_No],[DE_Intitule],[DE_Adresse],[DE_Complement],[DE_CodePostal],[DE_Ville]\n" +
                         "\t\t,[DE_Contact],[DE_Principal],[DE_CatCompta],[DE_Region],[DE_Pays],[DE_EMail]\n" +
                         "\t\t,[DE_Code],[DE_Telephone],[DE_Telecopie],[DE_Replication],[DP_NoDefaut],[cbProt]\n" +
-                        "\t\t,[cbCreateur],[cbModification],[cbReplication],[cbFlag],DE_NoSource,DatabaseSource)    \n" +
+                        "\t\t,[cbCreateur],[cbModification],[cbReplication],[cbFlag],DE_NoSource,cbMarqSource,DatabaseSource)    \n" +
                         "    \n" +
-                        "  SELECT ISNULL((SELECT Max(DE_No) FROM F_DEPOT),0)  + ROW_NUMBER() OVER(ORDER BY dest.DE_No),[DE_Intitule],[DE_Adresse],[DE_Complement],[DE_CodePostal],[DE_Ville]\n" +
+                        "  SELECT ISNULL((SELECT Max(DE_No) FROM F_DEPOT),0)  + ROW_NUMBER() OVER(ORDER BY dest.DE_No),dest.[DE_Intitule],[DE_Adresse],[DE_Complement],[DE_CodePostal],[DE_Ville]\n" +
                         "\t\t,[DE_Contact],[DE_Principal],[DE_CatCompta],[DE_Region],[DE_Pays],[DE_EMail]\n" +
-                        "\t\t,[DE_Code],[DE_Telephone],[DE_Telecopie],[DE_Replication],null/*[DP_NoDefaut]*/,[cbProt]\n" +
-                        "\t\t,[cbCreateur],[cbModification],[cbReplication],[cbFlag],DE_NoSource,DatabaseSource \n" +
+                        "\t\t,NULL,[DE_Telephone],[DE_Telecopie],[DE_Replication],null/*[DP_NoDefaut]*/,[cbProt]\n" +
+                        "\t\t,[cbCreateur],[cbModification],[cbReplication],[cbFlag],dest.DE_No, dest.cbMarqSource,dest.DatabaseSource \n" +
                         "  FROM F_DEPOT_DEST dest      \n" +
-                        "  LEFT JOIN (SELECT [DE_No] FROM F_DEPOT) src      \n" +
-                        "  ON dest.DE_No = src.DE_No      \n" +
-                        "  WHERE src.DE_No IS NULL ;    \n" +
+                        "  LEFT JOIN (SELECT [DE_NoSource],DataBaseSource,DE_Intitule FROM F_DEPOT) src      \n" +
+                        "  ON (dest.DE_No = src.DE_NoSource\n" +
+                        "  AND dest.DataBaseSource = src.DataBaseSource) OR dest.DE_Intitule = src.DE_Intitule\n" +
+                        "  WHERE src.DE_Intitule IS NULL ;  \n" +
+                        "  \n" +
+                        "ENABLE  TRIGGER [TG_INS_F_DEPOT] ON dbo.F_DEPOT; " +
                         " END TRY\n" +
                         " BEGIN CATCH \n" +
                         "INSERT INTO config.DB_Errors\n" +
@@ -47,10 +51,15 @@ public class Depot extends Table{
 
     public static void linkDepot(Connection sqlCon)
     {
-        String query = "UPDATE F_DEPOT \n" +
-                "     SET DP_NoDefaut = F_DEPOT_DEST.DP_NoDefaut \n" +
-                " FROM F_DEPOT_DEST \n" +
-                " WHERE F_DEPOT_DEST.DE_No = ISNULL(F_DEPOT.DE_NoSource,F_DEPOT.DE_No) \n";
+        String query = "\n" +
+                "UPDATE dep SET DP_NoDefaut = depE.DP_No\n" +
+                "FROM F_DEPOT dep\n" +
+                "INNER JOIN F_DEPOT_DEST depD\n" +
+                "ON dep.DE_NoSource = depD.DE_No\n" +
+                "AND dep.DataBaseSource = depD.DataBaseSource\n" +
+                "INNER JOIN F_DEPOTEMPL depE\n" +
+                "ON depE.DP_NoSource = depD.DP_NoDefaut\n" +
+                "AND depE.DataBaseSource = depD.DataBaseSource";
         //                           " UPDATE F_DEPOTEMPL \n" +
         //                           "     SET DE_No = F_DEPOTEMPL_DEST.DE_No \n" +
         //" FROM F_DEPOTEMPL_DEST \n" +
@@ -74,7 +83,7 @@ public class Depot extends Table{
                 String filename = children[i];
                 readOnFile(path,filename,tableName+"_DEST",sqlCon);
                 readOnFile(path,"deleteList"+filename,tableName+"_SUPPR",sqlCon);
-                executeQuery(sqlCon,updateTableDest( "DE_No","'DE_No','DP_NoDefaut'",tableName,tableName+"_DEST"));
+                executeQuery(sqlCon,updateTableDest( "","'DE_No','DP_NoDefaut','DE_Code','DE_NoSource','DatabaseSource'",tableName,tableName+"_DEST"));
                 sendData(sqlCon, path, filename,insert());
 
                 DepotEmpl.sendDataElement(sqlCon, path,database);

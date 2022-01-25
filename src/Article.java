@@ -94,7 +94,7 @@ public class Article extends Table {
             for (int i = 0; i < children.length; i++) {
                 String filename = children[i];
                 readOnFile(path, filename, tableName + "_DEST", sqlCon);
-                executeQuery(sqlCon, updateTableDest("AR_Ref", "'AR_Ref'", tableName, tableName + "_DEST"));
+                executeQuery(sqlCon, updateTableDest("AR_Ref", "'AR_Ref','AR_SuiviStock'", tableName, tableName + "_DEST"));
                 sendData(sqlCon, path, filename, insert());
                 Condition.sendDataElement(sqlCon, path, database);
                 RessourceProd.sendDataElement(sqlCon, path, database);

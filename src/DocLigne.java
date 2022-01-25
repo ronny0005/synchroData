@@ -32,7 +32,7 @@ public class DocLigne extends Table {
                 "\t  ,[DL_Remise01REM_Valeur] ,[DL_Remise01REM_Type],[DL_Remise02REM_Valeur],[DL_Remise02REM_Type],[DL_Remise03REM_Valeur] ,[DL_Remise03REM_Type]\n" +
                 "      ,[DL_PrixUnitaire] ,[DL_PUBC] ,[DL_Taxe1] ,[DL_TypeTaux1],[DL_TypeTaxe1],[DL_Taxe2] ,[DL_TypeTaux2],[DL_TypeTaxe2],[CO_No]/*,[AG_No1],[AG_No2]*/\n" +
                 "\t  ,[DL_PrixRU] ,[DL_CMUP] ,[DL_MvtStock],[DT_No],[AF_RefFourniss],[EU_Enumere],[EU_Qte] ,[DL_TTC]\n" +
-                "      ,ISNULL(dsrc.[DE_NoSource],dest.DE_No),[DL_NoRef],[DL_TypePL],[DL_PUDevise] ,[DL_PUTTC] ,[DL_No],[DO_DateLivr],[CA_Num],[DL_Taxe3] ,[DL_TypeTaux3],[DL_TypeTaxe3],[DL_Frais] \n" +
+                "      ,ISNULL(dsrc.[DE_No],dest.DE_No),[DL_NoRef],[DL_TypePL],[DL_PUDevise] ,[DL_PUTTC] ,[DL_No],[DO_DateLivr],[CA_Num],[DL_Taxe3] ,[DL_TypeTaux3],[DL_TypeTaxe3],[DL_Frais] \n" +
                 "      ,[DL_Valorise],[AR_RefCompose],[DL_NonLivre],[AC_RefClient],[DL_MontantHT] ,[DL_MontantTTC] ,[DL_FactPoids],[DL_Escompte],[DL_PiecePL],[DL_DatePL],[DL_QtePL] ,[DL_NoColis],[DL_NoLink]\n" +
                 "      ,[RP_Code],[DL_QteRessource],[DL_DateAvancement],[cbProt],[cbCreateur],[cbModification],[cbReplication],[cbFlag]" +
                 "      ,[MOTIFS_REMISE],[RECEPTION],[USERG],[DATEMODIF],[CONTROLE]"+
@@ -41,7 +41,7 @@ public class DocLigne extends Table {
                 "LEFT JOIN (SELECT cbMarqSource,dataBaseSource FROM F_DOCLIGNE) src\n" +
                 "\tON\tdest.cbMarqSource = src.cbMarqSource\n" +
                 "\tAND\tdest.dataBaseSource = src.dataBaseSource\n" +
-                "LEFT JOIN (SELECT DE_NoSource,dataBaseSource FROM F_DEPOT) dsrc\n" +
+                "LEFT JOIN (SELECT DE_NoSource,dataBaseSource,DE_No FROM F_DEPOT) dsrc\n" +
                 "\tON\tdsrc.DE_NoSource = dest.DE_No\n" +
                 "\tAND\tdsrc.dataBaseSource = dest.dataBaseSource\n" +
                 "WHERE src.cbMarqSource IS NULL;\n" +

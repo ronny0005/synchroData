@@ -1,3 +1,5 @@
+import org.json.simple.JSONObject;
+
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
@@ -10,88 +12,92 @@ public class UpdateData {
 
 
     public static void main(String[] args){
-        String databaseDestFile = "resource/databaseDest.csv";
+        String databaseDestFile = "resource/databaseDest.json";
         try {
             Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
         }
 
-        ArrayList<String> list = DataBase.getInfoConnexion(databaseDestFile);
-        String path = list.get(4);
+        JSONObject list = DataBase.getInfoConnexion(databaseDestFile);
+        String path = ((String)list.get("path"));
 
         try {
-            String dbURL = "jdbc:sqlserver://"+list.get(0)+";databaseName="+list.get(1);
+            String dbURL = "jdbc:sqlserver://"+((String)list.get("servername"))+";databaseName="+((String)list.get("database"));
             Properties properties = new Properties();
-            properties.put("user", list.get(2));
-            properties.put("password", list.get(3));
+            properties.put("user", ((String)list.get("username")));
+            properties.put("password", ((String)list.get("password")));
             Connection sqlCon = DriverManager.getConnection(dbURL, properties);
             sqlCon.setAutoCommit(true);
             System.out.println("--Démarrage Application--");
-            System.out.println("Base de données : "+list.get(1)+"\n Chemin : "+path+"\n");
-            System.out.println("Serveur : "+list.get(0));
-
+            System.out.println("Base de données : "+((String)list.get("database"))+"\n Chemin : "+path+"\n");
+            System.out.println("Serveur : "+((String)list.get("servername")));
+            String database = (String)list.get("database");
 //            DocLigne.sendDataElement(sqlCon, path,list.get(1));
-            if(list.get(16).equals("1")) {
+            if(((String)list.get("taxe")).equals("1")) {
+                System.out.println("--Chargement Taxe--");
+                Taxe.sendDataElement(sqlCon, path,database);
+            }
+            if(((String)list.get("compteg")).equals("1")) {
                 System.out.println("--Chargement Compte Général--");
-                Compteg.sendDataElement(sqlCon, path,list.get(1));
+                Compteg.sendDataElement(sqlCon, path,database);
             }
-            if(list.get(7).equals("1")) {
+            if(((String)list.get("depot")).equals("1")) {
                 System.out.println("--Chargement Depot--");
-                Depot.sendDataElement(sqlCon, path,list.get(1));
+                Depot.sendDataElement(sqlCon, path,database);
             }
 
-            if(list.get(12).equals("1")) {
+            if(((String)list.get("famille")).equals("1")) {
                 System.out.println("--Chargement Famille--");
-                Famille.sendDataElement(sqlCon, path, list.get(1));
+                Famille.sendDataElement(sqlCon, path, database);
             }
 
-            if(list.get(6).equals("1")) {
+            if(((String)list.get("tiers")).equals("1")) {
                 System.out.println("--Chargement Compte Tiers--");
-                Comptet.sendDataElement(sqlCon, path, list.get(1));
+                Comptet.sendDataElement(sqlCon, path, database);
             }
 
-            if(list.get(8).equals("1")) {
+            if(((String)list.get("livraison")).equals("1")) {
                 System.out.println("--Chargement Livraison--");
-                Livraison.sendDataElement(sqlCon, path, list.get(1));
+                Livraison.sendDataElement(sqlCon, path, database);
             }
 
-            if(list.get(5).equals("1")) {
+            if(((String)list.get("article")).equals("1")) {
                 System.out.println("--Chargement Article--");
-                Article.sendDataElement(sqlCon, path, list.get(1));
+                Article.sendDataElement(sqlCon, path, database);
             }
 
-            if(list.get(9).equals("1")) {
+            if(((String)list.get("entete")).equals("1")) {
                 System.out.println("--Chargement Entete--");
-                DocEntete.sendDataElement(sqlCon, path,list.get(1));
-                DocRegl.sendDataElement(sqlCon, path,list.get(1));
+                DocEntete.sendDataElement(sqlCon, path,database);
+                DocRegl.sendDataElement(sqlCon, path,database);
             }
 
-            if(list.get(10).equals("1")) {
+            if(((String)list.get("ligne")).equals("1")) {
                 System.out.println("--Chargement Ligne--");
-                DocLigne.sendDataElement(sqlCon, path, list.get(1));
+                DocLigne.sendDataElement(sqlCon, path, database);
             }
 
-            if(list.get(11).equals("1")) {
+            if(((String)list.get("reglement")).equals("1")) {
                 System.out.println("--Chargement Reglement--");
-                Reglement.sendDataElement(sqlCon, path,list.get(1));
-                ReglEch.sendDataElement(sqlCon, path,list.get(1));
+                Reglement.sendDataElement(sqlCon, path,database);
+                ReglEch.sendDataElement(sqlCon, path,database);
             }
 
-            if(list.get(13).equals("1")) {
+            if(((String)list.get("artstock")).equals("1")) {
                 System.out.println("--Chargement ArtStock--");
-                ArtStock.sendDataElement(sqlCon, path,list.get(1));
+                ArtStock.sendDataElement(sqlCon, path,database);
             }
 
-            if(list.get(14).equals("1")) {
+            if(((String)list.get("ecriturec")).equals("1")) {
                 System.out.println("--Chargement Ecriture Comptable--");
-                JMouv.sendDataElement(sqlCon, path,list.get(1));
-                EcritureC.sendDataElement(sqlCon, path,list.get(1));
+                JMouv.sendDataElement(sqlCon, path,database);
+                EcritureC.sendDataElement(sqlCon, path,database);
             }
 
-            if(list.get(15).equals("1")) {
+            if(((String)list.get("ecriturea")).equals("1")) {
                 System.out.println("--Chargement Ecriture Analytique--");
-                EcritureA.sendDataElement(sqlCon, path,list.get(1));
+                EcritureA.sendDataElement(sqlCon, path,database);
             }
 
         } catch (SQLException throwables) {

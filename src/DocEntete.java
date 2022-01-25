@@ -38,7 +38,7 @@ public class DocEntete extends Table {
                 "            \n" +
                 "SELECT dest.[DO_Domaine], dest.[DO_Type], dest.[DO_Date], LEFT(dest.[DO_Ref],17)\n" +
                 "\t, dest.[DO_Tiers], dest.[CO_No], dest.[DO_Period], dest.[DO_Devise]\n" +
-                "\t, dest.[DO_Cours], dest.[DE_No], dest.[LI_No]\n" +
+                "\t, dest.[DO_Cours], ISNULL(dep.DE_No,dest.[DE_No]), dest.[LI_No]\n" +
                 "\t, dest.[CT_NumPayeur], dest.[DO_Expedit], dest.[DO_NbFacture], dest.[DO_BLFact]\n" +
                 "\t, dest.[DO_TxEscompte], dest.[DO_Reliquat], dest.[DO_Imprim], dest.[CA_Num]\n" +
                 "\t, dest.[DO_Coord01], dest.[DO_Coord02], dest.[DO_Coord03], dest.[DO_Coord04]\n" +
@@ -63,6 +63,7 @@ public class DocEntete extends Table {
                 "\tAND\tdest.DO_Type = src.DO_Type\n" +
                 "\tAND\tdest.DO_Piece = src.DO_Piece\n" +
                 "\tAND\tdest.dataBaseSource = src.dataBaseSource\n" +
+                "LEFT JOIN F_DEPOT dep ON dep.DE_NoSource = src.DE_No AND dep.DataSource = src.DataSource \n"+
                 "WHERE src.DO_Domaine IS NULL;\n" +
                 "IF OBJECT_ID('F_DOCENTETE_DEST') IS NOT NULL \n" +
                 "DROP TABLE F_DOCENTETE_DEST;\n" +

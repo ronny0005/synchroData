@@ -4,6 +4,7 @@ import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
 import com.jcraft.jsch.SftpException;
+import org.json.simple.JSONObject;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -40,8 +41,8 @@ public class SendFileFTP {
     public static void main(String[] args){
         JSch jsch = new JSch();
         Session session = null;
-        String databaseSourceFile = "resource/databaseSource.csv";
-        ArrayList<String> list = DataBase.getInfoConnexion(databaseSourceFile);
+        String databaseSourceFile = "resource/databaseSource.json";
+        JSONObject list = DataBase.getInfoConnexion(databaseSourceFile);
         try {
             session = jsch.getSession("u85460117-upload", "home631778145.1and1-data.host", 22);
             session.setConfig("StrictHostKeyChecking", "no");
@@ -51,21 +52,21 @@ public class SendFileFTP {
             Channel channel = session.openChannel("sftp");
             channel.connect();
             ChannelSftp sftpChannel = (ChannelSftp) channel;
-            File dir = new File(list.get(4));
+            File dir = new File((String)list.get("path"));
             File[] directoryListing = dir.listFiles();
             try {
-                sftpChannel.mkdir(list.get(18));
+                sftpChannel.mkdir((String)list.get("folderftp"));
             } catch (SftpException e) {
                 System.out.println(e.id); // Prints "Failure"
                 System.out.println(e.getMessage()); // Prints "null"
                 assert (e.id == ChannelSftp.SSH_FX_FAILURE);
                 assert (e.id == 4);
             }
-            File backup = new File(list.get(4)+"/archive");
+            File backup = new File((String)list.get("path")+"/archive");
             if (directoryListing != null) {
                 for (File child : directoryListing) {
                     if(child.isFile()) {
-                        sftpChannel.put(child.getAbsolutePath(), "/" + list.get(18) + "/" + child.getName());
+                        sftpChannel.put(child.getAbsolutePath(), "/" + (String)list.get("folderftp") + "/" + child.getName());
                     }
                     // Do something with child
                 }

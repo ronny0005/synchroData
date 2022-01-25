@@ -167,13 +167,21 @@ CREATE TABLE config.ListCatTarif (
 IF OBJECT_ID('config.ListDepotEmpl', 'U') IS NULL
 CREATE TABLE config.ListDepotEmpl (
 	DP_No INT
+    ,DataBaseSource NVARCHAR(50)
 	,cbMarq INT
 )
 
 IF OBJECT_ID('config.ListDepot', 'U') IS NULL
 CREATE TABLE config.ListDepot (
 	DE_No INT
+    ,DataBaseSource NVARCHAR(50)
 	,cbMarq INT
+)
+
+IF OBJECT_ID('config.ListTaxe', 'U') IS NULL
+CREATE TABLE config.ListTaxe (
+      TA_Code VARCHAR(50)
+      ,cbMarq INT
 )
 
 IF OBJECT_ID('config.listJMouv', 'U') IS NULL
@@ -269,4 +277,17 @@ ALTER TABLE F_DEPOT ADD DataBaseSource NVARCHAR(50)
 
 IF COL_LENGTH('dbo.F_DEPOT', 'DE_NoSource') IS NULL
 ALTER TABLE F_DEPOT ADD DE_NoSource INT
+
+IF COL_LENGTH('dbo.F_DEPOT', 'cbMarqSource') IS NULL
+ALTER TABLE F_DEPOT ADD cbMarqSource INT
+
+IF COL_LENGTH('dbo.F_DEPOTEMPL', 'DataBaseSource') IS NULL
+ALTER TABLE F_DEPOTEMPL ADD DataBaseSource NVARCHAR(50)
+
+IF COL_LENGTH('dbo.F_DEPOTEMPL', 'DP_NoSource') IS NULL
+ALTER TABLE F_DEPOTEMPL ADD DP_NoSource INT
+
+IF COL_LENGTH('dbo.F_DEPOTEMPL', 'cbMarqSource') IS NULL
+ALTER TABLE F_DEPOTEMPL ADD cbMarqSource INT
+
 
