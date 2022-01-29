@@ -35,7 +35,7 @@ public class UploadFileFTP {
     public static void main(String[] args){
         JSch jsch = new JSch();
         Session session = null;
-        String databaseSourceFile = "resource/databaseDest.json";
+        String databaseSourceFile = "resource/databaseSource.json";
         if(args.length > 0)
             databaseSourceFile = args[0];
 
