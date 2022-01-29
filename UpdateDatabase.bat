@@ -1,2 +1,2 @@
-cd C:\ItSolution\ItSolution\SynchroData
-bin\java -jar UpdateDatabase.jar
+cd C:\ItSolution\ItSolution\SynchroData\UpdateDatabase_jar
+..\bin\java -jar UpdateDatabase.jar ..\ConfigFile_jar\resource\databaseSource.json

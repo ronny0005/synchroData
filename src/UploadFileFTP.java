@@ -36,6 +36,9 @@ public class UploadFileFTP {
         JSch jsch = new JSch();
         Session session = null;
         String databaseSourceFile = "resource/databaseDest.json";
+        if(args.length > 0)
+            databaseSourceFile = args[0];
+
         JSONObject list = DataBase.getInfoConnexion(databaseSourceFile);
         try {
             session = jsch.getSession("u85460117-upload", "home631778145.1and1-data.host", 22);

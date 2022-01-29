@@ -13,6 +13,9 @@ public class UpdateData {
 
     public static void main(String[] args){
         String databaseDestFile = "resource/databaseDest.json";
+        if(args.length > 0)
+            databaseDestFile = args[0];
+
         try {
             Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
         } catch (ClassNotFoundException e) {

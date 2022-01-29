@@ -31,15 +31,19 @@ public class UpdateDatabase {
 
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyyMMddHHmmssSSS");
         String databaseSourceFile = "resource/databaseSource.json";
+        if(args.length > 0)
+            databaseSourceFile = args[0];
+
         try {
             Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
         }
         JSONObject list = DataBase.getInfoConnexion(databaseSourceFile);
+
         String path = (String)list.get("path");
         try {
-            String dbURL = "jdbc:sqlserver://"+list.get(0)+";databaseName="+list.get(1);
+            String dbURL = "jdbc:sqlserver://"+((String)list.get("servername"))+";databaseName="+((String)list.get("database"));
             Properties properties = new Properties();
             properties.put("user", (String)list.get("username"));
             properties.put("password", (String)list.get("password"));

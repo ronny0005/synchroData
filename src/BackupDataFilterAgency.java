@@ -14,6 +14,8 @@ public class BackupDataFilterAgency {
 
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyyMMddHHmmssSSS");
         String databaseSourceFile = "resource/databaseSource.json";
+        if(args.length > 0)
+            databaseSourceFile = args[0];
         String agency ="YDE";
 
         try {

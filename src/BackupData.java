@@ -13,9 +13,11 @@ import java.util.Properties;
 public class BackupData {
 
     public static void main(String[] args){
-
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyyMMddHHmmssSSS");
         String databaseSourceFile = "resource/databaseSource.json";
+        if(args.length > 0)
+            databaseSourceFile = args[0];
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyyMMddHHmmssSSS");
+
         try {
             Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
         } catch (ClassNotFoundException e) {
