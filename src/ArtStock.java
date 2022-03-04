@@ -112,6 +112,48 @@ public class ArtStock extends Table {
         }
     }
 
+    public static String selectSourceTable(String table,String dataSource){
+        return "BEGIN \n" +
+                "DECLARE @MaColonne AS VARCHAR(250);\n" +
+                "DECLARE @MonSQL AS VARCHAR(MAX)=''; \n" +
+                "DECLARE @TableName AS VARCHAR(100) = '"+table+"'; \n" +
+                "DECLARE @getid CURSOR\n" +
+                "\n" +
+                "SET @getid = CURSOR FOR\n" +
+                "SELECT col.name\n" +
+                "FROM sys.tables tab\n" +
+                "INNER JOIN sys.columns col\n" +
+                "\tON tab.object_id = col.object_id\n" +
+                "WHERE tab.name = @TableName\n" +
+                "AND col.name NOT LIKE 'cb%'" +
+                "AND col.name NOT IN ('DataBaseSource','cbMarqSource')\n" +
+                "\n" +
+                "OPEN @getid\n" +
+                "FETCH NEXT\n" +
+                "FROM @getid INTO @MaColonne\n" +
+                "WHILE @@FETCH_STATUS = 0\n" +
+                "BEGIN\n" +
+                " SELECT @MonSQL = @MonSQL+ ',' + @MaColonne \n" +
+                "\n" +
+                " FETCH NEXT\n" +
+                "    FROM @getid INTO @MaColonne --, @name\n" +
+                "END\n" +
+                "CLOSE @getid\n" +
+                "DEALLOCATE @getid\n" +
+                "SELECT @MonSQL = SUBSTRING(@MonSQL,2,LEN(@MonSQL)) \n" +
+                "\n" +
+                "SELECT @MonSQL = 'SELECT ' + @MonSQL + ',[cbProt],[cbCreateur],[cbModification],[cbReplication],[cbFlag],cbMarqSource = [cbMarq],[DataBaseSource] = ''"+dataSource+"''  FROM '+ @TableName " +
+                "IF EXISTS (\tSELECT\tcol.name  \n" +
+                "\t\t\tFROM\tsys.tables tab  \n" +
+                "\t\t\tINNER JOIN sys.columns col\tON\ttab.object_id = col.object_id  \n" +
+                "\t\t\tWHERE\ttab.name = @TableName  \n" +
+                "\t\t\tAND\t\tcol.name = 'DataBaseSource') \n" +
+                "\t SELECT @MonSQL = @MonSQL + ' AND ISNULL(DataBaseSource,''"+dataSource+"'') = ''"+dataSource+"''' \n" +
+                "EXEC(@MonSQL)\n" +
+                "\n" +
+                "END";
+    }
+
     public static void getDataElement(Connection  sqlCon, String path,String database,String time)
     {
         String filename =  file+time+".csv";

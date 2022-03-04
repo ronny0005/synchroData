@@ -1,3 +1,5 @@
+import org.json.simple.JSONObject;
+
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -47,6 +49,68 @@ public class Table {
                 "\n" +
                 "SELECT @MonSQL = 'SELECT ' + @MonSQL + ',[cbProt],[cbCreateur],[cbModification],[cbReplication],[cbFlag],cbMarqSource = [cbMarq],[DataBaseSource] = ''"+dataSource+"''  FROM '+ @TableName " +
                 "+ ' WHERE cbModification >= ISNULL((SELECT LastSynchro FROM config.SelectTable WHERE tableName='''+ @TableName +'''),''1900-01-01'')' \n" +
+                "IF EXISTS (\tSELECT\tcol.name  \n" +
+                "\t\t\tFROM\tsys.tables tab  \n" +
+                "\t\t\tINNER JOIN sys.columns col\tON\ttab.object_id = col.object_id  \n" +
+                "\t\t\tWHERE\ttab.name = @TableName  \n" +
+                "\t\t\tAND\t\tcol.name = 'DataBaseSource') \n" +
+                "\t SELECT @MonSQL = @MonSQL + ' AND ISNULL(DataBaseSource,''"+dataSource+"'') = ''"+dataSource+"''' \n" +
+                "EXEC(@MonSQL)\n" +
+                "\n" +
+                "END";
+    }
+
+    public static String selectSourceTable(String table, String dataSource, JSONObject type){
+        return "BEGIN \n" +
+                "DECLARE @MaColonne AS VARCHAR(250);\n" +
+                "DECLARE @MonSQL AS VARCHAR(MAX)=''; \n" +
+                "DECLARE @vente AS VARCHAR(1) = "+ type.get("facturedevente") +"; \n" +
+                "DECLARE @devis AS VARCHAR(1) = "+type.get("devis")+"; \n" +
+                "DECLARE @bonlivraison AS VARCHAR(1) = "+type.get("bondelivraison")+"; \n" +
+                "DECLARE @achat AS VARCHAR(1) = "+type.get("facturedachat")+"; \n" +
+                "DECLARE @entree AS VARCHAR(1) = "+type.get("entree")+"; \n" +
+                "DECLARE @sortie AS VARCHAR(1) = "+type.get("sortie")+"; \n" +
+                "DECLARE @transfert AS VARCHAR(1) = "+type.get("transfert")+"; \n" +
+                "DECLARE @interne1 AS VARCHAR(1) = "+type.get("documentinterne1")+"; \n" +
+                "DECLARE @interne2 AS VARCHAR(1) = "+type.get("documentinterne2")+"; \n" +
+                "DECLARE @TableName AS VARCHAR(100) = '"+table+"'; \n" +
+                "DECLARE @getid CURSOR\n" +
+                "\n" +
+                "SET @getid = CURSOR FOR\n" +
+                "SELECT col.name\n" +
+                "FROM sys.tables tab\n" +
+                "INNER JOIN sys.columns col\n" +
+                "\tON tab.object_id = col.object_id\n" +
+                "WHERE tab.name = @TableName\n" +
+                "AND col.name NOT LIKE 'cb%'" +
+                "AND col.name NOT IN ('DataBaseSource','cbMarqSource')\n" +
+                "\n" +
+                "OPEN @getid\n" +
+                "FETCH NEXT\n" +
+                "FROM @getid INTO @MaColonne\n" +
+                "WHILE @@FETCH_STATUS = 0\n" +
+                "BEGIN\n" +
+                " SELECT @MonSQL = @MonSQL+ ',' + @MaColonne \n" +
+                "\n" +
+                " FETCH NEXT\n" +
+                "    FROM @getid INTO @MaColonne --, @name\n" +
+                "END\n" +
+                "CLOSE @getid\n" +
+                "DEALLOCATE @getid\n" +
+                "SELECT @MonSQL = SUBSTRING(@MonSQL,2,LEN(@MonSQL)) \n" +
+                "\n" +
+                "SELECT @MonSQL = 'SELECT ' + @MonSQL + ',[cbProt],[cbCreateur],[cbModification],[cbReplication],[cbFlag],cbMarqSource = [cbMarq],[DataBaseSource] = ''"+dataSource+"''  FROM '+ @TableName +'" +
+                "  WHERE cbModification >= ISNULL((SELECT LastSynchro FROM config.SelectTable WHERE tableName='''+ @TableName +'''),''1900-01-01'') \n" +
+                "  AND CASE WHEN ' + @vente + ' = 1 AND DO_Domaine = 0 AND DO_Type = 6 THEN 1 \n" +
+                "           WHEN ' + @devis + ' = 1 AND DO_Domaine = 0 AND DO_Type = 0 THEN 1 \n" +
+                "           WHEN ' + @bonlivraison + ' = 1 AND DO_Domaine = 0 AND DO_Type = 3 THEN 1 \n" +
+                "           WHEN ' + @achat + ' = 1 AND DO_Domaine = 1 AND DO_Type = 6 THEN 1 \n" +
+                "           WHEN ' + @entree + ' = 1 AND DO_Domaine = 2 AND DO_Type = 20 THEN 1 \n" +
+                "           WHEN ' + @sortie + ' = 1 AND DO_Domaine = 2 AND DO_Type = 21 THEN 1 \n" +
+                "           WHEN ' + @transfert + ' = 1 AND DO_Domaine = 2 AND DO_Type = 23 THEN 1 \n" +
+                "           WHEN ' + @interne1 + ' = 1 AND DO_Domaine = 4 AND DO_Type = 40 THEN 1 \n" +
+                "           WHEN ' + @interne2 + ' = 1 AND DO_Domaine = 4 AND DO_Type = 41 THEN 1 END = 1 '\n" +
+                "\n" +
                 "IF EXISTS (\tSELECT\tcol.name  \n" +
                 "\t\t\tFROM\tsys.tables tab  \n" +
                 "\t\t\tINNER JOIN sys.columns col\tON\ttab.object_id = col.object_id  \n" +

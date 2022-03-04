@@ -1,3 +1,5 @@
+import org.json.simple.JSONObject;
+
 import java.io.File;
 import java.io.FilenameFilter;
 import java.sql.Connection;
@@ -98,12 +100,12 @@ public class DocRegl extends Table {
             }
         }
     }
-    public static void getDataElement(Connection sqlCon, String path,String database,String time)
+    public static void getDataElement(Connection sqlCon, String path, String database, String time, JSONObject type)
     {
         String filename =  file+time+".csv";
         dbSource = database;
         initTableParam(sqlCon,tableName,configList,"DO_Domaine,DO_Type,DO_Piece,DR_No,DatabaseSource");
-        getData(sqlCon, selectSourceTable(tableName,database), tableName, path, filename);
+        getData(sqlCon, selectSourceTable(tableName,database,type), tableName, path, filename);
         listDeleteAllInfo(sqlCon, path, "deleteList" + filename,tableName,configList,database);
 
     }

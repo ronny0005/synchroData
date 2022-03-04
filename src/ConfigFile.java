@@ -28,6 +28,15 @@ public class ConfigFile {
     private JTextField dossierFTPSource;
     private JTextField codeAgence;
     private JCheckBox SrcTaxeCheckBox;
+    private JCheckBox factureDeVenteCheckBox;
+    private JCheckBox devisCheckBox;
+    private JCheckBox bonDeLivraisonCheckBox;
+    private JCheckBox factureDAchatCheckBox;
+    private JCheckBox documentDEntréeCheckBox;
+    private JCheckBox documentInterne1CheckBox;
+    private JCheckBox documentDeSortieCheckBox;
+    private JCheckBox documentDeTransfertCheckBox;
+    private JCheckBox documentInterne2CheckBox;
     private String databaseSourceFile = "resource/databaseSource.json";
     private String databaseDestFile = "resource/databaseDest.json";
     private JSONObject infoSource = DataBase.getInfoConnexion(databaseSourceFile);
@@ -68,8 +77,15 @@ public class ConfigFile {
         checkBox(Integer.valueOf((String)infoSource.get("ecriturec")),SrcEcritureCCheckBox);
         checkBox(Integer.valueOf((String)infoSource.get("ecriturea")),SrcEcritureACheckBox);
         checkBox(Integer.valueOf((String)infoSource.get("compteg")), SrcCompteGeneralCheckBox);
-        checkBox(Integer.valueOf((String)infoSource.get("taxe")), SrcTaxeCheckBox);
-
+        checkBox(Integer.valueOf((String)((JSONObject)infoSource.get("typedocument")).get("facturedevente")), factureDeVenteCheckBox);
+        checkBox(Integer.valueOf((String)((JSONObject)infoSource.get("typedocument")).get("devis")), devisCheckBox);
+        checkBox(Integer.valueOf((String)((JSONObject)infoSource.get("typedocument")).get("bondelivraison")), bonDeLivraisonCheckBox);
+        checkBox(Integer.valueOf((String)((JSONObject)infoSource.get("typedocument")).get("facturedachat")), factureDAchatCheckBox);
+        checkBox(Integer.valueOf((String)((JSONObject)infoSource.get("typedocument")).get("entree")), documentDEntréeCheckBox);
+        checkBox(Integer.valueOf((String)((JSONObject)infoSource.get("typedocument")).get("sortie")), documentDeSortieCheckBox);
+        checkBox(Integer.valueOf((String)((JSONObject)infoSource.get("typedocument")).get("transfert")), documentDeTransfertCheckBox);
+        checkBox(Integer.valueOf((String)((JSONObject)infoSource.get("typedocument")).get("documentinterne1")), documentInterne1CheckBox);
+        checkBox(Integer.valueOf((String)((JSONObject)infoSource.get("typedocument")).get("documentinterne2")), documentInterne2CheckBox);
     }
 
     public void setConfigData(){
@@ -94,6 +110,17 @@ public class ConfigFile {
         infoSource.put("ecriturea",setCheckBox(SrcEcritureACheckBox));
         infoSource.put("compteg",setCheckBox(SrcCompteGeneralCheckBox));
         infoSource.put("taxe",setCheckBox(SrcTaxeCheckBox));
+        JSONObject typeDocument = new JSONObject();
+        typeDocument.put("facturedevente",setCheckBox(factureDeVenteCheckBox));
+        typeDocument.put("devis",setCheckBox(devisCheckBox));
+        typeDocument.put("bondelivraison",setCheckBox(bonDeLivraisonCheckBox));
+        typeDocument.put("facturedachat",setCheckBox(factureDAchatCheckBox));
+        typeDocument.put("entree",setCheckBox(documentDEntréeCheckBox));
+        typeDocument.put("sortie",setCheckBox(documentDeSortieCheckBox));
+        typeDocument.put("transfert",setCheckBox(documentDeTransfertCheckBox));
+        typeDocument.put("documentinterne1",setCheckBox(documentInterne1CheckBox));
+        typeDocument.put("documentinterne2",setCheckBox(documentInterne2CheckBox));
+        infoSource.put("typedocument",typeDocument);
     }
 
     public ConfigFile(){

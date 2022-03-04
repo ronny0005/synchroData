@@ -49,13 +49,13 @@ public class BackupData {
             if(((String)list.get("article")).equals("1"))
                 Article.getDataElement(sqlCon, path,database,simpleDateFormat.format(new Date()));
             if(((String)list.get("entete")).equals("1")) {
-                DocEntete.getDataElement(sqlCon, path,database,simpleDateFormat.format(new Date()));
-                DocRegl.getDataElement(sqlCon, path,database,simpleDateFormat.format(new Date()));
+                DocEntete.getDataElement(sqlCon, path,database,simpleDateFormat.format(new Date()),(JSONObject) list.get("typedocument"));
+                DocRegl.getDataElement(sqlCon, path,database,simpleDateFormat.format(new Date()),(JSONObject) list.get("typedocument"));
             }
             if(((String)list.get("ligne")).equals("1"))
-                DocLigne.getDataElement(sqlCon, path,database,simpleDateFormat.format(new Date()));
+                DocLigne.getDataElement(sqlCon, path,database,simpleDateFormat.format(new Date()),(JSONObject) list.get("typedocument"));
             if(((String)list.get("reglement")).equals("1")) {
-                ReglEch.getDataElement(sqlCon, path,database,simpleDateFormat.format(new Date()));
+                ReglEch.getDataElement(sqlCon, path,database,simpleDateFormat.format(new Date()),(JSONObject) list.get("typedocument"));
                 Reglement.getDataElement(sqlCon, path,database,simpleDateFormat.format(new Date()));
             }
             if(((String)list.get("artstock")).equals("1")) {
