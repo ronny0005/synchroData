@@ -15,17 +15,18 @@ public class Livraison extends Table {
                 "INSERT INTO F_LIVRAISON ( [LI_No],[CT_Num],[LI_Intitule],[LI_Adresse],[LI_Complement],[LI_CodePostal],[LI_Ville]\n" +
                 ",[LI_CodeRegion],[LI_Pays],[LI_Contact],[N_Expedition],[N_Condition],[LI_Principal]\n" +
                 ",[LI_Telephone],[LI_Telecopie],[LI_EMail],[cbProt],[cbCreateur]\n" +
-                ",[cbModification],[cbReplication],[cbFlag]) \n" +
+                ",[cbModification],[cbReplication],[cbFlag],cbMarqSource,DataBaseSource,LI_NoSource) \n" +
                 "                                 \n" +
-                "SELECT dest.[LI_No],dest.[CT_Num],[LI_Intitule],[LI_Adresse],[LI_Complement],[LI_CodePostal],[LI_Ville]\n" +
+                "SELECT (SELECT MAX(LI_No) FROM F_LIVRAISON) + ROW_NUMBER() OVER(ORDER BY dest.LI_No),dest.[CT_Num],[LI_Intitule],[LI_Adresse],[LI_Complement],[LI_CodePostal],[LI_Ville]\n" +
                 ",[LI_CodeRegion],[LI_Pays],[LI_Contact],[N_Expedition],[N_Condition],[LI_Principal]\n" +
                 ",[LI_Telephone],[LI_Telecopie],[LI_EMail],[cbProt],[cbCreateur]\n" +
-                ",[cbModification],[cbReplication],[cbFlag]\n" +
+                ",[cbModification],[cbReplication],[cbFlag],dest.[cbMarqSource],dest.[dataBaseSource],dest.LI_No\n" +
                 "FROM F_LIVRAISON_DEST dest \n" +
-                "LEFT JOIN (SELECT [LI_No],[CT_Num] FROM F_LIVRAISON) src \n" +
-                "ON dest.[LI_No] = src.[LI_No] \n" +
+                "LEFT JOIN (SELECT [LI_NoSource],[CT_Num],[DatabaseSource] FROM F_LIVRAISON) src \n" +
+                "ON dest.[LI_No] = src.[LI_NoSource] \n" +
                 "AND dest.[CT_Num] = src.[CT_Num] \n" +
-                "WHERE src.[LI_No] IS NULL ;" +
+                "AND dest.[DatabaseSource] = src.[DatabaseSource] \n" +
+                "WHERE src.[LI_NoSource] IS NULL ;" +
                 " END TRY\n" +
                 " BEGIN CATCH \n" +
                 "INSERT INTO config.DB_Errors\n" +
@@ -59,7 +60,7 @@ public class Livraison extends Table {
                 String filename = children[i];
                 readOnFile(path, filename, tableName + "_DEST", sqlCon);
                 readOnFile(path, "deleteList" + filename, tableName + "_SUPPR", sqlCon);
-                executeQuery(sqlCon, updateTableDest("LI_No,CT_Num", "'LI_No','CT_Num'", tableName, tableName + "_DEST"));
+                executeQuery(sqlCon, updateTableDest("", "'LI_NoSource','LI_No','CT_Num','DataBaseSource'", tableName, tableName + "_DEST"));
                 sendData(sqlCon, path, filename, insert());
 
                 deleteTempTable(sqlCon, tableName);

@@ -38,7 +38,7 @@ public class DocRegl extends Table {
                 "      ,[cbReplication] = F_DOCREGL_DEST.cbReplication\n" +
                 "      ,[cbFlag] = F_DOCREGL_DEST.cbFlag\n" +
                 "FROM F_DOCREGL_DEST\n" +
-                "WHERE\tF_DOCREGL.DR_NoSource = F_DOCREGL_DEST.DR_No\n" +
+                "WHERE\tF_DOCREGL.cbMarqSource = F_DOCREGL_DEST.cbMarqSource \n" +
                 "\tAND\tF_DOCREGL.DataBaseSource = F_DOCREGL_DEST.DataBaseSource\n" +
                 "            \n" +
                 "            \n" +
@@ -50,12 +50,12 @@ public class DocRegl extends Table {
                 "SELECT \tISNULL((SELECT Max(DR_No) FROM F_DOCREGL),0) + ROW_NUMBER() OVER(ORDER BY dest.DR_No)\n" +
                 "\t\t,dest.[DO_Domaine],dest.[DO_Type],dest.[DO_Piece],[DR_TypeRegl],[DR_Date]\n" +
                 "\t\t,[DR_Libelle],[DR_Pourcent],[DR_Montant],[DR_MontantDev],[DR_Equil],[EC_No],[DR_Regle]\n" +
-                "\t\t,[N_Reglement],[cbProt],[cbCreateur],[cbModification],[cbReplication],[cbFlag],cbMarqSource,dest.[dataBaseSource],dest.DR_No\n" +
+                "\t\t,[N_Reglement],[cbProt],[cbCreateur],[cbModification],[cbReplication],[cbFlag],dest.cbMarqSource,dest.[dataBaseSource],dest.DR_No\n" +
                 "FROM F_DOCREGL_DEST dest\n" +
-                "LEFT JOIN (SELECT DR_NoSource,DataBaseSource FROM F_DOCREGL) src\n" +
-                "\tON\tdest.DR_No = src.DR_NoSource\n" +
+                "LEFT JOIN (SELECT cbMarqSource,DataBaseSource FROM F_DOCREGL) src\n" +
+                "\tON\tdest.cbMarqSource = src.cbMarqSource\n" +
                 "\tAND\tdest.DataBaseSource = src.DataBaseSource\n" +
-                "WHERE src.DR_NoSource IS NULL\n" +
+                "WHERE src.cbMarqSource IS NULL\n" +
                 "            \n" +
                 "IF OBJECT_ID('F_DOCREGL_DEST') IS NOT NULL \n" +
                 "DROP TABLE F_DOCREGL_DEST\n" +

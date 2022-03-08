@@ -36,7 +36,7 @@ public class DocEntete extends Table {
                 "\t\t, [DO_TypeTaux3], [DO_TypeTaxe3], [DO_MajCpta], [DO_Motif]\n" +
                 "\t\t\t, [CT_NumCentrale], [DO_Contact], [DO_FactureElec], [DO_TypeTransac]\n" +
                 "\t\t\t, [cbProt], [cbCreateur], [cbModification], [cbReplication]\n" +
-                "\t\t\t, [cbFlag],[DO_Piece],DataBaseSource)\n" +
+                "\t\t\t, [cbFlag],[DO_Piece],[DataBaseSource],[cbMarqSource])\n" +
                 "            \n" +
                 "SELECT dest.[DO_Domaine], dest.[DO_Type], dest.[DO_Date], LEFT(dest.[DO_Ref],17)\n" +
                 "\t, dest.[DO_Tiers], dest.[CO_No], dest.[DO_Period], dest.[DO_Devise]\n" +
@@ -58,14 +58,12 @@ public class DocEntete extends Table {
                 "\t\t, dest.[DO_TypeTaux3], dest.[DO_TypeTaxe3], dest.[DO_MajCpta], dest.[DO_Motif]\n" +
                 "\t\t\t, dest.[CT_NumCentrale], dest.[DO_Contact], dest.[DO_FactureElec], dest.[DO_TypeTransac]\n" +
                 "\t\t\t, dest.[cbProt], dest.[cbCreateur], dest.[cbModification], dest.[cbReplication]\n" +
-                "\t\t\t, dest.[cbFlag],dest.[DO_Piece],dest.[dataBaseSource]\n" +
+                "\t\t\t, dest.[cbFlag],dest.[DO_Piece],dest.[dataBaseSource],dest.[cbMarqSource]\n" +
                 "FROM F_DOCENTETE_DEST dest\n" +
                 "LEFT JOIN F_DOCENTETE src\n" +
-                "\tON\tdest.DO_Domaine = src.DO_Domaine\n" +
-                "\tAND\tdest.DO_Type = src.DO_Type\n" +
-                "\tAND\tdest.DO_Piece = src.DO_Piece\n" +
+                "\tON\tdest.cbMarqSource = src.cbMarqSource\n" +
                 "\tAND\tdest.dataBaseSource = src.dataBaseSource\n" +
-                "LEFT JOIN F_DEPOT dep ON dep.DE_NoSource = src.DE_No AND dep.DataSource = src.DataSource \n"+
+                "LEFT JOIN F_DEPOT dep ON dep.DE_NoSource = src.DE_No AND dep.dataBaseSource = src.dataBaseSource \n"+
                 "WHERE src.DO_Domaine IS NULL;\n" +
                 "IF OBJECT_ID('F_DOCENTETE_DEST') IS NOT NULL \n" +
                 "DROP TABLE F_DOCENTETE_DEST;\n" +
@@ -102,7 +100,7 @@ public class DocEntete extends Table {
                 dbSource = database;
                 readOnFile(path, filename, tableName + "_DEST", sqlCon);
                 readOnFile(path, "deleteList" + filename, tableName + "_SUPPR", sqlCon);
-                executeQuery(sqlCon, updateTableDest("DO_Domaine,DO_Type,DO_Piece,DataBaseSource", "'DO_Domaine','DO_Type','DO_Piece','DataBaseSource'", tableName, tableName + "_DEST"));
+                executeQuery(sqlCon, updateTableDest("", "'DO_Domaine','DO_Type','DO_Piece','DataBaseSource','cbMarqSource'", tableName, tableName + "_DEST"));
                 sendData(sqlCon, path, filename, insert());
 
                 deleteTempTable(sqlCon, tableName);

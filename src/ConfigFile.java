@@ -77,6 +77,7 @@ public class ConfigFile {
         checkBox(Integer.valueOf((String)infoSource.get("ecriturec")),SrcEcritureCCheckBox);
         checkBox(Integer.valueOf((String)infoSource.get("ecriturea")),SrcEcritureACheckBox);
         checkBox(Integer.valueOf((String)infoSource.get("compteg")), SrcCompteGeneralCheckBox);
+        checkBox(Integer.valueOf((String)infoSource.get("taxe")), SrcTaxeCheckBox);
         checkBox(Integer.valueOf((String)((JSONObject)infoSource.get("typedocument")).get("facturedevente")), factureDeVenteCheckBox);
         checkBox(Integer.valueOf((String)((JSONObject)infoSource.get("typedocument")).get("devis")), devisCheckBox);
         checkBox(Integer.valueOf((String)((JSONObject)infoSource.get("typedocument")).get("bondelivraison")), bonDeLivraisonCheckBox);

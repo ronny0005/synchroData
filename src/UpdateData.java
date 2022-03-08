@@ -12,7 +12,7 @@ public class UpdateData {
 
 
     public static void main(String[] args){
-        String databaseDestFile = "resource/databaseDest.json";
+        String databaseDestFile = "resource/databaseSource.json";
         if(args.length > 0)
             databaseDestFile = args[0];
 
