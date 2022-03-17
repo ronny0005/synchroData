@@ -3,8 +3,6 @@ import org.json.simple.JSONObject;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Date;
 import java.util.Properties;
 
 public class UpdateData {
@@ -44,6 +42,10 @@ public class UpdateData {
             if(((String)list.get("compteg")).equals("1")) {
                 System.out.println("--Chargement Compte Général--");
                 Compteg.sendDataElement(sqlCon, path,database);
+            }
+            if(((String)list.get("journaux")).equals("1")) {
+                System.out.println("--Chargement Journaux--");
+                FJournaux.sendDataElement(sqlCon, path,database);
             }
             if(((String)list.get("depot")).equals("1")) {
                 System.out.println("--Chargement Depot--");

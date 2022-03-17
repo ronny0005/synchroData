@@ -3,6 +3,8 @@ import org.json.simple.JSONObject;
 import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.util.ArrayList;
 
 public class ConfigFile {
@@ -37,6 +39,9 @@ public class ConfigFile {
     private JCheckBox documentDeSortieCheckBox;
     private JCheckBox documentDeTransfertCheckBox;
     private JCheckBox documentInterne2CheckBox;
+    private JCheckBox venteCheckBox;
+    private JCheckBox stockCheckBox;
+    private JCheckBox SrcJournauxCheckBox;
     private String databaseSourceFile = "resource/databaseSource.json";
     private String databaseDestFile = "resource/databaseDest.json";
     private JSONObject infoSource = DataBase.getInfoConnexion(databaseSourceFile);
@@ -78,6 +83,7 @@ public class ConfigFile {
         checkBox(Integer.valueOf((String)infoSource.get("ecriturea")),SrcEcritureACheckBox);
         checkBox(Integer.valueOf((String)infoSource.get("compteg")), SrcCompteGeneralCheckBox);
         checkBox(Integer.valueOf((String)infoSource.get("taxe")), SrcTaxeCheckBox);
+        checkBox(Integer.valueOf((String)infoSource.get("journaux")), SrcJournauxCheckBox);
         checkBox(Integer.valueOf((String)((JSONObject)infoSource.get("typedocument")).get("facturedevente")), factureDeVenteCheckBox);
         checkBox(Integer.valueOf((String)((JSONObject)infoSource.get("typedocument")).get("devis")), devisCheckBox);
         checkBox(Integer.valueOf((String)((JSONObject)infoSource.get("typedocument")).get("bondelivraison")), bonDeLivraisonCheckBox);
@@ -87,6 +93,8 @@ public class ConfigFile {
         checkBox(Integer.valueOf((String)((JSONObject)infoSource.get("typedocument")).get("transfert")), documentDeTransfertCheckBox);
         checkBox(Integer.valueOf((String)((JSONObject)infoSource.get("typedocument")).get("documentinterne1")), documentInterne1CheckBox);
         checkBox(Integer.valueOf((String)((JSONObject)infoSource.get("typedocument")).get("documentinterne2")), documentInterne2CheckBox);
+        checkBox(Integer.valueOf((String)((JSONObject)infoSource.get("typedocument")).get("vente")), venteCheckBox);
+        checkBox(Integer.valueOf((String)((JSONObject)infoSource.get("typedocument")).get("stock")), stockCheckBox);
     }
 
     public void setConfigData(){
@@ -111,6 +119,7 @@ public class ConfigFile {
         infoSource.put("ecriturea",setCheckBox(SrcEcritureACheckBox));
         infoSource.put("compteg",setCheckBox(SrcCompteGeneralCheckBox));
         infoSource.put("taxe",setCheckBox(SrcTaxeCheckBox));
+        infoSource.put("journaux",setCheckBox(SrcJournauxCheckBox));
         JSONObject typeDocument = new JSONObject();
         typeDocument.put("facturedevente",setCheckBox(factureDeVenteCheckBox));
         typeDocument.put("devis",setCheckBox(devisCheckBox));
@@ -121,6 +130,8 @@ public class ConfigFile {
         typeDocument.put("transfert",setCheckBox(documentDeTransfertCheckBox));
         typeDocument.put("documentinterne1",setCheckBox(documentInterne1CheckBox));
         typeDocument.put("documentinterne2",setCheckBox(documentInterne2CheckBox));
+        typeDocument.put("vente",setCheckBox(venteCheckBox));
+        typeDocument.put("stock",setCheckBox(stockCheckBox));
         infoSource.put("typedocument",typeDocument);
     }
 
@@ -136,6 +147,89 @@ public class ConfigFile {
                 JOptionPane.showMessageDialog(null, "Les informations ont été enregistrées");
             }
         });
+        venteCheckBox.addItemListener(new ItemListener() {
+            @Override
+            public void itemStateChanged(ItemEvent e) {
+                if(e.getStateChange() == ItemEvent.SELECTED) {
+                    factureDeVenteCheckBox.setSelected(true);
+                    devisCheckBox.setSelected(true);
+                    bonDeLivraisonCheckBox.setSelected(true);
+                } else {
+                    factureDeVenteCheckBox.setSelected(false);
+                    devisCheckBox.setSelected(false);
+                    bonDeLivraisonCheckBox.setSelected(false);
+                };
+            }
+        });
+        factureDeVenteCheckBox.addItemListener(new ItemListener() {
+            @Override
+            public void itemStateChanged(ItemEvent e) {
+                if(e.getStateChange() != ItemEvent.SELECTED) {
+                    venteCheckBox.setSelected(false);
+                } else {
+
+                };
+            }
+        });
+        bonDeLivraisonCheckBox.addItemListener(new ItemListener() {
+            @Override
+            public void itemStateChanged(ItemEvent e) {
+                if(e.getStateChange() != ItemEvent.SELECTED) {
+                    venteCheckBox.setSelected(false);
+                } else {
+
+                };
+            }
+        });
+
+        stockCheckBox.addItemListener(new ItemListener() {
+            @Override
+            public void itemStateChanged(ItemEvent e) {
+                if(e.getStateChange() == ItemEvent.SELECTED) {
+                    documentDEntréeCheckBox.setSelected(true);
+                    documentDeSortieCheckBox.setSelected(true);
+                    documentDeTransfertCheckBox.setSelected(true);
+                } else {
+                    documentDEntréeCheckBox.setSelected(false);
+                    documentDeSortieCheckBox.setSelected(false);
+                    documentDeTransfertCheckBox.setSelected(false);
+                };
+            }
+        });
+
+        documentDEntréeCheckBox.addItemListener(new ItemListener() {
+            @Override
+            public void itemStateChanged(ItemEvent e) {
+                if(e.getStateChange() != ItemEvent.SELECTED) {
+                    stockCheckBox.setSelected(false);
+                } else {
+
+                };
+            }
+        });
+
+        documentDeSortieCheckBox.addItemListener(new ItemListener() {
+            @Override
+            public void itemStateChanged(ItemEvent e) {
+                if(e.getStateChange() != ItemEvent.SELECTED) {
+                    stockCheckBox.setSelected(false);
+                } else {
+
+                };
+            }
+        });
+
+        documentDeTransfertCheckBox.addItemListener(new ItemListener() {
+            @Override
+            public void itemStateChanged(ItemEvent e) {
+                if(e.getStateChange() != ItemEvent.SELECTED) {
+                    stockCheckBox.setSelected(false);
+                } else {
+
+                };
+            }
+        });
+
     }
 
     public static void main(String[] args){

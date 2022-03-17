@@ -95,7 +95,6 @@ public class DocRegl extends Table {
                 executeQuery(sqlCon, updateTableDest("", "'DR_No'", tableName, tableName + "_DEST"));
                 sendData(sqlCon, path, filename, insert());
                 deleteTempTable(sqlCon, tableName);
-
                 deleteDocRegl(sqlCon, path,filename);
             }
         }

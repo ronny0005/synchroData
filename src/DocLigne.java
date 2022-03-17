@@ -82,7 +82,7 @@ public class DocLigne extends Table {
             for (int i = 0; i < children.length; i++) {
                 String filename = children[i];
                 dbSource = database;
-                readOnFile(path, filename, tableName + "_DEST", sqlCon);
+               readOnFile(path, filename, tableName + "_DEST", sqlCon);
                 readOnFile(path, "deleteList" + filename, tableName + "_SUPPR", sqlCon);
                 executeQuery(sqlCon, updateTableDest("", "'AG_No1','AG_No2','DL_No','AR_Ref'", tableName, tableName + "_DEST"));
                 sendData(sqlCon, path, filename, insert());

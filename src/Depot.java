@@ -83,7 +83,7 @@ public class Depot extends Table{
                 String filename = children[i];
                 readOnFile(path,filename,tableName+"_DEST",sqlCon);
                 readOnFile(path,"deleteList"+filename,tableName+"_SUPPR",sqlCon);
-                executeQuery(sqlCon,updateTableDest( "","'DE_No','DP_NoDefaut','DE_Code','DE_NoSource','DatabaseSource'",tableName,tableName+"_DEST"));
+                executeQuery(sqlCon,updateTableDest( "","'DE_No','DP_NoDefaut','DE_Code','DE_NoSource','DatabaseSource','DE_Intitule'",tableName,tableName+"_DEST"));
                 sendData(sqlCon, path, filename,insert());
 
                 DepotEmpl.sendDataElement(sqlCon, path,database);

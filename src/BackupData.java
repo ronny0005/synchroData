@@ -71,6 +71,9 @@ public class BackupData {
             if(((String)list.get("compteg")).equals("1")) {
                 Compteg.getDataElement(sqlCon, path,database,simpleDateFormat.format(new Date()));
             }
+            if(((String)list.get("journaux")).equals("1")) {
+                FJournaux.getDataElement(sqlCon, path,database,simpleDateFormat.format(new Date()));
+            }
 
         } catch (SQLException throwables) {
             throwables.printStackTrace();

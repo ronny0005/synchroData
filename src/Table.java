@@ -64,10 +64,12 @@ public class Table {
         return "BEGIN \n" +
                 "DECLARE @MaColonne AS VARCHAR(250);\n" +
                 "DECLARE @MonSQL AS VARCHAR(MAX)=''; \n" +
-                "DECLARE @vente AS VARCHAR(1) = "+ type.get("facturedevente") +"; \n" +
+                "DECLARE @facturevente AS VARCHAR(1) = "+ type.get("facturedevente") +"; \n" +
+                "DECLARE @vente AS VARCHAR(1) = "+ type.get("vente") +"; \n" +
+                "DECLARE @stock AS VARCHAR(1) = "+ type.get("stock") +"; \n" +
                 "DECLARE @devis AS VARCHAR(1) = "+type.get("devis")+"; \n" +
                 "DECLARE @bonlivraison AS VARCHAR(1) = "+type.get("bondelivraison")+"; \n" +
-                "DECLARE @achat AS VARCHAR(1) = "+type.get("facturedachat")+"; \n" +
+                "DECLARE @factureachat AS VARCHAR(1) = "+type.get("facturedachat")+"; \n" +
                 "DECLARE @entree AS VARCHAR(1) = "+type.get("entree")+"; \n" +
                 "DECLARE @sortie AS VARCHAR(1) = "+type.get("sortie")+"; \n" +
                 "DECLARE @transfert AS VARCHAR(1) = "+type.get("transfert")+"; \n" +
@@ -101,10 +103,12 @@ public class Table {
                 "\n" +
                 "SELECT @MonSQL = 'SELECT ' + @MonSQL + ',[cbProt],[cbCreateur],[cbModification],[cbReplication],[cbFlag],cbMarqSource = [cbMarq],[DataBaseSource] = ''"+dataSource+"''  FROM '+ @TableName +'" +
                 "  WHERE cbModification >= ISNULL((SELECT LastSynchro FROM config.SelectTable WHERE tableName='''+ @TableName +'''),''1900-01-01'') \n" +
-                "  AND CASE WHEN ' + @vente + ' = 1 AND DO_Domaine = 0 AND DO_Type = 6 THEN 1 \n" +
+                "  AND CASE WHEN ' + @vente + ' = 1 AND DO_Domaine = 0 THEN 1 \n" +
+                "           WHEN ' + @facturevente + ' = 1 AND DO_Domaine = 0 AND DO_Type IN (6,7) THEN 1 \n" +
                 "           WHEN ' + @devis + ' = 1 AND DO_Domaine = 0 AND DO_Type = 0 THEN 1 \n" +
                 "           WHEN ' + @bonlivraison + ' = 1 AND DO_Domaine = 0 AND DO_Type = 3 THEN 1 \n" +
-                "           WHEN ' + @achat + ' = 1 AND DO_Domaine = 1 AND DO_Type = 6 THEN 1 \n" +
+                "           WHEN ' + @factureachat + ' = 1 AND DO_Domaine = 1 THEN 1 \n" +
+                "           WHEN ' + @stock + ' = 1 AND DO_Domaine = 2 THEN 1 \n" +
                 "           WHEN ' + @entree + ' = 1 AND DO_Domaine = 2 AND DO_Type = 20 THEN 1 \n" +
                 "           WHEN ' + @sortie + ' = 1 AND DO_Domaine = 2 AND DO_Type = 21 THEN 1 \n" +
                 "           WHEN ' + @transfert + ' = 1 AND DO_Domaine = 2 AND DO_Type = 23 THEN 1 \n" +
@@ -670,7 +674,7 @@ public class Table {
                         sql = " IF OBJECTPROPERTY(OBJECT_ID('" + table + "'), 'TableHasIdentity') = 1 SET IDENTITY_INSERT " + table + " ON ; "
                                 + sql.substring(0, sql.length() - 1) + "); "
                                 + " IF OBJECTPROPERTY(OBJECT_ID('" + table + "'), 'TableHasIdentity') = 1  SET IDENTITY_INSERT " + table + " OFF ; ";
-                        executeQuery(sqlCon,sql);
+                       executeQuery(sqlCon,sql);
                     }
                     i++;
                 }

@@ -4,7 +4,6 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.Properties;
 
@@ -26,10 +25,10 @@ public class BackupDataFilterAgency {
         JSONObject list = DataBase.getInfoConnexion(databaseSourceFile);
         String path = ((String)list.get("path"));
         try {
-            String dbURL = "jdbc:sqlserver://"+list.get(0)+";databaseName="+list.get(1);
+            String dbURL = "jdbc:sqlserver://"+list.get("servername")+";databaseName="+list.get("database");
             Properties properties = new Properties();
-            properties.put("user", list.get(2));
-            properties.put("password", list.get(3));
+            properties.put("user", list.get("username"));
+            properties.put("password", list.get("password"));
             Connection sqlCon = DriverManager.getConnection(dbURL, properties);
 
             sqlCon.setAutoCommit(true);
