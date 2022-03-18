@@ -126,13 +126,13 @@ public class Reglement extends Table {
             for (int i = 0; i < children.length; i++) {
                 String filename = children[i];
                 dbSource = database;
-        //        readOnFile(path, filename, tableName + "_DEST", sqlCon);
-        //        readOnFile(path, "deleteList" + filename, tableName + "_SUPPR", sqlCon);
-        //        executeQuery(sqlCon, updateTableDest("", "'RG_No'", tableName, tableName + "_DEST"));
+                readOnFile(path, filename, tableName + "_DEST", sqlCon);
+                readOnFile(path, "deleteList" + filename, tableName + "_SUPPR", sqlCon);
+                executeQuery(sqlCon, updateTableDest("", "'RG_No'", tableName, tableName + "_DEST"));
                 sendData(sqlCon, path, filename, insert());
 
-        //        deleteTempTable(sqlCon, tableName);
-        //        deleteReglement(sqlCon, path,filename);
+                deleteTempTable(sqlCon, tableName);
+                deleteReglement(sqlCon, path,filename);
             }
         }
     }

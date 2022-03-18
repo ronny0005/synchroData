@@ -331,47 +331,6 @@ public class Table {
         executeQuery(sqlCon, query);
     }
 
-    public static void deleteRows(Connection sqlCon, String path,String file,String table,String isDataSource)
-    {
-        String query =
-                " BEGIN TRY\n" +
-                        "DECLARE @MonSQL AS VARCHAR(MAX)=''; \n" +
-                        "DECLARE @TableName AS VARCHAR(100) = '"+table+"';\n" +
-                        "DECLARE @isDataSource AS INT = "+isDataSource+"; \n" +
-                        "\n" +
-                        "SELECT @MonSQL = 'DELETE FROM '+@TableName+\t' WHERE EXISTS (SELECT 1 FROM '+@TableName+'_SUPPR WHERE '\n" +
-                        "+@TableName+'.cbMarqSource '\n" +
-                        "\n" +
-                        "IF @isDataSource = 1\n" +
-                        "\tSELECT @MonSQL = @MonSQL + ' AND '+@TableName+'.DataBaseSource = '+@TableName+'_SUPPR.DataBaseSource'\n" +
-                        "\n" +
-                        "EXEC (@MonSQL)\n" +
-                        "\n" +
-                        "END TRY\n" +
-                        "BEGIN CATCH \n" +
-                        "\tINSERT INTO config.DB_Errors\n" +
-                        "\tVALUES\n" +
-                        "\t(\n" +
-                        "\t\tSUSER_SNAME(),\n" +
-                        "\t\tERROR_NUMBER(),\n" +
-                        "\t\tERROR_STATE(),\n" +
-                        "\t\tERROR_SEVERITY(),\n" +
-                        "\t\tERROR_LINE(),\n" +
-                        "\t\tERROR_PROCEDURE(),\n" +
-                        "\t\tERROR_MESSAGE(),\n" +
-                        "\t\t@TableName,\n" +
-                        "\t\t@MonSQL,\n" +
-                        "\t\tGETDATE()\n" +
-                        "\t);\n" +
-                        "END CATCH\n";
-        if ((new File(path + "\\deleteList" + file)).exists())
-        {
-            executeQuery(sqlCon, query);
-            archiveDocument(path + "\\archive", path, "deleteList" + file);
-        }
-    }
-
-
     public static void deleteItem(Connection sqlCon, String path,String file,String table)
     {
         String query =
@@ -539,11 +498,28 @@ public class Table {
     }
     public static void archiveDocument(String archive, String source,String file)
     {
+        String folder[] = file.split("_");
+        String year = folder[1].substring(0,4);
+        String month = folder[1].substring(4,6);
+        String day = folder[1].substring(6,8);
+
         File filePath = new File(archive);
         if(!filePath.exists())
-        {
             filePath.mkdir();
-        }
+
+        filePath = new File(archive + "\\" + year );
+        if(!filePath.exists())
+            filePath.mkdir();
+
+        filePath = new File(archive + "\\" + year + "\\" + month);
+        if(!filePath.exists())
+            filePath.mkdir();
+
+        filePath = new File(archive + "\\" + year + "\\" + month +"\\"+ day);
+        if(!filePath.exists())
+            filePath.mkdir();
+
+        archive = archive + "\\" + year + "\\" + month +"\\"+ day;
         try {
             Files.move(Paths.get(source+"\\"+file),Paths.get(archive + "\\" + file));
         } catch (IOException e) {
