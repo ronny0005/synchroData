@@ -8,7 +8,7 @@ public class FJournaux extends Table {
     public static String tableName = "F_JOURNAUX";
     public static String configList = "listFJournaux";
 
-    public static String insert()
+    public static String insert(String filename)
     {
         return  "BEGIN TRY " +
                 " \n" +
@@ -43,7 +43,7 @@ public class FJournaux extends Table {
                 "   ERROR_LINE(),\n" +
                 "   ERROR_PROCEDURE(),\n" +
                 "   ERROR_MESSAGE(),\n" +
-                "   'insert',\n"+
+                "   'Insert '+ ' "+filename+"',\n" +
                 "   'F_COMPTET',\n" +
                 "   GETDATE());\n" +
                 "END CATCH";
@@ -64,8 +64,8 @@ public class FJournaux extends Table {
                 String filename = children[i];
                 readOnFile(path, filename, tableName + "_DEST", sqlCon);
                 readOnFile(path, "deleteList" + filename, tableName + "_SUPPR", sqlCon);
-                executeQuery(sqlCon, updateTableDest("JO_Num,JO_Type", "'JO_Num','JO_Type'", tableName, tableName + "_DEST"));
-                sendData(sqlCon, path, filename, insert());
+                executeQuery(sqlCon, updateTableDest("JO_Num,JO_Type", "'JO_Num','JO_Type','CG_Num','JO_IFRS'", tableName, tableName + "_DEST",filename));
+                sendData(sqlCon, path, filename, insert(filename));
 
                 deleteTempTable(sqlCon, tableName);
                 deleteJournaux(sqlCon, path,filename);

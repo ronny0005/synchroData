@@ -8,7 +8,7 @@ public class Livraison extends Table {
     public static String tableName = "F_LIVRAISON";
     public static String configList = "listLivraison";
 
-    public static String insert()
+    public static String insert(String filename)
     {
         return  "BEGIN TRY " +
                 " SET DATEFORMAT ymd;\n" +
@@ -38,7 +38,7 @@ public class Livraison extends Table {
                 "   ERROR_LINE(),\n" +
                 "   ERROR_PROCEDURE(),\n" +
                 "   ERROR_MESSAGE(),\n" +
-                "   'insert',\n" +
+                "   'Insert '+ ' "+filename+"',\n" +
                 "   'F_LIVRAISON',\n" +
                 "   GETDATE());\n" +
                 "END CATCH";
@@ -60,8 +60,8 @@ public class Livraison extends Table {
                 String filename = children[i];
                 readOnFile(path, filename, tableName + "_DEST", sqlCon);
                 readOnFile(path, "deleteList" + filename, tableName + "_SUPPR", sqlCon);
-                executeQuery(sqlCon, updateTableDest("", "'LI_NoSource','LI_No','CT_Num','DataBaseSource'", tableName, tableName + "_DEST"));
-                sendData(sqlCon, path, filename, insert());
+                executeQuery(sqlCon, updateTableDest("", "'LI_NoSource','LI_No','CT_Num','DataBaseSource'", tableName, tableName + "_DEST",filename));
+                sendData(sqlCon, path, filename, insert(filename));
 
                 deleteTempTable(sqlCon, tableName);
                 deleteLivraison(sqlCon, path,filename);

@@ -7,7 +7,7 @@ public class Article extends Table {
     public static String tableName = "F_ARTICLE";
     public static String configList = "listArticle";
 
-    public static String insert()
+    public static String insert(String filename)
     {
         return  "BEGIN TRY " +
                 " SET DATEFORMAT ymd;\n" +
@@ -59,7 +59,7 @@ public class Article extends Table {
                 "   ERROR_LINE(),\n" +
                 "   ERROR_PROCEDURE(),\n" +
                 "   ERROR_MESSAGE(),\n" +
-                "   'Insert',\n" +
+                "   'Insert '+ ' "+filename+"',\n" +
                 "   'F_ARTICLE',\n" +
                 "   GETDATE());\n" +
                 "END CATCH";
@@ -94,8 +94,8 @@ public class Article extends Table {
             for (int i = 0; i < children.length; i++) {
                 String filename = children[i];
                 readOnFile(path, filename, tableName + "_DEST", sqlCon);
-                executeQuery(sqlCon, updateTableDest("AR_Ref", "'AR_Ref','AR_SuiviStock'", tableName, tableName + "_DEST"));
-                sendData(sqlCon, path, filename, insert());
+                executeQuery(sqlCon, updateTableDest("AR_Ref", "'AR_Ref','AR_SuiviStock'", tableName, tableName + "_DEST",filename));
+                sendData(sqlCon, path, filename, insert(filename));
                 Condition.sendDataElement(sqlCon, path, database);
                 RessourceProd.sendDataElement(sqlCon, path, database);
                 ArticleRessource.sendDataElement(sqlCon, path, database);

@@ -8,7 +8,7 @@ public class Collaborateur extends Table {
     public static String tableName = "F_COLLABORATEUR";
     public static String configList = "listCollaborateur";
 
-    public static String insert()
+    public static String insert(String filename)
     {
         return  "BEGIN TRY " +
                 " SET DATEFORMAT ymd;\n" +
@@ -40,7 +40,7 @@ public class Collaborateur extends Table {
                 "   ERROR_LINE(),\n" +
                 "   ERROR_PROCEDURE(),\n" +
                 "   ERROR_MESSAGE(),\n" +
-                "   'insert',\n" +
+                "   'Insert '+ ' "+filename+"',\n" +
                 "   'F_COLLABORATEUR',\n" +
                 "   GETDATE());\n" +
                 "END CATCH";
@@ -62,8 +62,8 @@ public class Collaborateur extends Table {
                 String filename = children[i];
                 readOnFile(path, filename, tableName + "_DEST", sqlCon);
                 readOnFile(path, "deleteList" + filename, tableName + "_SUPPR", sqlCon);
-                executeQuery(sqlCon, updateTableDest("CO_No", "'CO_No'", tableName, tableName + "_DEST"));
-                sendData(sqlCon, path, filename, insert());
+                executeQuery(sqlCon, updateTableDest("CO_No", "'CO_No'", tableName, tableName + "_DEST",filename));
+                sendData(sqlCon, path, filename, insert(filename));
 
                 deleteTempTable(sqlCon, tableName);
                 deleteCollaborateur(sqlCon, path,filename);

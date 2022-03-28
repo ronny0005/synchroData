@@ -7,7 +7,7 @@ public class Taxe extends Table {
     public static String tableName = "F_TAXE";
     public static String configList = "listTaxe";
 
-    public static String insert()
+    public static String insert(String filename)
     {
         return
                 " BEGIN TRY " +
@@ -39,7 +39,7 @@ public class Taxe extends Table {
                 "   ERROR_LINE(),\n" +
                 "   ERROR_PROCEDURE(),\n" +
                 "   ERROR_MESSAGE(),\n" +
-                "   'insert',\n" +
+                "   'Insert '+ ' "+filename+"',\n" +
                 "   'F_TAXE',\n" +
                 "   GETDATE());\n" +
                 "END CATCH";
@@ -61,8 +61,8 @@ public class Taxe extends Table {
                 readOnFile(path, filename, tableName + "_DEST", sqlCon);
 
                 readOnFile(path, "deleteList" + filename, tableName + "_SUPPR", sqlCon);
-                executeQuery(sqlCon, updateTableDest("TA_Code", "'TA_Code'", tableName, tableName + "_DEST"));
-                sendData(sqlCon, path, filename, insert());
+                executeQuery(sqlCon, updateTableDest("TA_Code", "'TA_Code'", tableName, tableName + "_DEST",filename));
+                sendData(sqlCon, path, filename, insert(filename));
 
                 deleteTempTable(sqlCon, tableName);
                 deleteArtCompta(sqlCon, path,filename);

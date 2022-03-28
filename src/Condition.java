@@ -8,7 +8,7 @@ public class Condition extends Table{
     public static String tableName = "F_CONDITION";
     public static String configList = "listCondition";
 
-    public static String insert()
+    public static String insert(String filename)
     {
         return  " BEGIN TRY " +
                 " SET DATEFORMAT ymd;\n" +
@@ -37,7 +37,7 @@ public class Condition extends Table{
                 "   ERROR_LINE(),\n" +
                 "   ERROR_PROCEDURE(),\n" +
                 "   ERROR_MESSAGE(),\n" +
-                "   'insert',\n" +
+                "   'Insert '+ ' "+filename+"',\n" +
                 "   'F_CONDITION',\n" +
                 "   GETDATE());\n" +
                 "END CATCH";
@@ -58,8 +58,8 @@ public class Condition extends Table{
                 String filename = children[i];
                 readOnFile(path, filename, tableName + "_DEST", sqlCon);
                 readOnFile(path, "deleteList" + filename, tableName + "_SUPPR", sqlCon);
-                executeQuery(sqlCon, updateTableDest("CO_No,AR_Ref", "'CO_No','AR_Ref'", tableName, tableName + "_DEST"));
-                sendData(sqlCon, path, filename, insert());
+                executeQuery(sqlCon, updateTableDest("CO_No,AR_Ref", "'CO_No','AR_Ref'", tableName, tableName + "_DEST",filename));
+                sendData(sqlCon, path, filename, insert(filename));
 
                 deleteCondition(sqlCon, path,filename);
             }

@@ -16,7 +16,7 @@ public class ArticleRessource extends Table {
                 "WHERE cbModification >= ISNULL((SELECT LastSynchro FROM config.SelectTable WHERE tableName='F_ARTICLERESSOURCE'),'1900-01-01')";
     }
 
-    public static String insert()
+    public static String insert(String filename)
     {
         return "BEGIN TRY" +
                 " SET DATEFORMAT ymd;\n" +
@@ -42,7 +42,7 @@ public class ArticleRessource extends Table {
                 "   ERROR_LINE(),\n" +
                 "   ERROR_PROCEDURE(),\n" +
                 "   ERROR_MESSAGE(),\n" +
-                "   'insert',\n" +
+                "   'Insert '+ ' "+filename+"',\n" +
                 "   'F_ARTICLERESSOURCE',\n" +
                 "   GETDATE());\n" +
                 "END CATCH";
@@ -64,8 +64,8 @@ public class ArticleRessource extends Table {
                 String filename = children[i];
                 readOnFile(path, filename, tableName + "_DEST", sqlCon);
                 readOnFile(path, "deleteList" + filename, tableName + "_SUPPR", sqlCon);
-                executeQuery(sqlCon, updateTableDest("RP_Code,AR_Ref", "'RP_Code'", tableName, tableName + "_DEST"));
-                sendData(sqlCon, path, filename, insert());
+                executeQuery(sqlCon, updateTableDest("RP_Code,AR_Ref", "'RP_Code'", tableName, tableName + "_DEST",filename));
+                sendData(sqlCon, path, filename, insert(filename));
 
                 deleteArticleRessource(sqlCon, path,filename);
             }

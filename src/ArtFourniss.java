@@ -8,7 +8,7 @@ public class ArtFourniss extends Table {
     public static String tableName = "F_ARTFOURNISS";
     public static String configList = "listArtFourniss";
 
-    public static String insert()
+    public static String insert(String filename)
     {
         return
                         "  BEGIN TRY " +
@@ -43,7 +43,7 @@ public class ArtFourniss extends Table {
                         "   ERROR_LINE(),\n" +
                         "   ERROR_PROCEDURE(),\n" +
                         "   ERROR_MESSAGE(),\n" +
-                        "   'insert',\n" +
+                        "   'Insert '+ ' "+filename+"',\n" +
                         "   'F_ARTFOURNISS',\n" +
                         "   GETDATE());\n" +
                         "END CATCH";
@@ -65,8 +65,8 @@ public class ArtFourniss extends Table {
                 String filename = children[i];
                 readOnFile(path, filename, tableName + "_DEST", sqlCon);
                 readOnFile(path, "deleteList" + filename, tableName + "_SUPPR", sqlCon);
-                executeQuery(sqlCon, updateTableDest("AR_Ref,CT_Num", "'AR_Ref','CT_Num'", tableName, tableName + "_DEST"));
-                sendData(sqlCon, path, filename, insert());
+                executeQuery(sqlCon, updateTableDest("AR_Ref,CT_Num", "'AR_Ref','CT_Num'", tableName, tableName + "_DEST",filename));
+                sendData(sqlCon, path, filename, insert(filename));
 
                 deleteTempTable(sqlCon, tableName);
                 deleteArtFourniss(sqlCon, path,filename);

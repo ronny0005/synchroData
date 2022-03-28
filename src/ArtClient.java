@@ -7,7 +7,7 @@ public class ArtClient extends Table{
     public static String tableName = "F_ARTCLIENT";
     public static String configList = "listArtClient";
 
-    public static String insert()
+    public static String insert(String filename)
     {
         return
                         " BEGIN TRY " +
@@ -44,7 +44,7 @@ public class ArtClient extends Table{
                         "   ERROR_LINE(),\n" +
                         "   ERROR_PROCEDURE(),\n" +
                         "   ERROR_MESSAGE(),\n" +
-                        "   'Insert',\n" +
+                        "   'Insert '+' "+filename+"',\n" +
                         "   'F_ARTCLIENT',\n" +
                         "   GETDATE());\n" +
                         "END CATCH";
@@ -67,8 +67,8 @@ public class ArtClient extends Table{
                 String filename = children[i];
                 readOnFile(path, filename, tableName + "_DEST", sqlCon);
                 readOnFile(path, "deleteList" + filename, tableName + "_SUPPR", sqlCon);
-                executeQuery(sqlCon, updateTableDest("AR_Ref,AC_Categorie", "'AR_Ref','AC_Categorie','CT_Num'", tableName, tableName + "_DEST"));
-                sendData(sqlCon, path, filename, insert());
+                executeQuery(sqlCon, updateTableDest("AR_Ref,AC_Categorie", "'AR_Ref','AC_Categorie','CT_Num'", tableName, tableName + "_DEST",filename));
+                sendData(sqlCon, path, filename, insert(filename));
 
                 deleteTempTable(sqlCon, tableName);
                 deleteArtClient(sqlCon, path,filename);

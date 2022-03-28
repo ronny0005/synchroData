@@ -8,10 +8,16 @@ CREATE TABLE config.initTable (
 	,cbMarq INT PRIMARY KEY IDENTITY(1,1)
 )
 
-IF OBJECT_ID('config.ListArticle', 'U') IS NULL 
+IF OBJECT_ID('config.ListArticle', 'U') IS NULL
 CREATE TABLE config.ListArticle (
-	AR_Ref NVARCHAR(50)
-	,cbMarq INT
+    AR_Ref NVARCHAR(50)
+    ,cbMarq INT
+)
+
+IF OBJECT_ID('config.listFJournaux', 'U') IS NULL
+CREATE TABLE config.listFJournaux (
+    JO_Num NVARCHAR(50)
+    ,cbMarq INT
 )
 
 IF OBJECT_ID('config.ListCondition', 'U') IS NULL 

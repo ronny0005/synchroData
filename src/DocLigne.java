@@ -12,7 +12,7 @@ public class DocLigne extends Table {
     public static String tableName = "F_DOCLIGNE";
     public static String configList = "listDocLigne";
 
-    public static String insert()
+    public static String insert(String filename)
     {
         return  "BEGIN TRY " +
                 " SET DATEFORMAT ymd;\n" +
@@ -47,7 +47,49 @@ public class DocLigne extends Table {
                 "LEFT JOIN (SELECT DE_NoSource,dataBaseSource,DE_No FROM F_DEPOT) dsrc\n" +
                 "\tON\tdsrc.DE_NoSource = dest.DE_No\n" +
                 "\tAND\tdsrc.dataBaseSource = dest.dataBaseSource\n" +
-                "WHERE src.cbMarqSource IS NULL;\n" +
+                "WHERE src.cbMarqSource IS NULL\n" +
+                "AND EXISTS (   SELECT 1\n" +
+                "               FROM F_DOCENTETE ent\n" +
+                "               WHERE ent.DO_Piece = dest.DO_Piece\n" +
+                "               AND ent.DO_Type = dest.DO_Type\n" +
+                "               AND ent.DO_Domaine = dest.DO_Domaine);\n" +
+                "\n" +
+                "INSERT INTO config.DB_Errors(\n" +
+                "          UserName,\n" +
+                "          ErrorNumber,\n" +
+                "          ErrorState,\n" +
+                "          ErrorSeverity,\n" +
+                "          ErrorLine,\n" +
+                "          ErrorProcedure,\n" +
+                "          ErrorMessage,\n" +
+                "          TableLoad,\n" +
+                "          Query,\n" +
+                "          ErrorDateTime)\n" +
+
+                "SELECT\t   SUSER_SNAME()," +
+                "           NULL," +
+                "           NULL," +
+                "           NULL," +
+                "           NULL," +
+                "           NULL," +
+                "           NULL,'Domaine : '+[DO_Domaine]+' Type : ' + [DO_Type] + ' Piece : ' + [DO_Piece]" +
+                "           +' cbMarq : ' + dest.[cbMarqSource] + ' database : ' + dest.[DataBaseSource]" +
+                "           + 'fileName : "+filename+" '" +
+                "           ,'F_DOCLIGNE' +\n" +
+                "           ,GETDATE()\n" +
+                "FROM F_DOCLIGNE_DEST dest\n" +
+                "LEFT JOIN (SELECT cbMarqSource,dataBaseSource FROM F_DOCLIGNE) src\n" +
+                "\tON\tdest.cbMarqSource = src.cbMarqSource\n" +
+                "\tAND\tdest.dataBaseSource = src.dataBaseSource\n" +
+                "LEFT JOIN (SELECT DE_NoSource,dataBaseSource,DE_No FROM F_DEPOT) dsrc\n" +
+                "\tON\tdsrc.DE_NoSource = dest.DE_No\n" +
+                "\tAND\tdsrc.dataBaseSource = dest.dataBaseSource\n" +
+                "WHERE src.cbMarqSource IS NULL\n" +
+                "AND NOT EXISTS (   SELECT 1\n" +
+                "               FROM F_DOCENTETE ent\n" +
+                "               WHERE ent.DO_Piece = dest.DO_Piece\n" +
+                "               AND ent.DO_Type = dest.DO_Type\n" +
+                "               AND ent.DO_Domaine = dest.DO_Domaine);\n" +
                 "            \n" +
                 "IF OBJECT_ID('F_DOCLIGNE_DEST') IS NOT NULL \n" +
                 "DROP TABLE F_DOCLIGNE_DEST;\n" +
@@ -62,7 +104,7 @@ public class DocLigne extends Table {
                 "   ERROR_LINE(),\n" +
                 "   ERROR_PROCEDURE(),\n" +
                 "   ERROR_MESSAGE(),\n" +
-                "   'Insert',\n" +
+                "   'Insert '+ ' "+filename+"',\n" +
                 "   'F_DOCLIGNE',\n" +
                 "   GETDATE());\n" +
                 "END CATCH";
@@ -84,8 +126,8 @@ public class DocLigne extends Table {
                 dbSource = database;
                readOnFile(path, filename, tableName + "_DEST", sqlCon);
                 readOnFile(path, "deleteList" + filename, tableName + "_SUPPR", sqlCon);
-                executeQuery(sqlCon, updateTableDest("", "'AG_No1','AG_No2','DL_No','AR_Ref'", tableName, tableName + "_DEST"));
-                sendData(sqlCon, path, filename, insert());
+                executeQuery(sqlCon, updateTableDest("", "'AG_No1','AG_No2','DL_No','AR_Ref'", tableName, tableName + "_DEST",filename));
+                sendData(sqlCon, path, filename, insert(filename));
                 deleteTempTable(sqlCon, tableName);
                 deleteDocLigne(sqlCon, path,filename);
             }

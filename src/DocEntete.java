@@ -11,7 +11,7 @@ public class DocEntete extends Table {
     public static String tableName = "F_DOCENTETE";
     public static String configList = "listDocEntete";
 
-    public static String insert()
+    public static String insert(String filename)
     {
         return "BEGIN TRY " +
                 " SET DATEFORMAT ymd;\n" +
@@ -79,7 +79,7 @@ public class DocEntete extends Table {
                 "   ERROR_LINE(),\n" +
                 "   ERROR_PROCEDURE(),\n" +
                 "   ERROR_MESSAGE(),\n" +
-                "   'Insert',\n" +
+                "   'Insert '+ ' "+filename+"',\n" +
                 "   'F_DOCENTETE',\n" +
                 "   GETDATE());\n" +
                 "END CATCH";
@@ -101,8 +101,8 @@ public class DocEntete extends Table {
                 dbSource = database;
                 readOnFile(path, filename, tableName + "_DEST", sqlCon);
                 readOnFile(path, "deleteList" + filename, tableName + "_SUPPR", sqlCon);
-                executeQuery(sqlCon, updateTableDest("", "'DO_Domaine','DO_Type','DO_Piece','DataBaseSource','cbMarqSource'", tableName, tableName + "_DEST"));
-                sendData(sqlCon, path, filename, insert());
+                executeQuery(sqlCon, updateTableDest("", "'DO_Domaine','DO_Type','DO_Piece','DataBaseSource','cbMarqSource'", tableName, tableName + "_DEST",filename));
+                sendData(sqlCon, path, filename, insert(filename));
 
                 deleteTempTable(sqlCon, tableName);
                 deleteDocEntete(sqlCon, path,filename);

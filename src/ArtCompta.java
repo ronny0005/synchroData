@@ -7,7 +7,7 @@ public class ArtCompta extends Table {
     public static String tableName = "F_ARTCOMPTA";
     public static String configList = "listArtCompta";
 
-    public static String insert()
+    public static String insert(String filename)
     {
         return
                 " BEGIN TRY " +
@@ -40,7 +40,7 @@ public class ArtCompta extends Table {
                 "   ERROR_LINE(),\n" +
                 "   ERROR_PROCEDURE(),\n" +
                 "   ERROR_MESSAGE(),\n" +
-                "   'insert',\n" +
+                "   'Insert '+ ' "+filename+"',\n" +
                 "   'F_ARTCOMPTA',\n" +
                 "   GETDATE());\n" +
                 "END CATCH";
@@ -62,8 +62,8 @@ public class ArtCompta extends Table {
                 readOnFile(path, filename, tableName + "_DEST", sqlCon);
 
                 readOnFile(path, "deleteList" + filename, tableName + "_SUPPR", sqlCon);
-                executeQuery(sqlCon, updateTableDest("AR_Ref,ACP_Type,ACP_Champ", "'AR_Ref','ACP_Type','ACP_Champ'", tableName, tableName + "_DEST"));
-                sendData(sqlCon, path, filename, insert());
+                executeQuery(sqlCon, updateTableDest("AR_Ref,ACP_Type,ACP_Champ", "'AR_Ref','ACP_Type','ACP_Champ'", tableName, tableName + "_DEST",filename));
+                sendData(sqlCon, path, filename, insert(filename));
 
                 deleteTempTable(sqlCon, tableName);
                 deleteArtCompta(sqlCon, path,filename);

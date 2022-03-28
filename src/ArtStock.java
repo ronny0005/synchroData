@@ -8,7 +8,7 @@ public class ArtStock extends Table {
     public static String tableName = "F_ARTSTOCK";
     public static String configList = "listArtStock";
 
-    public static String insert()
+    public static String insert(String filename)
     {
         return          "BEGIN TRY " +
                         "\n" +
@@ -81,7 +81,7 @@ public class ArtStock extends Table {
                         "   ERROR_LINE(),\n" +
                         "   ERROR_PROCEDURE(),\n" +
                         "   ERROR_MESSAGE(),\n" +
-                        "   'insert',\n" +
+                        "   'Insert '+ ' "+filename+"',\n" +
                         "   'F_ARTSTOCK',\n" +
                         "   GETDATE());\n" +
                         "END CATCH";
@@ -104,7 +104,7 @@ public class ArtStock extends Table {
                 readOnFile(path, filename, tableName + "_DEST", sqlCon);
                 readOnFile(path, "deleteList" + filename, tableName + "_SUPPR", sqlCon);
                 //executeQuery(sqlCon, updateTableDest("AR_Ref,DE_No", "'AR_Ref','DE_No'", tableName, tableName + "_DEST"));
-                sendData(sqlCon, path, filename, insert());
+                sendData(sqlCon, path, filename, insert(filename));
 
                 deleteTempTable(sqlCon, tableName);
                 deleteArtStock(sqlCon, path,filename,database);

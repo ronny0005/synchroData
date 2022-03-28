@@ -8,7 +8,7 @@ public class Famille extends Table {
     public static String tableName = "F_FAMILLE";
     public static String configList = "listFamille";
 
-    public static String insert()
+    public static String insert(String filename)
     {
         return "BEGIN TRY " +
                 " SET DATEFORMAT ymd;\n" +
@@ -49,7 +49,7 @@ public class Famille extends Table {
                 "   ERROR_LINE(),\n" +
                 "   ERROR_PROCEDURE(),\n" +
                 "   ERROR_MESSAGE(),\n" +
-                "   'insert',\n" +
+                "   'Insert '+ ' "+filename+"',\n" +
                 "   'F_FAMILLE',\n" +
                 "   GETDATE());\n" +
                 "END CATCH";
@@ -72,8 +72,8 @@ public class Famille extends Table {
                 String filename = children[i];
                 readOnFile(path, filename, tableName + "_DEST", sqlCon);
                 readOnFile(path, "deleteList" + filename, tableName + "_SUPPR", sqlCon);
-                executeQuery(sqlCon, updateTableDest("FA_CodeFamille", "'FA_CodeFamille','FA_Type'", tableName, tableName + "_DEST"));
-                sendData(sqlCon, path, filename, insert());
+                executeQuery(sqlCon, updateTableDest("FA_CodeFamille", "'FA_CodeFamille','FA_Type'", tableName, tableName + "_DEST",filename));
+                sendData(sqlCon, path, filename, insert(filename));
 
                 FamCompta.sendDataElement(sqlCon, path, database);
                 deleteTempTable(sqlCon, tableName);

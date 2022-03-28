@@ -8,7 +8,7 @@ public class Comptet extends Table {
     public static String tableName = "F_COMPTET";
     public static String configList = "listComptet";
 
-    public static String insert()
+    public static String insert(String filename)
     {
         return  "BEGIN TRY " +
                 " \n" +
@@ -43,7 +43,7 @@ public class Comptet extends Table {
                 "      ,[CT_Siret],[CT_Statistique01],[CT_Statistique02],[CT_Statistique03]\n" +
                 "      ,[CT_Statistique04],[CT_Statistique05],[CT_Statistique06],[CT_Statistique07]\n" +
                 "      ,[CT_Statistique08],[CT_Statistique09],[CT_Statistique10],[CT_Commentaire]\n" +
-                "      ,[CT_Encours],[CT_Assurance],[CT_NumPayeur],[N_Risque]\n" +
+                "      ,[CT_Encours],[CT_Assurance],srcP.[CT_Num],[N_Risque]\n" +
                 "      ,[CO_No],[N_CatTarif],[CT_Taux01],[CT_Taux02],[CT_Taux03],[CT_Taux04]\n" +
                 "      ,[N_CatCompta],[N_Period],[CT_Facture],[CT_BLFact]\n" +
                 "      ,[CT_Langue],[CT_Edi1],[CT_Edi2],[CT_Edi3],[N_Expedition],[N_Condition]\n" +
@@ -54,12 +54,16 @@ public class Comptet extends Table {
                 "      ,[CT_SvRegul],[CT_SvCotation],[CT_SvDateMaj],[CT_SvObjetMaj]\n" +
                 "      ,[CT_SvDateBilan],[CT_SvNbMoisBilan],[N_AnalytiqueIFRS],[CA_NumIFRS]\n" +
                 "      ,[CT_PrioriteLivr],[CT_LivrPartielle]\n" +
-                "      ,[MR_No],[CT_NotPenal],[EB_No],[CT_NumCentrale],[CT_DateFermeDebut],[CT_DateFermeFin]\n" +
+                "      ,[MR_No],[CT_NotPenal],[EB_No],srcC.[CT_Num],[CT_DateFermeDebut],[CT_DateFermeFin]\n" +
                 "      ,[CT_FactureElec],[CT_TypeNIF],[CT_RepresentInt],[CT_RepresentNIF]\n" +
                 "      ,[cbProt],[cbCreateur],[cbModification],[cbReplication],[cbFlag]\n" +
                 "FROM F_COMPTET_DEST dest\n" +
                 "LEFT JOIN (SELECT CT_Num FROM F_COMPTET) src\n" +
                 "\tON\tdest.CT_Num = src.CT_Num\n" +
+                "LEFT JOIN (SELECT CT_Num FROM F_COMPTET) srcP\n" +
+                "\tON\tdest.CT_NumPayeur = srcP.CT_Num\n" +
+                "LEFT JOIN (SELECT CT_Num FROM F_COMPTET) srcC\n" +
+                "\tON\tdest.CT_NumCentrale = srcC.CT_Num\n" +
                 "WHERE src.CT_Num IS NULL\n" +
                 "            \n" +
                 "IF OBJECT_ID('F_COMPTET_DEST') IS NOT NULL \n" +
@@ -75,7 +79,7 @@ public class Comptet extends Table {
                 "   ERROR_LINE(),\n" +
                 "   ERROR_PROCEDURE(),\n" +
                 "   ERROR_MESSAGE(),\n" +
-                "   'insert',\n"+
+                "   'Insert '+ ' "+filename+"',\n" +
                 "   'F_COMPTET',\n" +
                 "   GETDATE());\n" +
                 "END CATCH";
@@ -96,8 +100,8 @@ public class Comptet extends Table {
                 String filename = children[i];
                 readOnFile(path, filename, tableName + "_DEST", sqlCon);
                 readOnFile(path, "deleteList" + filename, tableName + "_SUPPR", sqlCon);
-                executeQuery(sqlCon, updateTableDest("CT_Num,CT_Type", "'CT_Num','CT_Type'", tableName, tableName + "_DEST"));
-                sendData(sqlCon, path, filename, insert());
+                executeQuery(sqlCon, updateTableDest("CT_Num,CT_Type", "'CT_Num','CT_Type'", tableName, tableName + "_DEST",filename));
+                sendData(sqlCon, path, filename, insert(filename));
 
                 deleteTempTable(sqlCon, tableName);
                 deleteComptet(sqlCon, path,filename);

@@ -78,7 +78,7 @@ public class SendFileFTP {
                 for (File child : directoryListing) {
                     if(child.isFile()) {
                         File newFile = new File(backup.getAbsolutePath()+"\\"+child.getName());
-                        Files.move(child.toPath() ,newFile.toPath());
+                        Table.archiveDocument((String)list.get("path") + "\\archive", (String)list.get("path"), child.getName());
                     }
                 }
             }
@@ -87,8 +87,6 @@ public class SendFileFTP {
         } catch (JSchException e) {
             e.printStackTrace();
         } catch (SftpException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
             e.printStackTrace();
         }
     }

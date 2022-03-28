@@ -426,7 +426,7 @@ public class Table {
                 "\t);\n" +
                 "END CATCH\n";
     }
-    public static String updateTableDest(String key,String exclude,String tableName,String tableNameDest){
+    public static String updateTableDest(String key,String exclude,String tableName,String tableNameDest,String filename){
         String[] keys = key.split(",");
         String sql =  "\n" +
                 "BEGIN TRY\n" +
@@ -489,7 +489,7 @@ public class Table {
                 "\t\tERROR_LINE(),\n" +
                 "\t\tERROR_PROCEDURE(),\n" +
                 "\t\tERROR_MESSAGE(),\n" +
-                "\t\t@TableName,\n" +
+                "\t\t@TableName + ' "+filename+"',\n" +
                 "\t\t@MonSQL,\n" +
                 "\t\tGETDATE()\n" +
                 "\t);\n" +

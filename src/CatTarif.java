@@ -8,7 +8,7 @@ public class CatTarif extends Table {
     public static String tableName = "P_CATTARIF";
     public static String configList = "listCatTarif";
 
-    public static String insert()
+    public static String insert(String filename)
     {
         return          " BEGIN TRY " +
                         " SET DATEFORMAT ymd;\n" +
@@ -34,7 +34,7 @@ public class CatTarif extends Table {
                         "   ERROR_LINE(),\n" +
                         "   ERROR_PROCEDURE(),\n" +
                         "   ERROR_MESSAGE(),\n" +
-                        "   'insert',\n" +
+                        "   'Insert '+ ' "+filename+"',\n" +
                         "   'P_CATTARIF',\n" +
                         "   GETDATE());\n" +
                         "END CATCH";
@@ -56,8 +56,8 @@ public class CatTarif extends Table {
                 String filename = children[i];
                 readOnFile(path, filename, tableName + "_DEST", sqlCon);
                 readOnFile(path, "deleteList" + filename, tableName + "_SUPPR", sqlCon);
-                executeQuery(sqlCon, updateTableDest("cbIndice", "'cbIndice'", tableName, tableName + "_DEST"));
-                sendData(sqlCon, path, filename, insert());
+                executeQuery(sqlCon, updateTableDest("cbIndice", "'cbIndice'", tableName, tableName + "_DEST",filename));
+                sendData(sqlCon, path, filename, insert(filename));
 
                 deleteTempTable(sqlCon, tableName);
                 deleteCatTarif(sqlCon, path,filename);

@@ -8,7 +8,7 @@ public class DepotEmpl extends Table {
     public static String tableName = "F_DEPOTEMPL";
     public static String configList = "listDepotEmpl";
 
-    public static String insert()
+    public static String insert(String filename)
     {
         return          "BEGIN TRY " +
                         " SET DATEFORMAT ymd;\n" +
@@ -54,7 +54,7 @@ public class DepotEmpl extends Table {
                         "   ERROR_LINE(),\n" +
                         "   ERROR_PROCEDURE(),\n" +
                         "   ERROR_MESSAGE(),\n" +
-                        "   'insert',\n" +
+                        "   'Insert '+ ' "+filename+"',\n" +
                         "   'F_DEPOTEMPL',\n" +
                         "   GETDATE());\n" +
                         "END CATCH";
@@ -76,8 +76,8 @@ public class DepotEmpl extends Table {
                 String filename = children[i];
                 readOnFile(path, filename, tableName + "_DEST", sqlCon);
                 readOnFile(path, "deleteList" + filename, tableName + "_SUPPR", sqlCon);
-                executeQuery(sqlCon, updateTableDest("", "'DP_No','DE_No','DP_NoSource'", tableName, tableName + "_DEST"));
-                sendData(sqlCon, path, filename, insert());
+                executeQuery(sqlCon, updateTableDest("", "'DP_No','DE_No','DP_NoSource'", tableName, tableName + "_DEST",filename));
+                sendData(sqlCon, path, filename, insert(filename));
 
                 deleteTempTable(sqlCon, tableName);
                 deleteDepot(sqlCon, path,filename);

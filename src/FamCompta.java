@@ -8,7 +8,7 @@ public class FamCompta extends Table {
     public static String tableName = "F_FAMCOMPTA";
     public static String configList = "listFamCompta";
 
-    public static String insert()
+    public static String insert(String filename)
     {
         return          " BEGIN TRY " +
 
@@ -40,7 +40,7 @@ public class FamCompta extends Table {
                         "   ERROR_LINE(),\n" +
                         "   ERROR_PROCEDURE(),\n" +
                         "   ERROR_MESSAGE(),\n" +
-                        "   'insert',\n" +
+                        "   'Insert '+ ' "+filename+"',\n" +
                         "   'F_FAMCOMPTA',\n" +
                         "   GETDATE());\n" +
                         "END CATCH";
@@ -63,8 +63,8 @@ public class FamCompta extends Table {
                 String filename = children[i];
                 readOnFile(path, filename, tableName + "_DEST", sqlCon);
                 readOnFile(path, "deleteList" + filename, tableName + "_SUPPR", sqlCon);
-                executeQuery(sqlCon, updateTableDest("FA_CodeFamille,FCP_Type,FCP_Champ", "'FA_CodeFamille','FCP_Type','FCP_Champ'", tableName, tableName + "_DEST"));
-                sendData(sqlCon, path, filename, insert());
+                executeQuery(sqlCon, updateTableDest("FA_CodeFamille,FCP_Type,FCP_Champ", "'FA_CodeFamille','FCP_Type','FCP_Champ'", tableName, tableName + "_DEST",filename));
+                sendData(sqlCon, path, filename, insert(filename));
                 deleteTempTable(sqlCon, tableName);
 
                 deleteFamCompta(sqlCon, path,filename);

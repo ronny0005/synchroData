@@ -10,7 +10,7 @@ public class Depot extends Table{
     public static String configList = "listDepot";
     public static String file ="depot_";
 
-    public static String insert()
+    public static String insert(String filename)
     {
         return          "BEGIN TRY " +
                         " SET DATEFORMAT ymd;\n" +
@@ -43,7 +43,7 @@ public class Depot extends Table{
                         "   ERROR_LINE(),\n" +
                         "   ERROR_PROCEDURE(),\n" +
                         "   ERROR_MESSAGE(),\n" +
-                        "   'insert',\n" +
+                        "   'Insert '+ ' "+filename+"',\n" +
                         "   'F_DEPOT',\n" +
                         "   GETDATE());\n" +
                         "END CATCH";
@@ -83,8 +83,8 @@ public class Depot extends Table{
                 String filename = children[i];
                 readOnFile(path,filename,tableName+"_DEST",sqlCon);
                 readOnFile(path,"deleteList"+filename,tableName+"_SUPPR",sqlCon);
-                executeQuery(sqlCon,updateTableDest( "","'DE_No','DP_NoDefaut','DE_Code','DE_NoSource','DatabaseSource','DE_Intitule'",tableName,tableName+"_DEST"));
-                sendData(sqlCon, path, filename,insert());
+                executeQuery(sqlCon,updateTableDest( "","'DE_No','DP_NoDefaut','DE_Code','DE_NoSource','DatabaseSource','DE_Intitule'",tableName,tableName+"_DEST",filename));
+                sendData(sqlCon, path, filename,insert(filename));
 
                 DepotEmpl.sendDataElement(sqlCon, path,database);
                 linkDepot(sqlCon);

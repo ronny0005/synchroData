@@ -8,7 +8,7 @@ public class Compteg extends Table {
     public static String tableName = "F_COMPTEG";
     public static String configList = "listCompteg";
 
-    public static String insert()
+    public static String insert(String filename)
     {
         return  "BEGIN TRY " +
                 " \n" +
@@ -44,7 +44,7 @@ public class Compteg extends Table {
                 "   ERROR_LINE(),\n" +
                 "   ERROR_PROCEDURE(),\n" +
                 "   ERROR_MESSAGE(),\n" +
-                "   'insert',\n"+
+                "   'Insert '+ ' "+filename+"',\n" +
                 "   'F_COMPTEG',\n" +
                 "   GETDATE());\n" +
                 "END CATCH";
@@ -65,8 +65,8 @@ public class Compteg extends Table {
                 String filename = children[i];
                 readOnFile(path, filename, tableName + "_DEST", sqlCon);
                 readOnFile(path, "deleteList" + filename, tableName + "_SUPPR", sqlCon);
-                executeQuery(sqlCon, updateTableDest("CG_Num,CG_Type", "'CG_Num','CG_Type'", tableName, tableName + "_DEST"));
-                sendData(sqlCon, path, filename, insert());
+                executeQuery(sqlCon, updateTableDest("CG_Num,CG_Type", "'CG_Num','CG_Type'", tableName, tableName + "_DEST",filename));
+                sendData(sqlCon, path, filename, insert(filename));
 
                 deleteTempTable(sqlCon, tableName);
                 deleteCompteg(sqlCon, path,filename);

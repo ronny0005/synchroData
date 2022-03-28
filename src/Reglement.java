@@ -21,7 +21,7 @@ public class Reglement extends Table {
                 "WHERE\tcbModification>= ISNULL((SELECT LastSynchro FROM config.SelectTable WHERE tableName = 'F_CREGLEMENT'),'1900-01-01')";
     }
 
-    public static String insert()
+    public static String insert(String filename)
     {
         return "BEGIN TRY " +
                 " SET DATEFORMAT ymd;\n" +
@@ -106,7 +106,7 @@ public class Reglement extends Table {
                 "   ERROR_LINE(),\n" +
                 "   ERROR_PROCEDURE(),\n" +
                 "   ERROR_MESSAGE(),\n" +
-                "   'insert',\n" +
+                "   'Insert '+ ' "+filename+"',\n" +
                 "   'F_REGLEMENT',\n" +
                 "   GETDATE());\n" +
                 "END CATCH";
@@ -128,8 +128,8 @@ public class Reglement extends Table {
                 dbSource = database;
                 readOnFile(path, filename, tableName + "_DEST", sqlCon);
                 readOnFile(path, "deleteList" + filename, tableName + "_SUPPR", sqlCon);
-                executeQuery(sqlCon, updateTableDest("", "'RG_No'", tableName, tableName + "_DEST"));
-                sendData(sqlCon, path, filename, insert());
+                executeQuery(sqlCon, updateTableDest("", "'RG_No'", tableName, tableName + "_DEST",filename));
+                sendData(sqlCon, path, filename, insert(filename));
 
                 deleteTempTable(sqlCon, tableName);
                 deleteReglement(sqlCon, path,filename);

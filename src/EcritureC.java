@@ -9,7 +9,7 @@ public class EcritureC extends Table {
     public static String tableName = "F_ECRITUREC";
     public static String configList = "listEcritureC";
 
-    public static String insert()
+    public static String insert(String filename)
     {
         return          "BEGIN TRY " +
                 " INSERT INTO F_ECRITUREC ([JO_Num],[EC_No],[EC_NoLink],[JM_Date],[EC_Jour]\n" +
@@ -93,7 +93,7 @@ public class EcritureC extends Table {
                 "   ERROR_LINE(),\n" +
                 "   ERROR_PROCEDURE(),\n" +
                 "   ERROR_MESSAGE(),\n" +
-                "   'insert',\n" +
+                "   'Insert '+ ' "+filename+"',\n" +
                 "   'F_ECRITUREC',\n" +
                 "   GETDATE());\n" +
                 " END CATCH";
@@ -118,8 +118,8 @@ public class EcritureC extends Table {
 
                 readOnFile(path, filename, tableName + "_DEST", sqlCon);
                 readOnFile(path, "deleteList" + filename, tableName + "_SUPPR", sqlCon);
-                executeQuery(sqlCon, updateTableDest("", "'EC_No','JM_Date','JO_Num','EC_CType'", tableName, tableName + "_DEST"));
-                sendData(sqlCon, path, filename, insert());
+                executeQuery(sqlCon, updateTableDest("", "'EC_No','JM_Date','JO_Num','EC_CType'", tableName, tableName + "_DEST",filename));
+                sendData(sqlCon, path, filename, insert(filename));
                 deleteTempTable(sqlCon, tableName);
 
                 deleteEcritureC(sqlCon, path,filename);

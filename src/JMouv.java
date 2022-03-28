@@ -7,7 +7,7 @@ public class JMouv extends Table {
     public static String tableName = "F_JMOUV";
     public static String configList = "listJMouv";
 
-    public static String insert()
+    public static String insert(String filename)
     {
         return
                 " BEGIN TRY " +
@@ -37,7 +37,7 @@ public class JMouv extends Table {
                 "   ERROR_LINE(),\n" +
                 "   ERROR_PROCEDURE(),\n" +
                 "   ERROR_MESSAGE(),\n" +
-                "   'insert',\n" +
+                "   'Insert '+ ' "+filename+"',\n" +
                 "   'F_JMOUV',\n" +
                 "   GETDATE());\n" +
                 "END CATCH";
@@ -59,8 +59,8 @@ public class JMouv extends Table {
                 readOnFile(path, filename, tableName + "_DEST", sqlCon);
 
                 readOnFile(path, "deleteList" + filename, tableName + "_SUPPR", sqlCon);
-                executeQuery(sqlCon, updateTableDest("JO_Num,JM_Date", "'JO_Num','JM_Date'", tableName, tableName + "_DEST"));
-                sendData(sqlCon, path, filename, insert());
+                executeQuery(sqlCon, updateTableDest("JO_Num,JM_Date", "'JO_Num','JM_Date'", tableName, tableName + "_DEST",filename));
+                sendData(sqlCon, path, filename, insert(filename));
 
                 deleteTempTable(sqlCon, tableName);
                 deleteArtCompta(sqlCon, path,filename);

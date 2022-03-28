@@ -12,7 +12,7 @@ public class ReglEch extends Table {
     public static String tableName = "F_REGLECH";
     public static String configList = "listReglEch";
 
-    public static String insert()
+    public static String insert(String filename)
     {
         return "BEGIN TRY " +
                 " SET DATEFORMAT ymd;\n" +
@@ -35,7 +35,47 @@ public class ReglEch extends Table {
                 "\tON\tcre.DataBaseSource = dest.DataBaseSource\n" +
                 "\tAND cre.RG_NoSource = dest.RG_No\n" +
                 "WHERE src.cbMarqSource IS NULL\n" +
+                "AND cre.RG_No IS NOT NULL AND fdr.DR_No IS NOT NULL\n" +
                 "            \n" +
+
+                "INSERT INTO config.DB_Errors(\n" +
+                "          UserName,\n" +
+                "          ErrorNumber,\n" +
+                "          ErrorState,\n" +
+                "          ErrorSeverity,\n" +
+                "          ErrorLine,\n" +
+                "          ErrorProcedure,\n" +
+                "          ErrorMessage,\n" +
+                "          TableLoad,\n" +
+                "          Query,\n" +
+                "          ErrorDateTime)\n" +
+
+                "SELECT\t   SUSER_SNAME()," +
+                "           NULL," +
+                "           NULL," +
+                "           NULL," +
+                "           NULL," +
+                "           NULL," +
+                "           NULL,'Domaine : '+dest.[DO_Domaine]+' Type : ' + dest.[DO_Type] + ' Piece : ' + dest.[DO_Piece]" +
+                "           +' cbMarq : ' + dest.[cbMarqSource] + ' database : ' + dest.[DataBaseSource]" +
+                "           + 'fileName : "+filename+" RG_No : '+dest.RG_No+' DR_No : '+dest.DR_No  " +
+                "           ,'F_DOCLIGNE' +\n" +
+                "           ,GETDATE()\n" +
+                "SELECT \tcre.[RG_No],fdr.[DR_No],dest.[DO_Domaine],dest.[DO_Type]\n" +
+                "\t\t,dest.[DO_Piece],dest.[RC_Montant],dest.[RG_TypeReg],dest.[cbProt],dest.[cbCreateur]\n" +
+                "\t\t,dest.[cbModification],dest.[cbReplication],dest.[cbFlag],dest.cbMarqSource,dest.DataBaseSource,dest.DR_No,dest.RG_No\n" +
+                "FROM F_REGLECH_DEST dest\n" +
+                "LEFT JOIN (SELECT DataBaseSource,cbMarqSource FROM F_REGLECH) src\n" +
+                "\tON\tdest.DataBaseSource = src.DataBaseSource\n" +
+                "\tAND dest.cbMarqSource = src.cbMarqSource\n" +
+                "LEFT JOIN F_DOCREGL fdr\n" +
+                "\tON\tfdr.DataBaseSource = dest.DataBaseSource\n" +
+                "\tAND fdr.DR_NoSource = dest.DR_No\n" +
+                "LEFT JOIN F_CREGLEMENT cre\n" +
+                "\tON\tcre.DataBaseSource = dest.DataBaseSource\n" +
+                "\tAND cre.RG_NoSource = dest.RG_No\n" +
+                "WHERE src.cbMarqSource IS NULL\n" +
+                "AND (cre.RG_No IS NULL OR fdr.DR_No IS NULL)\n" +
                 "IF OBJECT_ID('F_REGLECH_DEST') IS NOT NULL \n" +
                 "DROP TABLE F_REGLECH_DEST;" +
                 " END TRY\n" +
@@ -49,7 +89,7 @@ public class ReglEch extends Table {
                 "   ERROR_LINE(),\n" +
                 "   ERROR_PROCEDURE(),\n" +
                 "   ERROR_MESSAGE(),\n" +
-                "   'insert',\n" +
+                "   'Insert '+ ' "+filename+"',\n" +
                 "   'F_REGLECH',\n" +
                 "   GETDATE());\n" +
                 "END CATCH";
@@ -71,8 +111,8 @@ public class ReglEch extends Table {
                 dbSource = database;
                 readOnFile(path, filename, tableName + "_DEST", sqlCon);
                 readOnFile(path, "deleteList" + filename, tableName + "_SUPPR", sqlCon);
-                executeQuery(sqlCon, updateTableDest("", "'RG_No','DR_No'", tableName, tableName + "_DEST"));
-                sendData(sqlCon, path, filename, insert());
+                executeQuery(sqlCon, updateTableDest("", "'RG_No','DR_No'", tableName, tableName + "_DEST",filename));
+                sendData(sqlCon, path, filename, insert(filename));
 
                 deleteTempTable(sqlCon);
                 deleteReglEch(sqlCon, path,filename);

@@ -12,7 +12,7 @@ public class DocRegl extends Table {
     public static String tableName = "F_DOCREGL";
     public static String configList = "listDocRegl";
 
-    public static String insert()
+    public static String insert(String filename)
     {
         return  "BEGIN TRY " +
                 " SET DATEFORMAT ymd;\n" +
@@ -21,26 +21,26 @@ public class DocRegl extends Table {
                 "\t,[DR_Montant] = REPLACE([DR_Montant],',','.')\n" +
                 "\t, [DR_MontantDev] = REPLACE([DR_MontantDev],',','.')\n" +
                 "\n" +
-                "UPDATE [dbo].[F_DOCREGL]\n" +
-                "   SET [DR_TypeRegl] = F_DOCREGL_DEST.DR_TypeRegl\n" +
-                "      ,[DR_Date] = F_DOCREGL_DEST.DR_Date\n" +
-                "      ,[DR_Libelle] = F_DOCREGL_DEST.DR_Libelle\n" +
-                "      ,[DR_Pourcent] = F_DOCREGL_DEST.DR_Pourcent\n" +
-                "      ,[DR_Montant] = F_DOCREGL_DEST.DR_Montant\n" +
-                "      ,[DR_MontantDev] = F_DOCREGL_DEST.DR_MontantDev\n" +
-                "      ,[DR_Equil] = F_DOCREGL_DEST.DR_Equil\n" +
-                "      ,[EC_No] = F_DOCREGL_DEST.EC_No\n" +
-                "      ,[DR_Regle] = F_DOCREGL_DEST.DR_Regle\n" +
-                "      ,[N_Reglement] = F_DOCREGL_DEST.N_Reglement\n" +
-                "      ,[cbProt] = F_DOCREGL_DEST.cbProt\n" +
-                "      ,[cbCreateur] = F_DOCREGL_DEST.cbCreateur\n" +
-                "      ,[cbModification] = F_DOCREGL_DEST.cbModification\n" +
-                "      ,[cbReplication] = F_DOCREGL_DEST.cbReplication\n" +
-                "      ,[cbFlag] = F_DOCREGL_DEST.cbFlag\n" +
-                "FROM F_DOCREGL_DEST\n" +
-                "WHERE\tF_DOCREGL.cbMarqSource = F_DOCREGL_DEST.cbMarqSource \n" +
-                "\tAND\tF_DOCREGL.DataBaseSource = F_DOCREGL_DEST.DataBaseSource\n" +
-                "            \n" +
+                "UPDATE src\n" +
+                "   SET [DR_TypeRegl] = dest.DR_TypeRegl\n" +
+                "      ,[DR_Date] = dest.DR_Date\n" +
+                "      ,[DR_Libelle] = dest.DR_Libelle\n" +
+                "      ,[DR_Pourcent] = dest.DR_Pourcent\n" +
+                "      ,[DR_Montant] = dest.DR_Montant\n" +
+                "      ,[DR_MontantDev] = dest.DR_MontantDev\n" +
+                "      ,[DR_Equil] = dest.DR_Equil\n" +
+                "      ,[EC_No] = dest.EC_No\n" +
+                "      ,[DR_Regle] = dest.DR_Regle\n" +
+                "      ,[N_Reglement] = dest.N_Reglement\n" +
+                "      ,[cbProt] = dest.cbProt\n" +
+                "      ,[cbCreateur] = dest.cbCreateur\n" +
+                "      ,[cbModification] = dest.cbModification\n" +
+                "      ,[cbReplication] = dest.cbReplication\n" +
+                "      ,[cbFlag] = dest.cbFlag\n" +
+                "      ,[DR_NoSource] = dest.DR_No\n" +
+                "FROM [dbo].[F_DOCREGL] src\n" +
+                "INNER JOIN F_DOCREGL_DEST dest ON src.cbMarqSource = dest.cbMarqSource \n" +
+                "\tAND\tsrc.DataBaseSource = dest.DataBaseSource\n" +
                 "            \n" +
                 "INSERT INTO F_DOCREGL (\n" +
                 "[DR_No],[DO_Domaine],[DO_Type],[DO_Piece],[DR_TypeRegl],[DR_Date]\n" +
@@ -55,8 +55,47 @@ public class DocRegl extends Table {
                 "LEFT JOIN (SELECT cbMarqSource,DataBaseSource FROM F_DOCREGL) src\n" +
                 "\tON\tdest.cbMarqSource = src.cbMarqSource\n" +
                 "\tAND\tdest.DataBaseSource = src.DataBaseSource\n" +
+                "LEFT JOIN (SELECT DO_Piece,DO_Type,DO_Domaine FROM F_DOCENTETE) docE\n" +
+                "ON docE.DO_Domaine = dest.DO_Domaine\n"+
+                "AND docE.DO_Type = dest.DO_Type\n"+
+                "AND docE.DO_Piece = dest.DO_Piece\n"+
                 "WHERE src.cbMarqSource IS NULL\n" +
+                "AND docE.DO_Piece IS NOT NULL\n" +
                 "            \n" +
+                "" +
+                "INSERT INTO config.DB_Errors(\n" +
+                "          UserName,\n" +
+                "          ErrorNumber,\n" +
+                "          ErrorState,\n" +
+                "          ErrorSeverity,\n" +
+                "          ErrorLine,\n" +
+                "          ErrorProcedure,\n" +
+                "          ErrorMessage,\n" +
+                "          TableLoad,\n" +
+                "          Query,\n" +
+                "          ErrorDateTime)\n" +
+
+                "SELECT\t   SUSER_SNAME()," +
+                "           NULL," +
+                "           NULL," +
+                "           NULL," +
+                "           NULL," +
+                "           NULL," +
+                "           NULL,'Domaine : '+dest.[DO_Domaine]+' Type : ' + dest.[DO_Type] + ' Piece : ' + dest.[DO_Piece]" +
+                "           +' cbMarq : ' + dest.[cbMarqSource] + ' database : ' + dest.[DataBaseSource]" +
+                "           + 'fileName : "+filename+" '" +
+                "           ,'F_DOCLIGNE' +\n" +
+                "           ,GETDATE()\n" +
+                "FROM F_DOCREGL_DEST dest\n" +
+                "LEFT JOIN (SELECT cbMarqSource,DataBaseSource FROM F_DOCREGL) src\n" +
+                "\tON\tdest.cbMarqSource = src.cbMarqSource\n" +
+                "\tAND\tdest.DataBaseSource = src.DataBaseSource\n" +
+                "LEFT JOIN (SELECT DO_Piece,DO_Type,DO_Domaine FROM F_DOCENTETE) docE\n" +
+                "ON docE.DO_Domaine = dest.DO_Domaine\n"+
+                "AND docE.DO_Type = dest.DO_Type\n"+
+                "AND docE.DO_Piece = dest.DO_Piece\n"+
+                "WHERE src.cbMarqSource IS NULL\n" +
+                "AND docE.DO_Piece IS NULL\n" +
                 "IF OBJECT_ID('F_DOCREGL_DEST') IS NOT NULL \n" +
                 "DROP TABLE F_DOCREGL_DEST\n" +
                 " END TRY\n" +
@@ -70,7 +109,7 @@ public class DocRegl extends Table {
                 "   ERROR_LINE(),\n" +
                 "   ERROR_PROCEDURE(),\n" +
                 "   ERROR_MESSAGE(),\n" +
-                "   'insert',\n" +
+                "   'Insert '+ ' "+filename+"',\n" +
                 "   'F_DOCREGL',\n" +
                 "   GETDATE());\n" +
                 "END CATCH";
@@ -92,8 +131,8 @@ public class DocRegl extends Table {
                 dbSource = database;
                 readOnFile(path, filename, tableName + "_DEST", sqlCon);
                 readOnFile(path, "deleteList" + filename, tableName + "_SUPPR", sqlCon);
-                executeQuery(sqlCon, updateTableDest("", "'DR_No'", tableName, tableName + "_DEST"));
-                sendData(sqlCon, path, filename, insert());
+                executeQuery(sqlCon, updateTableDest("", "'DR_No'", tableName, tableName + "_DEST",filename));
+                sendData(sqlCon, path, filename, insert(filename));
                 deleteTempTable(sqlCon, tableName);
                 deleteDocRegl(sqlCon, path,filename);
             }

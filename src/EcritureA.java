@@ -20,7 +20,7 @@ public class EcritureA extends Table {
                 "WHERE cbModification >= ISNULL((SELECT LastSynchro FROM config.SelectTable WHERE tableName='F_ECRITUREA'),'1900-01-01')";
     }
 
-    public static String insert()
+    public static String insert(String filename)
     {
         return  "BEGIN TRY" +
                 "                   \n" +
@@ -51,7 +51,7 @@ public class EcritureA extends Table {
                 "   ERROR_LINE(),\n" +
                 "   ERROR_PROCEDURE(),\n" +
                 "   ERROR_MESSAGE(),\n" +
-                "   'insert',\n" +
+                "   'Insert '+ ' "+filename+"',\n" +
                 "   'F_ECRITUREA',\n" +
                 "   GETDATE());\n" +
                 "END CATCH";
@@ -74,8 +74,8 @@ public class EcritureA extends Table {
                 dbSource = database;
                 readOnFile(path, filename, tableName + "_DEST", sqlCon);
                 readOnFile(path, "deleteList" + filename, tableName + "_SUPPR", sqlCon);
-                executeQuery(sqlCon, updateTableDest("", "'EC_No','N_Analytique'", tableName, tableName + "_DEST"));
-                sendData(sqlCon, path, filename, insert());
+                executeQuery(sqlCon, updateTableDest("", "'EC_No','N_Analytique'", tableName, tableName + "_DEST",filename));
+                sendData(sqlCon, path, filename, insert(filename));
                 deleteTempTable(sqlCon, tableName);
                 deleteEcritureA(sqlCon, path,filename);
             }

@@ -8,7 +8,7 @@ public class RessourceProd extends Table {
     public static String tableName = "F_RESSOURCEPROD";
     public static String configList = "listRessourceProd";
 
-    public static String insert()
+    public static String insert(String filename)
     {
         return  "BEGIN TRY " +
                 " SET DATEFORMAT ymd;\n" +
@@ -61,7 +61,7 @@ public class RessourceProd extends Table {
                 "   ERROR_LINE(),\n" +
                 "   ERROR_PROCEDURE(),\n" +
                 "   ERROR_MESSAGE(),\n" +
-                "   'insert',\n" +
+                "   'Insert '+ ' "+filename+"',\n" +
                 "   'F_RESSOURCEPROD',\n" +
                 "   GETDATE());\n" +
                 "END CATCH";
@@ -83,8 +83,8 @@ public class RessourceProd extends Table {
                 String filename = children[i];
                 readOnFile(path, filename, tableName + "_DEST", sqlCon);
                 readOnFile(path, "deleteList" + filename, tableName + "_SUPPR", sqlCon);
-                executeQuery(sqlCon, updateTableDest("RP_Code,RP_Type", "'RP_Code','RP_Type','RP_TypeRess'", tableName, tableName + "_DEST"));
-                sendData(sqlCon, path, filename, insert());
+                executeQuery(sqlCon, updateTableDest("RP_Code,RP_Type", "'RP_Code','RP_Type','RP_TypeRess'", tableName, tableName + "_DEST",filename));
+                sendData(sqlCon, path, filename, insert(filename));
 
                 deleteTempTable(sqlCon, tableName);
                 deleteRessourceProd(sqlCon, path,filename);
