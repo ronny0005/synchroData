@@ -13,6 +13,8 @@ public class Taxe extends Table {
                 " BEGIN TRY " +
                 " SET DATEFORMAT ymd;\n" +
                 " \n" +
+
+                " IF OBJECT_ID('F_TAXE_DEST') IS NOT NULL\n"+
                 " INSERT INTO [dbo].[F_TAXE]\n" +
                 "           ([TA_Intitule],[TA_TTaux],[TA_Taux],[TA_Type],[CG_Num],[TA_No],[TA_Code],[TA_NP]\n" +
                 "           ,[TA_Sens],[TA_Provenance],[TA_Regroup],[TA_Assujet],[TA_GrilleBase],[TA_GrilleTaxe]\n" +

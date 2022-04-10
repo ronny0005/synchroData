@@ -20,6 +20,7 @@ public class ArticleRessource extends Table {
     {
         return "BEGIN TRY" +
                 " SET DATEFORMAT ymd;\n" +
+                " IF OBJECT_ID('F_ARTICLERESSOURCE_DEST') IS NOT NULL\n"+
                 "\tINSERT INTO F_ARTICLERESSOURCE (\n" +
                 "\t[AR_Ref],[RP_Code],[cbProt]\n" +
                 "\t\t\t,[cbCreateur],[cbModification],[cbReplication],[cbFlag])\n" +

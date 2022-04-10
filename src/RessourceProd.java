@@ -12,6 +12,8 @@ public class RessourceProd extends Table {
     {
         return  "BEGIN TRY " +
                 " SET DATEFORMAT ymd;\n" +
+
+                " IF OBJECT_ID('F_RESSOURCEPROD_DEST') IS NOT NULL\n"+
                 "\tINSERT INTO F_RESSOURCEPROD (\n" +
                 "\t[RP_Code],[RP_Type],[RP_Intitule],[RP_Complement],[RP_Central]\n" +
                 "      ,[RP_Visite],[RP_CoutStd],[RP_Temps],[RP_Sommeil]\n" +

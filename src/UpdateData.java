@@ -43,6 +43,10 @@ public class UpdateData {
                 System.out.println("--Chargement Compte Général--");
                 Compteg.sendDataElement(sqlCon, path,database);
             }
+            if(((String)list.get("collaborateur")).equals("1")) {
+                System.out.println("--Chargement Collaborateur--");
+                Collaborateur.sendDataElement(sqlCon, path,database);
+            }
             if(((String)list.get("journaux")).equals("1")) {
                 System.out.println("--Chargement Journaux--");
                 FJournaux.sendDataElement(sqlCon, path,database);
@@ -75,6 +79,7 @@ public class UpdateData {
             if(((String)list.get("entete")).equals("1")) {
                 System.out.println("--Chargement Entete--");
                 DocEntete.sendDataElement(sqlCon, path,database);
+                System.out.println("--Chargement DocRegl--");
                 DocRegl.sendDataElement(sqlCon, path,database);
             }
 
@@ -86,6 +91,7 @@ public class UpdateData {
             if(((String)list.get("reglement")).equals("1")) {
                 System.out.println("--Chargement Reglement--");
                 Reglement.sendDataElement(sqlCon, path,database);
+                System.out.println("--Chargement ReglEch--");
                 ReglEch.sendDataElement(sqlCon, path,database);
             }
 
@@ -95,8 +101,10 @@ public class UpdateData {
             }
 
             if(((String)list.get("ecriturec")).equals("1")) {
-                System.out.println("--Chargement Ecriture Comptable--");
+                System.out.println("--Chargement JMouv--");
                 JMouv.sendDataElement(sqlCon, path,database);
+
+                System.out.println("--Chargement Ecriture Comptable--");
                 EcritureC.sendDataElement(sqlCon, path,database);
             }
 

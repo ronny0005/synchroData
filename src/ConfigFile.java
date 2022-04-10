@@ -42,6 +42,7 @@ public class ConfigFile {
     private JCheckBox venteCheckBox;
     private JCheckBox stockCheckBox;
     private JCheckBox SrcJournauxCheckBox;
+    private JCheckBox SrcCollaborateurCheckBox;
     private String databaseSourceFile = "resource/databaseSource.json";
     private String databaseDestFile = "resource/databaseDest.json";
     private JSONObject infoSource = DataBase.getInfoConnexion(databaseSourceFile);
@@ -84,6 +85,7 @@ public class ConfigFile {
         checkBox(Integer.valueOf((String)infoSource.get("compteg")), SrcCompteGeneralCheckBox);
         checkBox(Integer.valueOf((String)infoSource.get("taxe")), SrcTaxeCheckBox);
         checkBox(Integer.valueOf((String)infoSource.get("journaux")), SrcJournauxCheckBox);
+        checkBox(Integer.valueOf((String)infoSource.get("collaborateur")), SrcCollaborateurCheckBox);
         checkBox(Integer.valueOf((String)((JSONObject)infoSource.get("typedocument")).get("facturedevente")), factureDeVenteCheckBox);
         checkBox(Integer.valueOf((String)((JSONObject)infoSource.get("typedocument")).get("devis")), devisCheckBox);
         checkBox(Integer.valueOf((String)((JSONObject)infoSource.get("typedocument")).get("bondelivraison")), bonDeLivraisonCheckBox);
@@ -132,6 +134,7 @@ public class ConfigFile {
         typeDocument.put("documentinterne2",setCheckBox(documentInterne2CheckBox));
         typeDocument.put("vente",setCheckBox(venteCheckBox));
         typeDocument.put("stock",setCheckBox(stockCheckBox));
+        typeDocument.put("collaborateur",setCheckBox(SrcCollaborateurCheckBox));
         infoSource.put("typedocument",typeDocument);
     }
 

@@ -15,6 +15,7 @@ public class Depot extends Table{
         return          "BEGIN TRY " +
                         " SET DATEFORMAT ymd;\n" +
                         "  DISABLE TRIGGER [TG_INS_F_DEPOT] ON dbo.F_DEPOT; \n" +
+                        " IF OBJECT_ID('F_DEPOT_DEST') IS NOT NULL\n"+
                         "  INSERT INTO [dbo].[F_DEPOT]    \n" +
                         "  ([DE_No],[DE_Intitule],[DE_Adresse],[DE_Complement],[DE_CodePostal],[DE_Ville]\n" +
                         "\t\t,[DE_Contact],[DE_Principal],[DE_CatCompta],[DE_Region],[DE_Pays],[DE_EMail]\n" +

@@ -13,6 +13,8 @@ public class FamCompta extends Table {
         return          " BEGIN TRY " +
 
                         " SET DATEFORMAT ymd;\n" +
+
+                        " IF OBJECT_ID('F_FAMCOMPTA_DEST') IS NOT NULL\n"+
                         " INSERT INTO [dbo].[F_FAMCOMPTA] \n" +
                         "\t ([FA_CodeFamille],[FCP_Type],[FCP_Champ],[FCP_ComptaCPT_CompteG]\n" +
                         "      ,[FCP_ComptaCPT_CompteA],[FCP_ComptaCPT_Taxe1],[FCP_ComptaCPT_Taxe2],[FCP_ComptaCPT_Taxe3]\n" +

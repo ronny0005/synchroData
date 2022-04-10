@@ -12,6 +12,7 @@ public class Collaborateur extends Table {
     {
         return  "BEGIN TRY " +
                 " SET DATEFORMAT ymd;\n" +
+                " IF OBJECT_ID('F_COLLABORATEUR_DEST') IS NOT NULL\n"+
                 "INSERT INTO F_COLLABORATEUR (\n" +
                 "[CO_No],[CO_Nom],[CO_Prenom],[CO_Fonction],[CO_Adresse],[CO_Complement],[CO_CodePostal],[CO_Ville],[CO_CodeRegion]\n" +
                 "      ,[CO_Pays],[CO_Service],[CO_Vendeur],[CO_Caissier],[CO_DateCreation],[CO_Acheteur],[CO_Telephone],[CO_Telecopie]\n" +
@@ -62,7 +63,7 @@ public class Collaborateur extends Table {
                 String filename = children[i];
                 readOnFile(path, filename, tableName + "_DEST", sqlCon);
                 readOnFile(path, "deleteList" + filename, tableName + "_SUPPR", sqlCon);
-                executeQuery(sqlCon, updateTableDest("CO_No", "'CO_No'", tableName, tableName + "_DEST",filename));
+                executeQuery(sqlCon, updateTableDest("CO_No", "'CO_No','CO_Nom'", tableName, tableName + "_DEST",filename));
                 sendData(sqlCon, path, filename, insert(filename));
 
                 deleteTempTable(sqlCon, tableName);

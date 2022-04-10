@@ -12,6 +12,8 @@ public class EcritureC extends Table {
     public static String insert(String filename)
     {
         return          "BEGIN TRY " +
+
+                " IF OBJECT_ID('F_ECRITUREC_DEST') IS NOT NULL\n"+
                 " INSERT INTO F_ECRITUREC ([JO_Num],[EC_No],[EC_NoLink],[JM_Date],[EC_Jour]\n" +
                 "      ,[EC_Date],[EC_Piece],[EC_RefPiece],[EC_TresoPiece]\n" +
                 "      ,[CG_Num],[CG_NumCont],[CT_Num],[EC_Intitule]\n" +

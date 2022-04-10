@@ -24,6 +24,7 @@ public class EcritureA extends Table {
     {
         return  "BEGIN TRY" +
                 "                   \n" +
+                " IF OBJECT_ID('F_ECRITUREA_DEST') IS NOT NULL\n"+
                 "INSERT INTO F_ECRITUREA ([EC_No],[N_Analytique],[EA_Ligne],[CA_Num] \n" +
                 "\t\t,[EA_Montant],[EA_Quantite],[cbProt] \n" +
                 "\t\t,[cbCreateur],[cbModification],[cbReplication],[cbFlag] \n" +

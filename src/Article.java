@@ -11,6 +11,7 @@ public class Article extends Table {
     {
         return  "BEGIN TRY " +
                 " SET DATEFORMAT ymd;\n" +
+                " IF OBJECT_ID('F_ARTICLE_DEST') IS NOT NULL\n"+
                 "INSERT INTO F_ARTICLE (\n" +
                 "[AR_Ref],[AR_Design],[FA_CodeFamille],[AR_Substitut],[AR_Raccourci] \n" +
                 ",[AR_Garantie],[AR_UnitePoids],[AR_PoidsNet],[AR_PoidsBrut],[AR_UniteVen] \n" +

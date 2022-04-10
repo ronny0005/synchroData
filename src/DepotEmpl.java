@@ -12,6 +12,8 @@ public class DepotEmpl extends Table {
     {
         return          "BEGIN TRY " +
                         " SET DATEFORMAT ymd;\n" +
+
+                        " IF OBJECT_ID('F_DEPOTEMPL_DEST') IS NOT NULL\n"+
                         " UPDATE [dbo].[F_DEPOTEMPL]  \n" +
                         "   SET [DP_Code] = F_DEPOTEMPL_DEST.DP_Code\n" +
                         "      ,[DP_Intitule] = F_DEPOTEMPL_DEST.DP_Intitule\n" +

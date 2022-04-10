@@ -12,6 +12,7 @@ public class Condition extends Table{
     {
         return  " BEGIN TRY " +
                 " SET DATEFORMAT ymd;\n" +
+                " IF OBJECT_ID('F_CONDITION_DEST') IS NOT NULL\n"+
                 "\tINSERT INTO F_CONDITION (\n" +
                 "\t[AR_Ref],[CO_No],[EC_Enumere],[EC_Quantite]\n" +
                 "\t\t\t,[CO_Ref],[CO_CodeBarre],[CO_Principal],[cbProt],[cbCreateur]\n" +

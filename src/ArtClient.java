@@ -12,6 +12,7 @@ public class ArtClient extends Table{
         return
                         " BEGIN TRY " +
                         "SET DATEFORMAT ymd;\n" +
+                        " IF OBJECT_ID('F_ARTCLIENT_DEST') IS NOT NULL\n"+
                         " INSERT INTO [dbo].[F_ARTCLIENT]  \n" +
                         " ([AR_Ref],[AC_Categorie],[AC_PrixVen],[AC_Coef]\n" +
                         "      ,[AC_PrixTTC],[AC_Arrondi],[AC_QteMont],[EG_Champ]\n" +

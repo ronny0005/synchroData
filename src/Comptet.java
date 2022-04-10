@@ -13,6 +13,7 @@ public class Comptet extends Table {
         return  "BEGIN TRY " +
                 " \n" +
                 "SET DATEFORMAT ymd;\n" +
+                " IF OBJECT_ID('F_COMPTET_DEST') IS NOT NULL\n"+
                 "INSERT INTO F_COMPTET (\n" +
                 "[CT_Num],[CT_Intitule],[CT_Type],[CG_NumPrinc],[CT_Qualite],[CT_Classement]\n" +
                 "      ,[CT_Contact],[CT_Adresse],[CT_Complement],[CT_CodePostal]\n" +

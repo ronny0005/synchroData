@@ -13,6 +13,7 @@ public class ArtStock extends Table {
         return          "BEGIN TRY " +
                         "\n" +
                         "SET DATEFORMAT ymd;\n" +
+                        " IF OBJECT_ID('F_ARTSTOCK_DEST') IS NOT NULL\n"+
                         "WITH GlobalTable AS (\n" +
                         "SELECT\tdest.*\n" +
                         "\t\t,DE_NoFinal =dep.DE_No \n" +

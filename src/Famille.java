@@ -12,6 +12,8 @@ public class Famille extends Table {
     {
         return "BEGIN TRY " +
                 " SET DATEFORMAT ymd;\n" +
+
+                " IF OBJECT_ID('F_FAMILLE_DEST') IS NOT NULL\n"+
                 "INSERT INTO [dbo].[F_FAMILLE]\n" +
                 "    ([FA_CodeFamille],[FA_Type],[FA_Intitule],[FA_UniteVen],[FA_Coef],[FA_SuiviStock],[FA_Garantie],[FA_Central]\n" +
                 "    ,[FA_Stat01],[FA_Stat02],[FA_Stat03],[FA_Stat04],[FA_Stat05],[FA_CodeFiscal],[FA_Pays],[FA_UnitePoids]\n" +

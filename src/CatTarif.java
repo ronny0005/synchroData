@@ -13,6 +13,7 @@ public class CatTarif extends Table {
         return          " BEGIN TRY " +
                         " SET DATEFORMAT ymd;\n" +
                         " \n" +
+                        " IF OBJECT_ID('P_CATTARIF_DEST') IS NOT NULL\n"+
                         " INSERT INTO [dbo].[P_CATTARIF] \n" +
                         " ([cbIndice],[CT_Intitule],[CT_PrixTTC]) \n" +
                         "\n" +

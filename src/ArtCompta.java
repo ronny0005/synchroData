@@ -13,6 +13,7 @@ public class ArtCompta extends Table {
                 " BEGIN TRY " +
                 " SET DATEFORMAT ymd;\n" +
                 " \n" +
+                " IF OBJECT_ID('F_ARTCOMPTA_DEST') IS NOT NULL\n"+
                 " INSERT INTO [dbo].[F_ARTCOMPTA] \n" +
                 "\t ([AR_Ref],[ACP_Type],[ACP_Champ],[ACP_ComptaCPT_CompteG]\n" +
                 "      ,[ACP_ComptaCPT_CompteA],[ACP_ComptaCPT_Taxe1],[ACP_ComptaCPT_Taxe2],[ACP_ComptaCPT_Taxe3]\n" +

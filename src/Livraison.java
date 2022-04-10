@@ -12,6 +12,8 @@ public class Livraison extends Table {
     {
         return  "BEGIN TRY " +
                 " SET DATEFORMAT ymd;\n" +
+
+                " IF OBJECT_ID('F_LIVRAISON_DEST') IS NOT NULL\n"+
                 "INSERT INTO F_LIVRAISON ( [LI_No],[CT_Num],[LI_Intitule],[LI_Adresse],[LI_Complement],[LI_CodePostal],[LI_Ville]\n" +
                 ",[LI_CodeRegion],[LI_Pays],[LI_Contact],[N_Expedition],[N_Condition],[LI_Principal]\n" +
                 ",[LI_Telephone],[LI_Telecopie],[LI_EMail],[cbProt],[cbCreateur]\n" +

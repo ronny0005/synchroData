@@ -16,11 +16,15 @@ public class DocRegl extends Table {
     {
         return  "BEGIN TRY " +
                 " SET DATEFORMAT ymd;\n" +
+
+                " IF OBJECT_ID('F_DOCREGL_DEST') IS NOT NULL\n"+
                 " UPDATE\tF_DOCREGL_DEST\n" +
                 "SET\t[DR_Pourcent] = REPLACE([DR_Pourcent],',','.')\n" +
                 "\t,[DR_Montant] = REPLACE([DR_Montant],',','.')\n" +
                 "\t, [DR_MontantDev] = REPLACE([DR_MontantDev],',','.')\n" +
                 "\n" +
+
+                " IF OBJECT_ID('F_DOCREGL_DEST') IS NOT NULL\n"+
                 "UPDATE src\n" +
                 "   SET [DR_TypeRegl] = dest.DR_TypeRegl\n" +
                 "      ,[DR_Date] = dest.DR_Date\n" +
@@ -42,6 +46,8 @@ public class DocRegl extends Table {
                 "INNER JOIN F_DOCREGL_DEST dest ON src.cbMarqSource = dest.cbMarqSource \n" +
                 "\tAND\tsrc.DataBaseSource = dest.DataBaseSource\n" +
                 "            \n" +
+
+                " IF OBJECT_ID('F_DOCREGL_DEST') IS NOT NULL\n"+
                 "INSERT INTO F_DOCREGL (\n" +
                 "[DR_No],[DO_Domaine],[DO_Type],[DO_Piece],[DR_TypeRegl],[DR_Date]\n" +
                 "\t\t,[DR_Libelle],[DR_Pourcent],[DR_Montant],[DR_MontantDev],[DR_Equil],[EC_No],[DR_Regle]\n" +
@@ -84,7 +90,7 @@ public class DocRegl extends Table {
                 "           NULL,'Domaine : '+dest.[DO_Domaine]+' Type : ' + dest.[DO_Type] + ' Piece : ' + dest.[DO_Piece]" +
                 "           +' cbMarq : ' + dest.[cbMarqSource] + ' database : ' + dest.[DataBaseSource]" +
                 "           + 'fileName : "+filename+" '" +
-                "           ,'F_DOCLIGNE' +\n" +
+                "           ,'F_DOCLIGNE'\n" +
                 "           ,GETDATE()\n" +
                 "FROM F_DOCREGL_DEST dest\n" +
                 "LEFT JOIN (SELECT cbMarqSource,DataBaseSource FROM F_DOCREGL) src\n" +

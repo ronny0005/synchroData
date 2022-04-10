@@ -16,6 +16,8 @@ public class ReglEch extends Table {
     {
         return "BEGIN TRY " +
                 " SET DATEFORMAT ymd;\n" +
+
+                " IF OBJECT_ID('F_REGLECH_DEST') IS NOT NULL\n"+
                 "INSERT INTO F_REGLECH (\n" +
                 "[RG_No],[DR_No],[DO_Domaine],[DO_Type]\n" +
                 "\t\t,[DO_Piece],[RC_Montant],[RG_TypeReg],[cbProt],[cbCreateur]\n" +
@@ -59,11 +61,8 @@ public class ReglEch extends Table {
                 "           NULL,'Domaine : '+dest.[DO_Domaine]+' Type : ' + dest.[DO_Type] + ' Piece : ' + dest.[DO_Piece]" +
                 "           +' cbMarq : ' + dest.[cbMarqSource] + ' database : ' + dest.[DataBaseSource]" +
                 "           + 'fileName : "+filename+" RG_No : '+dest.RG_No+' DR_No : '+dest.DR_No  " +
-                "           ,'F_DOCLIGNE' +\n" +
+                "           ,'F_DOCLIGNE'\n" +
                 "           ,GETDATE()\n" +
-                "SELECT \tcre.[RG_No],fdr.[DR_No],dest.[DO_Domaine],dest.[DO_Type]\n" +
-                "\t\t,dest.[DO_Piece],dest.[RC_Montant],dest.[RG_TypeReg],dest.[cbProt],dest.[cbCreateur]\n" +
-                "\t\t,dest.[cbModification],dest.[cbReplication],dest.[cbFlag],dest.cbMarqSource,dest.DataBaseSource,dest.DR_No,dest.RG_No\n" +
                 "FROM F_REGLECH_DEST dest\n" +
                 "LEFT JOIN (SELECT DataBaseSource,cbMarqSource FROM F_REGLECH) src\n" +
                 "\tON\tdest.DataBaseSource = src.DataBaseSource\n" +

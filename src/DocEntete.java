@@ -15,6 +15,7 @@ public class DocEntete extends Table {
     {
         return "BEGIN TRY " +
                 " SET DATEFORMAT ymd;\n" +
+                " IF OBJECT_ID('F_DOCENTETE_DEST') IS NOT NULL\n"+
                 " INSERT INTO F_DOCENTETE (\n" +
                 "[DO_Domaine], [DO_Type], [DO_Date], [DO_Ref]\n" +
                 "\t, [DO_Tiers], [CO_No], [DO_Period], [DO_Devise]\n" +
@@ -100,7 +101,7 @@ public class DocEntete extends Table {
                 String filename = children[i];
                 dbSource = database;
                 readOnFile(path, filename, tableName + "_DEST", sqlCon);
-                readOnFile(path, "deleteList" + filename, tableName + "_SUPPR", sqlCon);
+                 readOnFile(path, "deleteList" + filename, tableName + "_SUPPR", sqlCon);
                 executeQuery(sqlCon, updateTableDest("", "'DO_Domaine','DO_Type','DO_Piece','DataBaseSource','cbMarqSource'", tableName, tableName + "_DEST",filename));
                 sendData(sqlCon, path, filename, insert(filename));
 
@@ -131,11 +132,99 @@ public class DocEntete extends Table {
     public static void deleteDocEntete(Connection sqlCon, String path,String filename)
     {
         String query =
+                "BEGIN TRY " +
                 " DELETE FROM F_DOCENTETE \n" +
-                " WHERE EXISTS (SELECT 1 FROM F_DOCENTETE_SUPPR WHERE F_DOCENTETE.DataBaseSource = F_DOCENTETE_SUPPR.DataBaseSource AND F_DOCENTETE.DO_Domaine = F_DOCENTETE_SUPPR.DO_Domaine AND F_DOCENTETE.DO_Type = F_DOCENTETE_SUPPR.DO_Type AND F_DOCENTETE.DO_Piece = F_DOCENTETE_SUPPR.DO_Piece ) \n" +
+                " WHERE EXISTS (SELECT 1 \n" +
+                "       FROM F_DOCENTETE_SUPPR \n" +
+                "       WHERE F_DOCENTETE.DataBaseSource = F_DOCENTETE_SUPPR.DataBaseSource \n" +
+                "       AND F_DOCENTETE.DO_Domaine = F_DOCENTETE_SUPPR.DO_Domaine \n" +
+                "       AND F_DOCENTETE.DO_Type = F_DOCENTETE_SUPPR.DO_Type \n" +
+                "       AND F_DOCENTETE.DO_Piece = F_DOCENTETE_SUPPR.DO_Piece ) \n" +
+                " AND NOT EXISTS (SELECT 1 \n" +
+                "       FROM F_DOCLIGNE docL \n" +
+                "       WHERE F_DOCENTETE.DataBaseSource = docL.DataBaseSource \n" +
+                "       AND F_DOCENTETE.DO_Domaine = docL.DO_Domaine \n" +
+                "       AND F_DOCENTETE.DO_Type = docL.DO_Type \n" +
+                "       AND F_DOCENTETE.DO_Piece = docL.DO_Piece ) \n" +
+                " AND NOT EXISTS (SELECT 1 \n" +
+                "       FROM F_DOCREGL docL \n" +
+                "       WHERE F_DOCENTETE.DataBaseSource = docL.DataBaseSource \n" +
+                "       AND F_DOCENTETE.DO_Domaine = docL.DO_Domaine \n" +
+                "       AND F_DOCENTETE.DO_Type = docL.DO_Type \n" +
+                "       AND F_DOCENTETE.DO_Piece = docL.DO_Piece ) \n" +
+                " AND NOT EXISTS (SELECT 1 \n" +
+                "       FROM F_REGLECH docL \n" +
+                "       WHERE F_DOCENTETE.DataBaseSource = docL.DataBaseSource \n" +
+                "       AND F_DOCENTETE.DO_Domaine = docL.DO_Domaine \n" +
+                "       AND F_DOCENTETE.DO_Type = docL.DO_Type \n" +
+                "       AND F_DOCENTETE.DO_Piece = docL.DO_Piece ) \n" +
+                " \n" +
+                " \n" +
+                "INSERT INTO config.DB_Errors(\n" +
+                "          UserName,\n" +
+                "          ErrorNumber,\n" +
+                "          ErrorState,\n" +
+                "          ErrorSeverity,\n" +
+                "          ErrorLine,\n" +
+                "          ErrorProcedure,\n" +
+                "          ErrorMessage,\n" +
+                "          TableLoad,\n" +
+                "          Query,\n" +
+                "          ErrorDateTime)\n" +
+                "   SELECT\t   SUSER_SNAME()," +
+                "           NULL," +
+                "           NULL," +
+                "           NULL," +
+                "           NULL," +
+                "           NULL," +
+                "           NULL,'Domaine : '+ CAST(docE.[DO_Domaine] AS NVARCHAR(50)) +' Type : ' + CAST(docE.[DO_Type] AS NVARCHAR(50)) + ' Piece : ' + docE.[DO_Piece]" +
+                "           +' cbMarq : ' + CAST(docE.[cbMarqSource]  AS NVARCHAR(50)) + ' database : ' + docE.[DataBaseSource]" +
+                "           + ' fileName : "+filename+" '" +
+                "           ,'F_DOCLIGNE'\n" +
+                "           ,GETDATE()\n" +
+                " FROM F_DOCENTETE docE\n" +
+                " WHERE EXISTS (SELECT 1 \n" +
+                "       FROM F_DOCENTETE_SUPPR docL \n" +
+                "       WHERE docE.DataBaseSource = docL.DataBaseSource \n" +
+                "       AND docE.DO_Domaine = docL.DO_Domaine \n" +
+                "       AND docE.DO_Type = docL.DO_Type \n" +
+                "       AND docE.DO_Piece = docL.DO_Piece ) \n" +
+                " AND NOT EXISTS (SELECT 1 \n" +
+                "       FROM F_DOCLIGNE docL \n" +
+                "       WHERE docE.DataBaseSource = docL.DataBaseSource \n" +
+                "       AND docE.DO_Domaine = docL.DO_Domaine \n" +
+                "       AND docE.DO_Type = docL.DO_Type \n" +
+                "       AND docE.DO_Piece = docL.DO_Piece ) \n" +
+                " AND NOT EXISTS (SELECT 1 \n" +
+                "       FROM F_DOCREGL docL \n" +
+                "       WHERE docE.DataBaseSource = docL.DataBaseSource \n" +
+                "       AND docE.DO_Domaine = docL.DO_Domaine \n" +
+                "       AND docE.DO_Type = docL.DO_Type \n" +
+                "       AND docE.DO_Piece = docL.DO_Piece ) \n" +
+                " AND NOT EXISTS (SELECT 1 \n" +
+                "       FROM F_REGLECH docL \n" +
+                "       WHERE docE.DataBaseSource = docL.DataBaseSource \n" +
+                "       AND docE.DO_Domaine = docL.DO_Domaine \n" +
+                "       AND docE.DO_Type = docL.DO_Type \n" +
+                "       AND docE.DO_Piece = docL.DO_Piece ) \n" +
                 " \n" +
                 " IF OBJECT_ID('F_DOCENTETE_SUPPR') IS NOT NULL \n" +
-                " DROP TABLE F_DOCENTETE_SUPPR \n";
+                " DROP TABLE F_DOCENTETE_SUPPR \n"+
+                " END TRY\n" +
+                        " BEGIN CATCH \n" +
+                        "INSERT INTO config.DB_Errors\n" +
+                        "    VALUES\n" +
+                        "  (SUSER_SNAME(),\n" +
+                        "   ERROR_NUMBER(),\n" +
+                        "   ERROR_STATE(),\n" +
+                        "   ERROR_SEVERITY(),\n" +
+                        "   ERROR_LINE(),\n" +
+                        "   ERROR_PROCEDURE(),\n" +
+                        "   ERROR_MESSAGE(),\n" +
+                        "   'Delete '+ ' "+filename+"',\n" +
+                        "   'F_DOCENTETE',\n" +
+                        "   GETDATE());\n" +
+                        "END CATCH";
         if ((new File(path + "\\deleteList" + filename)).exists())
         {
             executeQuery(sqlCon, query);

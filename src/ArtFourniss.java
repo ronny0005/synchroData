@@ -13,6 +13,7 @@ public class ArtFourniss extends Table {
         return
                         "  BEGIN TRY " +
                         " SET DATEFORMAT ymd;\n" +
+                        " IF OBJECT_ID('F_ARTFOURNISS_DEST') IS NOT NULL\n"+
                         "  INSERT INTO [dbo].[F_ARTFOURNISS]   \n" +
                         "  ([AR_Ref],[CT_Num],[AF_RefFourniss],[AF_PrixAch],[AF_Unite],[AF_Conversion],[AF_DelaiAppro]\n" +
                         "      ,[AF_Garantie],[AF_Colisage],[AF_QteMini],[AF_QteMont],[EG_Champ],[AF_Principal]\n" +

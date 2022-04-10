@@ -25,12 +25,16 @@ public class Reglement extends Table {
     {
         return "BEGIN TRY " +
                 " SET DATEFORMAT ymd;\n" +
+
+                " IF OBJECT_ID('F_CREGLEMENT_DEST') IS NOT NULL\n"+
                 "UPDATE\tF_CREGLEMENT_DEST\n" +
                 "SET\t[RG_Montant] = REPLACE([RG_Montant],',','.')\n" +
                 "\t,[RG_MontantDev] = REPLACE([RG_MontantDev],',','.')\n" +
                 "\t,[RG_MontantEcart] = REPLACE([RG_MontantEcart],',','.')\n" +
                 "\t, [RG_Cours] = REPLACE([RG_Cours],',','.')\n" +
                 "\n" +
+
+                " IF OBJECT_ID('F_CREGLEMENT_DEST') IS NOT NULL\n"+
                 "UPDATE [dbo].[F_CREGLEMENT]\n" +
                 "   SET [CT_NumPayeur] = F_CREGLEMENT_DEST.CT_NumPayeur\n" +
                 "      ,[RG_Date] = F_CREGLEMENT_DEST.RG_Date\n" +
@@ -74,6 +78,8 @@ public class Reglement extends Table {
                 "WHERE\tF_CREGLEMENT.RG_NoSource = F_CREGLEMENT_DEST.RG_No\n" +
                 "\tAND\tF_CREGLEMENT.DataBaseSource = F_CREGLEMENT_DEST.DataBaseSource\n" +
                 "            \n" +
+
+                " IF OBJECT_ID('F_CREGLEMENT_DEST') IS NOT NULL\n"+
                 "INSERT INTO F_CREGLEMENT (\n" +
                 "[RG_No],[CT_NumPayeur],[RG_Date],[RG_Reference],[RG_Libelle],[RG_Montant],[RG_MontantDev],[N_Reglement],[RG_Impute]\n" +
                 "\t\t,[RG_Compta],[EC_No],[RG_Type],[RG_Cours],[N_Devise],[JO_Num],[CG_NumCont],[RG_Impaye]\n" +

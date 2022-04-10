@@ -17,6 +17,8 @@ public class DocLigne extends Table {
         return  "BEGIN TRY " +
                 " SET DATEFORMAT ymd;\n" +
 
+
+                " IF OBJECT_ID('F_DOCLIGNE_DEST') IS NOT NULL\n"+
                 "INSERT INTO F_DOCLIGNE (\n" +
                 "[DO_Domaine],[DO_Type],[CT_Num],[DO_Piece],[DL_PieceBC],[DL_PieceBL],[DO_Date],[DL_DateBC],[DL_DateBL],[DL_Ligne],[DO_Ref],[DL_TNomencl]\n" +
                 "      ,[DL_TRemPied],[DL_TRemExep],[AR_Ref],[DL_Design],[DL_Qte],[DL_QteBC],[DL_QteBL],[DL_PoidsNet] ,[DL_PoidsBrut] \n" +
@@ -75,7 +77,7 @@ public class DocLigne extends Table {
                 "           NULL,'Domaine : '+[DO_Domaine]+' Type : ' + [DO_Type] + ' Piece : ' + [DO_Piece]" +
                 "           +' cbMarq : ' + dest.[cbMarqSource] + ' database : ' + dest.[DataBaseSource]" +
                 "           + 'fileName : "+filename+" '" +
-                "           ,'F_DOCLIGNE' +\n" +
+                "           ,'F_DOCLIGNE'\n" +
                 "           ,GETDATE()\n" +
                 "FROM F_DOCLIGNE_DEST dest\n" +
                 "LEFT JOIN (SELECT cbMarqSource,dataBaseSource FROM F_DOCLIGNE) src\n" +

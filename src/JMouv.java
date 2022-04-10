@@ -13,6 +13,8 @@ public class JMouv extends Table {
                 " BEGIN TRY " +
                 " SET DATEFORMAT ymd;\n" +
                 " \n" +
+
+                " IF OBJECT_ID('F_JMOUV_DEST') IS NOT NULL\n"+
                 " INSERT INTO [dbo].[F_JMOUV] \n" +
                 "\t ([JO_Num],[JM_Date],[JM_Cloture],[JM_Impression],[JM_DateCloture]\n" +
                 "\t ,[cbProt],[cbCreateur],[cbModification],[cbReplication],[cbFlag]) \n" +

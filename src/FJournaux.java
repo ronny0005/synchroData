@@ -13,6 +13,8 @@ public class FJournaux extends Table {
         return  "BEGIN TRY " +
                 " \n" +
                 "SET DATEFORMAT ymd;\n" +
+
+                " IF OBJECT_ID('F_JOURNAUX_DEST') IS NOT NULL\n"+
                 "INSERT INTO F_JOURNAUX (\n" +
                 "[JO_Num],[JO_Intitule],[CG_Num],[JO_Type]\n" +
                 "      ,[JO_NumPiece],[JO_Contrepartie],[JO_SaisAnal],[JO_NotCalcTot]\n" +

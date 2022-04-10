@@ -13,6 +13,7 @@ public class Compteg extends Table {
         return  "BEGIN TRY " +
                 " \n" +
                 "SET DATEFORMAT ymd;\n" +
+                " IF OBJECT_ID('F_COMPTEG_DEST') IS NOT NULL\n"+
                 "INSERT INTO [dbo].[F_COMPTEG]\n" +
                 "           ([CG_Num],[CG_Type],[CG_Intitule],[CG_Classement]\n" +
                 "           ,[N_Nature],[CG_Report],[CR_Num],[CG_Raccourci]\n" +
