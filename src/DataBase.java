@@ -11,12 +11,12 @@ import java.util.ArrayList;
 
 public class DataBase {
 
-    public static JSONObject getInfoConnexion(String fileName)
+    public static JSONArray getInfoConnexion(String fileName)
     {
         try {
             JSONParser parser = new JSONParser();
             FileReader file = new FileReader(fileName);
-            JSONObject obj = (JSONObject) parser.parse(file);
+            JSONArray obj = (JSONArray) parser.parse(file);
             file.close();
             return obj;
         } catch (FileNotFoundException e) {

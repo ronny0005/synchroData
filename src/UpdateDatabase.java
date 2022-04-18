@@ -1,3 +1,4 @@
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
 import java.io.*;
@@ -27,11 +28,11 @@ public class UpdateDatabase {
         }
     }
 
-    public static void main(String[] args){
+    public static void main(String[] args) {
 
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyyMMddHHmmssSSS");
         String databaseSourceFile = "resource/databaseSource.json";
-        if(args.length > 0)
+        if (args.length > 0)
             databaseSourceFile = args[0];
 
         try {
@@ -39,22 +40,25 @@ public class UpdateDatabase {
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
         }
-        JSONObject list = DataBase.getInfoConnexion(databaseSourceFile);
-
-        String path = (String)list.get("path");
-        try {
-            String dbURL = "jdbc:sqlserver://"+((String)list.get("servername"))+";databaseName="+((String)list.get("database"));
-            Properties properties = new Properties();
-            properties.put("user", (String)list.get("username"));
-            properties.put("password", (String)list.get("password"));
-            Connection sqlCon = DriverManager.getConnection(dbURL, properties);
-            executeSQL(new File("resource/configListTable.sql"),sqlCon);
-        } catch (SQLException throwables) {
-            throwables.printStackTrace();
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (Exception e) {
-            e.printStackTrace();
+        JSONArray listObject = DataBase.getInfoConnexion(databaseSourceFile);
+        for(int i = 0 ; i< listObject.size() ; i++) {
+            JSONObject list = (JSONObject) listObject.get(i);
+            if(((String)list.get("reception")).equals("1")) {
+                try {
+                    String dbURL = "jdbc:sqlserver://" + ((String) list.get("servername")) + ";databaseName=" + ((String) list.get("database"));
+                    Properties properties = new Properties();
+                    properties.put("user", (String) list.get("username"));
+                    properties.put("password", (String) list.get("password"));
+                    Connection sqlCon = DriverManager.getConnection(dbURL, properties);
+                    executeSQL(new File("resource/configListTable.sql"), sqlCon);
+                } catch (SQLException throwables) {
+                    throwables.printStackTrace();
+                } catch (FileNotFoundException e) {
+                    e.printStackTrace();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
         }
     }
 }

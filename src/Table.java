@@ -11,6 +11,8 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
+
 public class Table {
 
     private static BufferedWriter fileWriter;
@@ -521,7 +523,7 @@ public class Table {
 
         archive = archive + "\\" + year + "\\" + month +"\\"+ day;
         try {
-            Files.move(Paths.get(source+"\\"+file),Paths.get(archive + "\\" + file));
+            Files.move(Paths.get(source+"\\"+file),Paths.get(archive + "\\" + file),REPLACE_EXISTING);
         } catch (IOException e) {
             e.printStackTrace();
         }
