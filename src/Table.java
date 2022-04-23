@@ -564,37 +564,40 @@ public class Table {
         FileWriter fileWriter = null;
         try {
             result = executeQueryResult(sqlCon,query);
-            fileWriter = new  FileWriter (fileName, StandardCharsets.ISO_8859_1);
-            int columnCount = writeHeaderLine(result,fileWriter);
-            while (result.next()) {
-                String line = "";
 
-                for (int i = 1; i <= columnCount; i++) {
-                    Object valueObject = result.getObject(i);
-                    String valueString = "";
+            if(result.isBeforeFirst()) {          //res.isBeforeFirst() is true if the cursor
+                fileWriter = new FileWriter(fileName, StandardCharsets.ISO_8859_1);
+                int columnCount = writeHeaderLine(result, fileWriter);
+                while (result.next()) {
+                    String line = "";
 
-                    if (valueObject != null) valueString = valueObject.toString();
+                    for (int i = 1; i <= columnCount; i++) {
+                        Object valueObject = result.getObject(i);
+                        String valueString = "";
 
-                    if (valueObject instanceof String) {
-                        valueString = "\"" + escapeDoubleQuotes(valueString) + "\"";
+                        if (valueObject != null) valueString = valueObject.toString();
+
+                        if (valueObject instanceof String) {
+                            valueString = "\"" + escapeDoubleQuotes(valueString) + "\"";
+                        }
+
+                        if (isDateValid(valueString)) {
+                            valueString = "\"" + valueString.replace(".0", "") + "\"";
+                        }
+
+                        line = line.concat(valueString);
+
+                        if (i != columnCount) {
+                            line = line.concat(";");
+                        }
                     }
 
-                    if(isDateValid(valueString)){
-                        valueString = "\"" + valueString.replace(".0","")+"\"";
-                    }
-
-                    line = line.concat(valueString);
-
-                    if (i != columnCount) {
-                        line = line.concat(";");
-                    }
+                    fileWriter.write(line + "\n");
+                    fileWriter.flush();
                 }
-
-                fileWriter.write(line+"\n");
-                fileWriter.flush();
+                fileWriter.close();
+                stmt.close();
             }
-            fileWriter.close();
-            stmt.close();
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         }

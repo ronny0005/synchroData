@@ -17,6 +17,7 @@ CREATE TABLE config.ListArticle (
 IF OBJECT_ID('config.listFJournaux', 'U') IS NULL
 CREATE TABLE config.listFJournaux (
     JO_Num NVARCHAR(50)
+    ,JO_Type INT
     ,cbMarq INT
 )
 
