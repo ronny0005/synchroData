@@ -137,7 +137,7 @@ public class Reglement extends Table {
                 executeQuery(sqlCon, updateTableDest("", "'RG_No'", tableName, tableName + "_DEST",filename));
                 sendData(sqlCon, path, filename, insert(filename));
 
-                deleteTempTable(sqlCon, tableName);
+                deleteTempTable(sqlCon, tableName + "_DEST");
                 deleteReglement(sqlCon, path,filename);
             }
         }

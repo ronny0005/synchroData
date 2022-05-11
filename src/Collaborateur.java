@@ -66,7 +66,7 @@ public class Collaborateur extends Table {
                 executeQuery(sqlCon, updateTableDest("CO_No", "'CO_No','CO_Nom'", tableName, tableName + "_DEST",filename));
                 sendData(sqlCon, path, filename, insert(filename));
 
-                deleteTempTable(sqlCon, tableName);
+                deleteTempTable(sqlCon, tableName+"_DEST");
                 deleteCollaborateur(sqlCon, path,filename);
             }
         }

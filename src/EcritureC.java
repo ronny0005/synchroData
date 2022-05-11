@@ -122,7 +122,7 @@ public class EcritureC extends Table {
                 readOnFile(path, "deleteList" + filename, tableName + "_SUPPR", sqlCon);
                 executeQuery(sqlCon, updateTableDest("", "'EC_No','JM_Date','JO_Num','EC_CType'", tableName, tableName + "_DEST",filename));
                 sendData(sqlCon, path, filename, insert(filename));
-                deleteTempTable(sqlCon, tableName);
+                deleteTempTable(sqlCon, tableName+"_DEST");
 
                 deleteEcritureC(sqlCon, path,filename);
             }

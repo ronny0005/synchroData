@@ -69,7 +69,7 @@ public class Compteg extends Table {
                 executeQuery(sqlCon, updateTableDest("CG_Num,CG_Type", "'CG_Num','CG_Type'", tableName, tableName + "_DEST",filename));
                 sendData(sqlCon, path, filename, insert(filename));
 
-                deleteTempTable(sqlCon, tableName);
+                deleteTempTable(sqlCon, tableName+"_DEST");
                 deleteCompteg(sqlCon, path,filename);
             }
         }

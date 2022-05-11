@@ -107,7 +107,7 @@ public class ArtStock extends Table {
                 //executeQuery(sqlCon, updateTableDest("AR_Ref,DE_No", "'AR_Ref','DE_No'", tableName, tableName + "_DEST"));
                 sendData(sqlCon, path, filename, insert(filename));
 
-                deleteTempTable(sqlCon, tableName);
+                deleteTempTable(sqlCon, tableName+"_DEST");
                 deleteArtStock(sqlCon, path,filename,database);
             }
         }

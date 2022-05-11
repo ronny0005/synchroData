@@ -104,7 +104,7 @@ public class Comptet extends Table {
                 executeQuery(sqlCon, updateTableDest("CT_Num,CT_Type", "'CT_Num','CT_Type'", tableName, tableName + "_DEST",filename));
                 sendData(sqlCon, path, filename, insert(filename));
 
-                deleteTempTable(sqlCon, tableName);
+                deleteTempTable(sqlCon, tableName+"_DEST");
                 deleteComptet(sqlCon, path,filename);
             }
         }

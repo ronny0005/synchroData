@@ -81,7 +81,7 @@ public class DepotEmpl extends Table {
                 executeQuery(sqlCon, updateTableDest("", "'DP_No','DE_No','DP_NoSource'", tableName, tableName + "_DEST",filename));
                 sendData(sqlCon, path, filename, insert(filename));
 
-                deleteTempTable(sqlCon, tableName);
+                deleteTempTable(sqlCon, tableName+"_DEST");
                 deleteDepot(sqlCon, path,filename);
             }
         }

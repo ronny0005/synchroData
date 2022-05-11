@@ -66,7 +66,7 @@ public class Taxe extends Table {
                 executeQuery(sqlCon, updateTableDest("TA_Code", "'TA_Code'", tableName, tableName + "_DEST",filename));
                 sendData(sqlCon, path, filename, insert(filename));
 
-                deleteTempTable(sqlCon, tableName);
+                deleteTempTable(sqlCon, tableName+"_DEST");
                 deleteArtCompta(sqlCon, path,filename);
             }
         }

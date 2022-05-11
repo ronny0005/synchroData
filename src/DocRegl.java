@@ -90,7 +90,7 @@ public class DocRegl extends Table {
                 "           NULL,'Domaine : '+dest.[DO_Domaine]+' Type : ' + dest.[DO_Type] + ' Piece : ' + dest.[DO_Piece]" +
                 "           +' cbMarq : ' + dest.[cbMarqSource] + ' database : ' + dest.[DataBaseSource]" +
                 "           + 'fileName : "+filename+" '" +
-                "           ,'F_DOCLIGNE'\n" +
+                "           ,'F_DOCREGL'\n" +
                 "           ,GETDATE()\n" +
                 "FROM F_DOCREGL_DEST dest\n" +
                 "LEFT JOIN (SELECT cbMarqSource,DataBaseSource FROM F_DOCREGL) src\n" +
@@ -102,8 +102,6 @@ public class DocRegl extends Table {
                 "AND docE.DO_Piece = dest.DO_Piece\n"+
                 "WHERE src.cbMarqSource IS NULL\n" +
                 "AND docE.DO_Piece IS NULL\n" +
-                "IF OBJECT_ID('F_DOCREGL_DEST') IS NOT NULL \n" +
-                "DROP TABLE F_DOCREGL_DEST\n" +
                 " END TRY\n" +
                 " BEGIN CATCH \n" +
                 "INSERT INTO config.DB_Errors\n" +
@@ -122,28 +120,38 @@ public class DocRegl extends Table {
     }
     public static void sendDataElement(Connection sqlCon, String path,String database)
     {
-        File dir = new File(path);
-        FilenameFilter filter = new FilenameFilter() {
-            public boolean accept(File dir, String name) {
-                return name.startsWith(file);
-            }
-        };
-        String[] children = dir.list(filter);
+        dbSource = database;
+        loadFile( path, database, sqlCon);
+        loadDeleteFile(path,sqlCon);
+        DocEntete.loadDeleteFile(path,sqlCon);
+    }
+
+    public static void loadFile(String path,String database,Connection sqlCon){
+        String [] children = getFile(path,file);
         if (children == null) {
             System.out.println("Either dir does not exist or is not a directory");
         } else {
-            for (int i = 0; i < children.length; i++) {
-                String filename = children[i];
-                dbSource = database;
+            for (String filename : children){
                 readOnFile(path, filename, tableName + "_DEST", sqlCon);
-                readOnFile(path, "deleteList" + filename, tableName + "_SUPPR", sqlCon);
                 executeQuery(sqlCon, updateTableDest("", "'DR_No'", tableName, tableName + "_DEST",filename));
                 sendData(sqlCon, path, filename, insert(filename));
-                deleteTempTable(sqlCon, tableName);
-                deleteDocRegl(sqlCon, path,filename);
+               // deleteTempTable(sqlCon, tableName+"_DEST");
             }
         }
     }
+
+    public static void loadDeleteFile(String path,Connection sqlCon) {
+        String [] children = getFile(path,"deleteList"+file);
+        if (children == null) {
+            System.out.println("Either dir does not exist or is not a directory");
+        } else {
+            for (String filename : children){
+                String deleteDocEntete = deleteDocRegl();
+                loadDeleteInfo(path,tableName,filename,sqlCon,deleteDocEntete);
+            }
+        }
+    }
+
     public static void getDataElement(Connection sqlCon, String path, String database, String time, JSONObject type)
     {
         String filename =  file+time+".csv";
@@ -163,19 +171,14 @@ public class DocRegl extends Table {
 
     }
 
-    public static void deleteDocRegl(Connection sqlCon, String path,String filename)
+    public static String deleteDocRegl()
     {
-        String query =
+        return
                 " DELETE FROM F_DOCREGL \n" +
                 " WHERE EXISTS (SELECT 1 FROM F_DOCREGL_SUPPR WHERE F_DOCREGL.DataBaseSource = F_DOCREGL_SUPPR.DataBaseSource AND F_DOCREGL.DR_NoSource = F_DOCREGL_SUPPR.DR_No ) \n" +
                 " \n" +
                 " IF OBJECT_ID('F_DOCENTETE_SUPPR') IS NOT NULL \n" +
                 " DROP TABLE F_DOCENTETE_SUPPR \n";
-        if ((new File(path + "\\deleteList" + filename)).exists())
-        {
-            executeQuery(sqlCon, query);
-            archiveDocument(path + "\\archive", path, "deleteList" + filename);
-        }
     }
 
 }

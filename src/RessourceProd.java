@@ -88,7 +88,7 @@ public class RessourceProd extends Table {
                 executeQuery(sqlCon, updateTableDest("RP_Code,RP_Type", "'RP_Code','RP_Type','RP_TypeRess'", tableName, tableName + "_DEST",filename));
                 sendData(sqlCon, path, filename, insert(filename));
 
-                deleteTempTable(sqlCon, tableName);
+                deleteTempTable(sqlCon, tableName+"_DEST");
                 deleteRessourceProd(sqlCon, path,filename);
             }
         }

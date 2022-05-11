@@ -64,7 +64,7 @@ public class JMouv extends Table {
                 executeQuery(sqlCon, updateTableDest("JO_Num,JM_Date", "'JO_Num','JM_Date'", tableName, tableName + "_DEST",filename));
                 sendData(sqlCon, path, filename, insert(filename));
 
-                deleteTempTable(sqlCon, tableName);
+                deleteTempTable(sqlCon, tableName+"_DEST");
                 deleteArtCompta(sqlCon, path,filename);
             }
         }

@@ -78,7 +78,7 @@ public class Famille extends Table {
                 sendData(sqlCon, path, filename, insert(filename));
 
                 FamCompta.sendDataElement(sqlCon, path, database);
-                deleteTempTable(sqlCon, tableName);
+                deleteTempTable(sqlCon, tableName+"_DEST");
                 deleteFamille(sqlCon, path,filename);
             }
         }

@@ -62,6 +62,8 @@ public class BackupData {
                         Article.getDataElement(sqlCon, path, database, simpleDateFormat.format(new Date()));
                     }
                     if (((String) list.get("entete")).equals("1")) {
+                        System.out.println("--Sauvegarde Caisse--");
+                        Caisse.getDataElement(sqlCon, path, database, simpleDateFormat.format(new Date()));
                         System.out.println("--Sauvegarde entete--");
                         DocEntete.getDataElement(sqlCon, path, database, simpleDateFormat.format(new Date()), (JSONObject) list.get("typedocument"));
                         System.out.println("--Sauvegarde DocRegl--");
@@ -70,6 +72,7 @@ public class BackupData {
                     if (((String) list.get("ligne")).equals("1")) {
                         System.out.println("--Sauvegarde ligne--");
                         DocLigne.getDataElement(sqlCon, path, database, simpleDateFormat.format(new Date()), (JSONObject) list.get("typedocument"));
+
                     }
                     if (((String) list.get("reglement")).equals("1")) {
                         System.out.println("--Sauvegarde ReglEch--");
@@ -103,6 +106,8 @@ public class BackupData {
                         System.out.println("--Sauvegarde Collaborateur--");
                         Collaborateur.getDataElement(sqlCon, path, database, simpleDateFormat.format(new Date()));
                     }
+                    /*if (((String) list.get("caisse")).equals("1")) {
+                    }*/
 
                 } catch (SQLException throwables) {
                     throwables.printStackTrace();

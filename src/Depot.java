@@ -90,7 +90,7 @@ public class Depot extends Table{
                 DepotEmpl.sendDataElement(sqlCon, path,database);
                 linkDepot(sqlCon);
 
-                deleteTempTable(sqlCon,tableName);
+                deleteTempTable(sqlCon, tableName+"_DEST");
 
                 deleteDepot(sqlCon, path,filename);
             }

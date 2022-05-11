@@ -105,10 +105,11 @@ public class Article extends Table {
                 ArtFourniss.sendDataElement(sqlCon, path, database);
                 linkArticle(sqlCon);
                 readOnFile(path, "deleteList" + filename, "F_ARTCLIENT_SUPPR", sqlCon);
-                deleteTempTable(sqlCon, tableName);
-                deleteTempTable(sqlCon, "F_ARTICLERESSOURCE");
-                deleteTempTable(sqlCon, "F_CONDITION");
-                deleteTempTable(sqlCon, "F_RESSOURCEPROD");
+
+                deleteTempTable(sqlCon, tableName+"_DEST");
+                deleteTempTable(sqlCon, "F_ARTICLERESSOURCE_DEST");
+                deleteTempTable(sqlCon, "F_CONDITION_DEST");
+                deleteTempTable(sqlCon, "F_RESSOURCEPROD_DEST");
 
                 deleteItem(sqlCon, path, filename, tableName);
                 deleteArticle(sqlCon, path,filename);

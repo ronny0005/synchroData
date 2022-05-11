@@ -67,7 +67,7 @@ public class FamCompta extends Table {
                 readOnFile(path, "deleteList" + filename, tableName + "_SUPPR", sqlCon);
                 executeQuery(sqlCon, updateTableDest("FA_CodeFamille,FCP_Type,FCP_Champ", "'FA_CodeFamille','FCP_Type','FCP_Champ'", tableName, tableName + "_DEST",filename));
                 sendData(sqlCon, path, filename, insert(filename));
-                deleteTempTable(sqlCon, tableName);
+                deleteTempTable(sqlCon, tableName+"_DEST");
 
                 deleteFamCompta(sqlCon, path,filename);
             }

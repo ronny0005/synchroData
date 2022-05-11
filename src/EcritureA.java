@@ -77,7 +77,7 @@ public class EcritureA extends Table {
                 readOnFile(path, "deleteList" + filename, tableName + "_SUPPR", sqlCon);
                 executeQuery(sqlCon, updateTableDest("", "'EC_No','N_Analytique'", tableName, tableName + "_DEST",filename));
                 sendData(sqlCon, path, filename, insert(filename));
-                deleteTempTable(sqlCon, tableName);
+                deleteTempTable(sqlCon, tableName+"_DEST");
                 deleteEcritureA(sqlCon, path,filename);
             }
         }

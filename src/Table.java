@@ -328,9 +328,50 @@ public class Table {
 
     public static void deleteTempTable(Connection sqlCon,String table)
     {
-        String query = "IF OBJECT_ID('"+table+"_DEST') IS NOT NULL \n" +
-                "\tDROP TABLE "+table+"_DEST;";
+        String query = "IF OBJECT_ID('"+table+"') IS NOT NULL \n" +
+                "\tDROP TABLE "+table+";";
         executeQuery(sqlCon, query);
+    }
+
+
+    public static void loadDeleteFile(String path,Connection sqlCon,String file,String tableName,String query) {
+        File dir = new File(path);
+        FilenameFilter filter = new FilenameFilter() {
+            public boolean accept(File dir, String name) {
+                return name.startsWith("deleteList"+file);
+            }
+        };
+        String [] children = dir.list(filter);
+        if (children == null) {
+            System.out.println("Either dir does not exist or is not a directory");
+        } else {
+            for (int i = 0; i < children.length; i++) {
+                String filename = children[i];
+                String deleteDocEntete = query;
+                loadDeleteInfo(path,tableName,filename,sqlCon,deleteDocEntete);
+            }
+        }
+    }
+
+    public static String [] getFile(String path,String file){
+        File dir = new File(path);
+        FilenameFilter filter = new FilenameFilter() {
+            public boolean accept(File dir, String name) {
+                return name.startsWith(file);
+            }
+        };
+        return dir.list(filter);
+    }
+
+    public static void loadDeleteInfo(String path,String tableName,String filename,Connection sqlCon,String query){
+        readOnFile(path, filename, tableName + "_SUPPR", sqlCon);
+        File file = new File(path + "\\" + filename);
+        if (file.exists())
+        {
+            executeQuery(sqlCon, query);
+            archiveDocument(path + "\\archive", path, filename);
+        }
+        deleteTempTable(sqlCon, tableName+"_SUPPR");
     }
 
     public static void deleteItem(Connection sqlCon, String path,String file,String table)
@@ -714,6 +755,18 @@ public class Table {
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         }
+    }
+
+    public static void disableTrigger (Connection sqlCon,String table){
+        executeQuery(sqlCon,
+                "                DISABLE TRIGGER dbo.[TG_CBUPD_"+table+"] ON [dbo].["+table+"] ;\n" +
+                    "                DISABLE TRIGGER dbo.[TG_UPD_"+table+"] ON [dbo].["+table+"] ;\n");
+    }
+
+    public static void enableTrigger (Connection sqlCon,String table){
+        executeQuery(sqlCon,
+        "                ENABLE TRIGGER dbo.[TG_CBUPD_"+table+"] ON [dbo].["+table+"];\n" +
+              "                ENABLE TRIGGER dbo.[TG_UPD_"+table+"] ON [dbo].["+table+"] ;\n");
     }
 
     public static ResultSet executeQueryResult(Connection sqlCon, String query)

@@ -221,7 +221,7 @@ CREATE TABLE [config].[DB_Errors]
           ErrorLine      INT,
           ErrorProcedure VARCHAR(MAX),
           ErrorMessage   VARCHAR(MAX),
-		  TableLoad		 VARCHAR(150),
+		  TableLoad		 VARCHAR(MAX),
           Query			 VARCHAR(MAX),
           ErrorDateTime  DATETIME)
 

@@ -67,7 +67,10 @@ public class UpdateData {
                         System.out.println("--Chargement Livraison--");
                         Livraison.sendDataElement(sqlCon, path, database);
                     }
-
+/*
+                    if (((String) list.get("caisse")).equals("1")) {
+                    }
+*/
                     if (((String) list.get("article")).equals("1")) {
                         System.out.println("--Chargement Famille--");
                         Famille.sendDataElement(sqlCon, path, database);
@@ -76,6 +79,8 @@ public class UpdateData {
                     }
 
                     if (((String) list.get("entete")).equals("1")) {
+                        System.out.println("--Chargement Caisse--");
+                        Caisse.sendDataElement(sqlCon, path, database);
                         System.out.println("--Chargement Entete--");
                         DocEntete.sendDataElement(sqlCon, path, database);
                         System.out.println("--Chargement DocRegl--");

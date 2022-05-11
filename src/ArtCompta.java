@@ -66,7 +66,7 @@ public class ArtCompta extends Table {
                 executeQuery(sqlCon, updateTableDest("AR_Ref,ACP_Type,ACP_Champ", "'AR_Ref','ACP_Type','ACP_Champ'", tableName, tableName + "_DEST",filename));
                 sendData(sqlCon, path, filename, insert(filename));
 
-                deleteTempTable(sqlCon, tableName);
+                deleteTempTable(sqlCon, tableName+"_DEST");
                 deleteArtCompta(sqlCon, path,filename);
             }
         }

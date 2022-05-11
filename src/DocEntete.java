@@ -62,13 +62,12 @@ public class DocEntete extends Table {
                 "\t\t\t, dest.[cbFlag],dest.[DO_Piece],dest.[dataBaseSource],dest.[cbMarqSource]\n" +
                 "FROM F_DOCENTETE_DEST dest\n" +
                 "LEFT JOIN F_DOCENTETE src\n" +
-                "\tON\tdest.cbMarqSource = src.cbMarqSource\n" +
-                "\tAND\tdest.dataBaseSource = src.dataBaseSource\n" +
+                "\tON\tdest.DO_Piece = src.DO_Piece\n" +
+                "\tAND\tdest.DO_Domaine = src.DO_Domaine\n" +
+                "\tAND\tdest.DO_Type = src.DO_Type\n" +
                 "LEFT JOIN F_DEPOT dep ON dep.DE_NoSource = dest.DE_No AND dep.dataBaseSource = src.dataBaseSource \n"+
                 "LEFT JOIN F_LIVRAISON liv ON liv.LI_NoSource = dest.LI_No AND liv.dataBaseSource = dest.dataBaseSource \n"+
                 "WHERE src.DO_Domaine IS NULL;\n" +
-                "IF OBJECT_ID('F_DOCENTETE_DEST') IS NOT NULL \n" +
-                "DROP TABLE F_DOCENTETE_DEST;\n" +
                 " END TRY\n" +
                 " BEGIN CATCH \n" +
                 "INSERT INTO config.DB_Errors\n" +
@@ -87,26 +86,35 @@ public class DocEntete extends Table {
     }
     public static void sendDataElement(Connection sqlCon, String path,String database)
     {
-        File dir = new File(path);
-        FilenameFilter filter = new FilenameFilter() {
-            public boolean accept(File dir, String name) {
-                return name.startsWith(file);
-            }
-        };
-        String[] children = dir.list(filter);
+        dbSource = database;
+        loadFile(path,sqlCon);
+        //loadDeleteFile(path,sqlCon);
+    }
+
+    public static void loadFile(String path,Connection sqlCon){
+        String [] children = getFile(path,file);
         if (children == null) {
             System.out.println("Either dir does not exist or is not a directory");
         } else {
-            for (int i = 0; i < children.length; i++) {
-                String filename = children[i];
-                dbSource = database;
+            for (String filename : children) {
                 readOnFile(path, filename, tableName + "_DEST", sqlCon);
-                 readOnFile(path, "deleteList" + filename, tableName + "_SUPPR", sqlCon);
+                disableTrigger(sqlCon,tableName);
                 executeQuery(sqlCon, updateTableDest("", "'DO_Domaine','DO_Type','DO_Piece','DataBaseSource','cbMarqSource'", tableName, tableName + "_DEST",filename));
+                enableTrigger(sqlCon,tableName);
                 sendData(sqlCon, path, filename, insert(filename));
+                //deleteTempTable(sqlCon, tableName+"_DEST");
+            }
+        }
+    }
 
-                deleteTempTable(sqlCon, tableName);
-                deleteDocEntete(sqlCon, path,filename);
+    public static void loadDeleteFile(String path,Connection sqlCon) {
+        String [] children = getFile(path,"deleteList"+file);
+        if (children == null) {
+            System.out.println("Either dir does not exist or is not a directory");
+        } else {
+            for (String filename : children) {
+                String deleteDocEntete = deleteDocEntete(filename);
+                loadDeleteInfo(path,tableName,filename,sqlCon,deleteDocEntete);
             }
         }
     }
@@ -129,18 +137,42 @@ public class DocEntete extends Table {
         listDeleteAllInfo(sqlCon, path, "deleteList" + filename,tableName,configList,database);
     }
 
-    public static void deleteDocEntete(Connection sqlCon, String path,String filename)
+    public static String deleteDocEntete(String filename)
     {
-        String query =
+        return
                 "BEGIN TRY " +
+                /*" DELETE FROM F_DOCLIGNE  " +
+                "   WHERE EXISTS (SELECT 1 "+
+                "       FROM F_DOCENTETE_SUPPR suppr\n" +
+                "       WHERE F_DOCLIGNE.DataBaseSource = suppr.DataBaseSource \n" +
+                "       AND F_DOCLIGNE.DO_Domaine = suppr.DO_Domaine \n" +
+                "       AND F_DOCLIGNE.DO_Type = suppr.DO_Type \n" +
+                "       AND F_DOCLIGNE.DO_Piece = suppr.DO_Piece ); \n" +
+                " DELETE FROM F_DOCREGL  " +
+                "   WHERE EXISTS (SELECT 1 "+
+                "       FROM F_DOCENTETE_SUPPR suppr\n" +
+                "       WHERE F_DOCREGL.DataBaseSource = suppr.DataBaseSource \n" +
+                "       AND F_DOCREGL.DO_Domaine = suppr.DO_Domaine \n" +
+                "       AND F_DOCREGL.DO_Type = suppr.DO_Type \n" +
+                "       AND F_DOCREGL.DO_Piece = suppr.DO_Piece ); \n" +
+                " DELETE FROM F_REGLECH  " +
+                "   WHERE EXISTS (SELECT 1 "+
+                "       FROM F_DOCENTETE_SUPPR suppr\n" +
+                "       WHERE F_REGLECH.DataBaseSource = suppr.DataBaseSource \n" +
+                "       AND F_REGLECH.DO_Domaine = suppr.DO_Domaine \n" +
+                "       AND F_REGLECH.DO_Type = suppr.DO_Type \n" +
+                "       AND F_REGLECH.DO_Piece = suppr.DO_Piece ); \n" +*/
+                "\n" +
+                "DISABLE TRIGGER dbo.[TG_CBDEL_F_DOCENTETE] ON [dbo].[F_DOCENTETE] ;\n" +
+                "DISABLE TRIGGER dbo.[TG_DEL_F_DOCENTETE] ON [dbo].[F_DOCENTETE] ;\n" +
                 " DELETE FROM F_DOCENTETE \n" +
                 " WHERE EXISTS (SELECT 1 \n" +
                 "       FROM F_DOCENTETE_SUPPR \n" +
                 "       WHERE F_DOCENTETE.DataBaseSource = F_DOCENTETE_SUPPR.DataBaseSource \n" +
                 "       AND F_DOCENTETE.DO_Domaine = F_DOCENTETE_SUPPR.DO_Domaine \n" +
                 "       AND F_DOCENTETE.DO_Type = F_DOCENTETE_SUPPR.DO_Type \n" +
-                "       AND F_DOCENTETE.DO_Piece = F_DOCENTETE_SUPPR.DO_Piece ) \n" +
-                " AND NOT EXISTS (SELECT 1 \n" +
+                "       AND F_DOCENTETE.DO_Piece = F_DOCENTETE_SUPPR.DO_Piece ) ;\n" +
+                /*" AND NOT EXISTS (SELECT 1 \n" +
                 "       FROM F_DOCLIGNE docL \n" +
                 "       WHERE F_DOCENTETE.DataBaseSource = docL.DataBaseSource \n" +
                 "       AND F_DOCENTETE.DO_Domaine = docL.DO_Domaine \n" +
@@ -157,7 +189,9 @@ public class DocEntete extends Table {
                 "       WHERE F_DOCENTETE.DataBaseSource = docL.DataBaseSource \n" +
                 "       AND F_DOCENTETE.DO_Domaine = docL.DO_Domaine \n" +
                 "       AND F_DOCENTETE.DO_Type = docL.DO_Type \n" +
-                "       AND F_DOCENTETE.DO_Piece = docL.DO_Piece ) \n" +
+                "       AND F_DOCENTETE.DO_Piece = docL.DO_Piece ) \n" +*/
+                "ENABLE TRIGGER dbo.[TG_CBDEL_F_DOCENTETE] ON [dbo].[F_DOCENTETE] ;\n" +
+                "ENABLE TRIGGER dbo.[TG_DEL_F_DOCENTETE] ON [dbo].[F_DOCENTETE] ;"+
                 " \n" +
                 " \n" +
                 "INSERT INTO config.DB_Errors(\n" +
@@ -208,8 +242,8 @@ public class DocEntete extends Table {
                 "       AND docE.DO_Type = docL.DO_Type \n" +
                 "       AND docE.DO_Piece = docL.DO_Piece ) \n" +
                 " \n" +
-                " IF OBJECT_ID('F_DOCENTETE_SUPPR') IS NOT NULL \n" +
-                " DROP TABLE F_DOCENTETE_SUPPR \n"+
+                /*" IF OBJECT_ID('F_DOCENTETE_SUPPR') IS NOT NULL \n" +
+                " DROP TABLE F_DOCENTETE_SUPPR \n"+*/
                 " END TRY\n" +
                         " BEGIN CATCH \n" +
                         "INSERT INTO config.DB_Errors\n" +
@@ -225,10 +259,6 @@ public class DocEntete extends Table {
                         "   'F_DOCENTETE',\n" +
                         "   GETDATE());\n" +
                         "END CATCH";
-        if ((new File(path + "\\deleteList" + filename)).exists())
-        {
-            executeQuery(sqlCon, query);
-            archiveDocument(path + "\\archive", path, "deleteList" + filename);
-        }
+
     }
 }

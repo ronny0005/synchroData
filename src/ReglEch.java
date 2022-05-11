@@ -93,31 +93,41 @@ public class ReglEch extends Table {
                 "   GETDATE());\n" +
                 "END CATCH";
     }
+
     public static void sendDataElement(Connection sqlCon, String path,String database)
     {
-        File dir = new File(path);
-        FilenameFilter filter = new FilenameFilter() {
-            public boolean accept(File dir, String name) {
-                return name.startsWith(file);
-            }
-        };
-        String[] children = dir.list(filter);
+        dbSource = database;
+        loadFile(path,sqlCon);
+        loadDeleteFile(path,sqlCon);
+        DocEntete.loadDeleteFile(path,sqlCon);
+    }
+
+    public static void loadFile(String path,Connection sqlCon){
+        String [] children = getFile(path,file);
         if (children == null) {
             System.out.println("Either dir does not exist or is not a directory");
         } else {
-            for (int i = 0; i < children.length; i++) {
-                String filename = children[i];
-                dbSource = database;
+            for (String filename : children) {
                 readOnFile(path, filename, tableName + "_DEST", sqlCon);
-                readOnFile(path, "deleteList" + filename, tableName + "_SUPPR", sqlCon);
                 executeQuery(sqlCon, updateTableDest("", "'RG_No','DR_No'", tableName, tableName + "_DEST",filename));
                 sendData(sqlCon, path, filename, insert(filename));
-
-                deleteTempTable(sqlCon);
-                deleteReglEch(sqlCon, path,filename);
+            //    deleteTempTable(sqlCon, tableName+"_DEST");
             }
         }
     }
+
+    public static void loadDeleteFile(String path,Connection sqlCon) {
+        String [] children = getFile(path,"deleteList"+file);
+        if (children == null) {
+            System.out.println("Either dir does not exist or is not a directory");
+        } else {
+            for (String filename : children) {
+                String deleteReglEch = deleteReglEch();
+                loadDeleteInfo(path,tableName,filename,sqlCon,deleteReglEch);
+            }
+        }
+    }
+
     public static void getDataElement(Connection sqlCon, String path, String database, String time, JSONObject type)
     {
         String filename =  file+time+".csv";
@@ -144,18 +154,13 @@ public class ReglEch extends Table {
         executeQuery(sqlCon, query);
     }
 
-    public static void deleteReglEch(Connection sqlCon, String path,String filename)
+    public static String deleteReglEch()
     {
-        String query =
+        return
                 " DELETE FROM F_REGLECH \n" +
                 " WHERE EXISTS (SELECT 1 FROM F_REGLECH_SUPPR WHERE F_REGLECH.DataBaseSource = F_REGLECH_SUPPR.DataBaseSource AND F_REGLECH.cbMarqSource = F_REGLECH_SUPPR.cbMarq ) \n" +
                 " \n" +
                 " IF OBJECT_ID('F_REGLECH_SUPPR') IS NOT NULL \n" +
                 " DROP TABLE F_REGLECH_SUPPR \n";
-        if ((new File(path + "\\deleteList" + filename)).exists())
-        {
-            executeQuery(sqlCon, query);
-            archiveDocument(path + "\\archive", path, "deleteList" + filename);
-        }
     }
 }

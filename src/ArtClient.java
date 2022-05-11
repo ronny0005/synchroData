@@ -71,7 +71,7 @@ public class ArtClient extends Table{
                 executeQuery(sqlCon, updateTableDest("AR_Ref,AC_Categorie", "'AR_Ref','AC_Categorie','CT_Num'", tableName, tableName + "_DEST",filename));
                 sendData(sqlCon, path, filename, insert(filename));
 
-                deleteTempTable(sqlCon, tableName);
+                deleteTempTable(sqlCon, tableName+"_DEST");
                 deleteArtClient(sqlCon, path,filename);
             }
         }
