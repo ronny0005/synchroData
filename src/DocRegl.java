@@ -132,10 +132,12 @@ public class DocRegl extends Table {
             System.out.println("Either dir does not exist or is not a directory");
         } else {
             for (String filename : children){
+                disableTrigger(sqlCon,tableName);
                 readOnFile(path, filename, tableName + "_DEST", sqlCon);
                 executeQuery(sqlCon, updateTableDest("", "'DR_No'", tableName, tableName + "_DEST",filename));
                 sendData(sqlCon, path, filename, insert(filename));
                // deleteTempTable(sqlCon, tableName+"_DEST");
+                enableTrigger(sqlCon,tableName);
             }
         }
     }

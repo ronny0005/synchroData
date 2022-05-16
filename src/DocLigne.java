@@ -40,7 +40,7 @@ public class DocLigne extends Table {
                 "       ,dest.[DL_TypeTaxe2],dest.[CO_No]/*,[AG_No1],[AG_No2]*/\n" +
                 "\t     ,dest.[DL_PrixRU] ,dest.[DL_CMUP] ,dest.[DL_MvtStock],dest.[DT_No],dest.[AF_RefFourniss],dest.[EU_Enumere],dest.[EU_Qte] ,dest.[DL_TTC]\n" +
                 "       ,ISNULL(dsrc.[DE_No],dest.DE_No),dest.[DL_NoRef],dest.[DL_TypePL],dest.[DL_PUDevise] ,dest.[DL_PUTTC] " +
-                "       ,ISNULL((SELECT MAX(DL_No) FROM F_DOCLIGNE)+ ROW_NUMBER() OVER (ORDER BY dest.[cbMarqSource]),1),dest.[DO_DateLivr],dest.[CA_Num]" +
+                "       ,ISNULL((SELECT MAX(DL_No) FROM F_DOCLIGNE),0)+ ROW_NUMBER() OVER (ORDER BY dest.[cbMarqSource]),dest.[DO_DateLivr],dest.[CA_Num]" +
                 "       ,dest.[DL_Taxe3] ,dest.[DL_TypeTaux3],dest.[DL_TypeTaxe3],dest.[DL_Frais] \n" +
                 "      ,[DL_Valorise],[AR_RefCompose],[DL_NonLivre],[AC_RefClient],[DL_MontantHT] ,[DL_MontantTTC] ,[DL_FactPoids],[DL_Escompte],[DL_PiecePL],[DL_DatePL],[DL_QtePL] ,[DL_NoColis],[DL_NoLink]\n" +
                 "      ,[RP_Code],[DL_QteRessource],[DL_DateAvancement],[cbProt],[cbCreateur],[cbModification],[cbReplication],[cbFlag]" +
@@ -127,9 +127,11 @@ public class DocLigne extends Table {
             System.out.println("Either dir does not exist or is not a directory");
         } else {
             for (String filename : children){
+                disableTrigger(sqlCon,tableName);
                 readOnFile(path, filename, tableName + "_DEST", sqlCon);
                 executeQuery(sqlCon, updateDocLigne(filename));
                 sendData(sqlCon, path, filename, insert(filename));
+                enableTrigger(sqlCon,tableName);
                 //deleteTempTable(sqlCon, tableName+"_DEST");
             }
         }

@@ -13,27 +13,28 @@ public class Caisse extends Table {
         return
                 " BEGIN TRY \n" +
                         "SET DATEFORMAT ymd;\n" +
+                        "IF OBJECT_ID('tempdb..#TmpCaisse') IS NOT NULL\n" +
+                        "    DROP TABLE #TmpCaisse\n"+
                         "\n" +
-                        "SELECT\t\tCA_No = (SELECT ISNULL((SELECT MAX(CA_No) FROM F_CAISSE),0)  + ROW_NUMBER() OVER(ORDER BY dest.CA_No))\n" +
-                        "\t\t\t,[CA_Intitule],DE_No = ISNULL(dep.DE_NoSource,[DE_No]),[CO_No]\n" +
-                        "           ,[CO_NoCaissier],[CT_Num],[JO_Num],[CA_IdentifCaissier]\n" +
-                        "           ,[CA_DateCreation],[N_Comptoir],[N_Clavier]\n" +
-                        "\t\t   ,[CA_LignesAfficheur],[CA_ColonnesAfficheur],[CA_ImpTicket]\n" +
-                        "           ,[CA_SaisieVendeur],[CA_Souche],[cbProt],[cbCreateur]\n" +
-                        "           ,[cbModification],[cbReplication],[cbFlag]\n" +
-                        "\t\t   ,dest.CA_No, dest.cbMarqSource,dest.DatabaseSource,src.CA_NoSource\n" +
-                        "\t\t   INTO #TmpCaisse\n" +
-                        "FROM F_CAISSE_DEST dest\n" +
-                        "LEFT JOIN (SELECT CA_NoSource,DatabaseSource FROM F_CAISSE) src\n" +
-                        "ON src.CA_NoSource = dest.CA_No\n" +
-                        "AND src.DatabaseSource = dest.DatabaseSource\n" +
-                        "LEFT JOIN (SELECT DE_NoSource,DatabaseSource FROM F_DEPOT) dep\n" +
-                        "ON dep.DE_NoSource = dest.DE_No\n" +
-                        "AND dep.DataBaseSource = dest.DataBaseSource\n" +
+                        "SELECT CA_No = ISNULL((SELECT MAX(CA_No) FROM F_CAISSE),0) + ROW_NUMBER() OVER(ORDER BY dest.CA_No) \n" +
+                        ",[CA_Intitule],DE_No = ISNULL(dep.DE_No,dest.[DE_No]),[CO_No] \n" +
+                        "           ,[CO_NoCaissier],[CT_Num],[JO_Num],[CA_IdentifCaissier] \n" +
+                        "           ,[CA_DateCreation],[N_Comptoir],[N_Clavier] \n" +
+                        "   ,[CA_LignesAfficheur],[CA_ColonnesAfficheur],[CA_ImpTicket] \n" +
+                        "           ,[CA_SaisieVendeur],[CA_Souche],[cbProt],[cbCreateur] \n" +
+                        "           ,[cbModification],[cbReplication],[cbFlag] \n" +
+                        "   ,CA_NoSource = dest.CA_No, dest.cbMarqSource,dest.DatabaseSource,[CA_NoSourceCai] = src.CA_NoSource \n" +
+                        "   INTO #TmpCaisse \n" +
+                        "FROM F_CAISSE_DEST dest \n" +
+                        "LEFT JOIN (SELECT CA_NoSource,DatabaseSource FROM F_CAISSE) src \n" +
+                        "ON src.CA_NoSource = dest.CA_No \n" +
+                        "AND src.DatabaseSource = dest.DatabaseSource \n" +
+                        "LEFT JOIN (SELECT DE_NoSource,DatabaseSource,DE_No FROM F_DEPOT) dep \n" +
+                        "ON dep.DE_NoSource = dest.DE_No \n" +
+                        "AND dep.DataBaseSource = dest.DataBaseSource " +
                         "\n" +
-                        "UPDATE dwh\n" +
-                        "   SET [CA_No] = tmp.[CA_No]\n" +
-                        "      ,[CA_Intitule] = tmp.CA_Intitule\n" +
+                        "UPDATE dwh SET\n" +
+                        "      [CA_Intitule] = tmp.CA_Intitule\n" +
                         "      ,[DE_No] = tmp.DE_No\n" +
                         "      ,[CO_No] = tmp.CO_No\n" +
                         "      ,[CO_NoCaissier] = tmp.CO_NoCaissier\n" +
@@ -54,7 +55,7 @@ public class Caisse extends Table {
                         "      ,[cbReplication] = tmp.cbReplication\n" +
                         "      ,[cbFlag] = tmp.cbFlag\n" +
                         "FROM F_CAISSE dwh\n" +
-                        "INNER JOIN #TmpCaisse tmp ON dwh.CA_No = tmp.CA_NoSource\n" +
+                        "INNER JOIN #TmpCaisse tmp ON dwh.CA_NoSource = tmp.CA_NoSource\n" +
                         "AND dwh.DatabaseSource = tmp.DatabaseSource\n" +
                         "\n" +
                         "INSERT INTO [dbo].[F_CAISSE]\n" +
@@ -66,17 +67,18 @@ public class Caisse extends Table {
                         "           ,[cbModification],[cbReplication],[cbFlag]\n" +
                         "\t\t   ,CA_NoSource,cbMarqSource,DatabaseSource)\n" +
                         "\n" +
-                        "SELECT\t\tSELECT ISNULL((SELECT MAX(CA_No) FROM F_CAISSE),0)  + ROW_NUMBER() OVER(ORDER BY dest.CA_No)\n" +
-                        "\t\t\t,[CA_Intitule],ISNULL(dep.DE_NoSource,[DE_No]),[CO_No]\n" +
-                        "           ,[CO_NoCaissier],[CT_Num],[JO_Num],[CA_IdentifCaissier]\n" +
-                        "           ,[CA_DateCreation],[N_Comptoir],[N_Clavier]\n" +
-                        "\t\t   ,[CA_LignesAfficheur],[CA_ColonnesAfficheur],[CA_ImpTicket]\n" +
-                        "           ,[CA_SaisieVendeur],[CA_Souche],[cbProt],[cbCreateur]\n" +
-                        "           ,[cbModification],[cbReplication],[cbFlag]\n" +
-                        "\t\t   ,dest.CA_No, dest.cbMarqSource,dest.DatabaseSource\n" +
-                        "FROM #TmpCaisse\n" +
-                        "WHERE src.CA_NoSource IS NULL\n" +
+                        "SELECT [CA_No] \n" +
+                        ", [CA_Intitule],[DE_No],[CO_No] \n" +
+                        "           ,[CO_NoCaissier],[CT_Num],[JO_Num],[CA_IdentifCaissier] \n" +
+                        "           ,[CA_DateCreation],[N_Comptoir],[N_Clavier] \n" +
+                        "   ,[CA_LignesAfficheur],[CA_ColonnesAfficheur],[CA_ImpTicket] \n" +
+                        "           ,[CA_SaisieVendeur],[CA_Souche],[cbProt],[cbCreateur] \n" +
+                        "           ,[cbModification],[cbReplication],[cbFlag] \n" +
+                        "   ,CA_NoSource, cbMarqSource,DatabaseSource \n" +
+                        "FROM #TmpCaisse \n" +
+                        "WHERE [CA_NoSourceCai]  IS NULL " +
                         "\n" +
+                        "END TRY" +
                         " BEGIN CATCH  \n" +
                         "INSERT INTO config.DB_Errors \n" +
                         "    VALUES \n" +

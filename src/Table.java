@@ -759,14 +759,12 @@ public class Table {
 
     public static void disableTrigger (Connection sqlCon,String table){
         executeQuery(sqlCon,
-                "                DISABLE TRIGGER dbo.[TG_CBUPD_"+table+"] ON [dbo].["+table+"] ;\n" +
-                    "                DISABLE TRIGGER dbo.[TG_UPD_"+table+"] ON [dbo].["+table+"] ;\n");
+                "                DISABLE TRIGGER ALL ON [dbo].["+table+"] ;\n");
     }
 
     public static void enableTrigger (Connection sqlCon,String table){
         executeQuery(sqlCon,
-        "                ENABLE TRIGGER dbo.[TG_CBUPD_"+table+"] ON [dbo].["+table+"];\n" +
-              "                ENABLE TRIGGER dbo.[TG_UPD_"+table+"] ON [dbo].["+table+"] ;\n");
+                "                ENABLE TRIGGER ALL ON [dbo].["+table+"] ;\n");
     }
 
     public static ResultSet executeQueryResult(Connection sqlCon, String query)

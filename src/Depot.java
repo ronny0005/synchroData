@@ -12,42 +12,42 @@ public class Depot extends Table{
 
     public static String insert(String filename)
     {
-        return          "BEGIN TRY " +
-                        " SET DATEFORMAT ymd;\n" +
-                        "  DISABLE TRIGGER [TG_INS_F_DEPOT] ON dbo.F_DEPOT; \n" +
-                        " IF OBJECT_ID('F_DEPOT_DEST') IS NOT NULL\n"+
-                        "  INSERT INTO [dbo].[F_DEPOT]    \n" +
-                        "  ([DE_No],[DE_Intitule],[DE_Adresse],[DE_Complement],[DE_CodePostal],[DE_Ville]\n" +
-                        "\t\t,[DE_Contact],[DE_Principal],[DE_CatCompta],[DE_Region],[DE_Pays],[DE_EMail]\n" +
-                        "\t\t,[DE_Code],[DE_Telephone],[DE_Telecopie],[DE_Replication],[DP_NoDefaut],[cbProt]\n" +
-                        "\t\t,[cbCreateur],[cbModification],[cbReplication],[cbFlag],DE_NoSource,cbMarqSource,DatabaseSource)    \n" +
-                        "    \n" +
-                        "  SELECT ISNULL((SELECT Max(DE_No) FROM F_DEPOT),0)  + ROW_NUMBER() OVER(ORDER BY dest.DE_No),dest.[DE_Intitule],[DE_Adresse],[DE_Complement],[DE_CodePostal],[DE_Ville]\n" +
-                        "\t\t,[DE_Contact],[DE_Principal],[DE_CatCompta],[DE_Region],[DE_Pays],[DE_EMail]\n" +
-                        "\t\t,NULL,[DE_Telephone],[DE_Telecopie],[DE_Replication],null/*[DP_NoDefaut]*/,[cbProt]\n" +
-                        "\t\t,[cbCreateur],[cbModification],[cbReplication],[cbFlag],dest.DE_No, dest.cbMarqSource,dest.DatabaseSource \n" +
-                        "  FROM F_DEPOT_DEST dest      \n" +
-                        "  LEFT JOIN (SELECT [DE_NoSource],DataBaseSource,DE_Intitule FROM F_DEPOT) src      \n" +
-                        "  ON (dest.DE_No = src.DE_NoSource\n" +
-                        "  AND dest.DataBaseSource = src.DataBaseSource) OR dest.DE_Intitule = src.DE_Intitule\n" +
-                        "  WHERE src.DE_Intitule IS NULL ;  \n" +
-                        "  \n" +
-                        "ENABLE  TRIGGER [TG_INS_F_DEPOT] ON dbo.F_DEPOT; " +
-                        " END TRY\n" +
-                        " BEGIN CATCH \n" +
-                        "INSERT INTO config.DB_Errors\n" +
-                        "    VALUES\n" +
-                        "  (SUSER_SNAME(),\n" +
-                        "   ERROR_NUMBER(),\n" +
-                        "   ERROR_STATE(),\n" +
-                        "   ERROR_SEVERITY(),\n" +
-                        "   ERROR_LINE(),\n" +
-                        "   ERROR_PROCEDURE(),\n" +
-                        "   ERROR_MESSAGE(),\n" +
-                        "   'Insert '+ ' "+filename+"',\n" +
-                        "   'F_DEPOT',\n" +
-                        "   GETDATE());\n" +
-                        "END CATCH";
+        return  "BEGIN TRY " +
+                " SET DATEFORMAT ymd;\n" +
+                "  DISABLE TRIGGER [TG_INS_F_DEPOT] ON dbo.F_DEPOT; \n" +
+                " IF OBJECT_ID('F_DEPOT_DEST') IS NOT NULL\n"+
+                "  INSERT INTO [dbo].[F_DEPOT]    \n" +
+                "  ([DE_No],[DE_Intitule],[DE_Adresse],[DE_Complement],[DE_CodePostal],[DE_Ville]\n" +
+                "\t\t,[DE_Contact],[DE_Principal],[DE_CatCompta],[DE_Region],[DE_Pays],[DE_EMail]\n" +
+                "\t\t,[DE_Code],[DE_Telephone],[DE_Telecopie],[DE_Replication],[DP_NoDefaut],[cbProt]\n" +
+                "\t\t,[cbCreateur],[cbModification],[cbReplication],[cbFlag],DE_NoSource,cbMarqSource,DatabaseSource)    \n" +
+                "    \n" +
+                "  SELECT ISNULL((SELECT Max(DE_No) FROM F_DEPOT),0)  + ROW_NUMBER() OVER(ORDER BY dest.DE_No),dest.[DE_Intitule],[DE_Adresse],[DE_Complement],[DE_CodePostal],[DE_Ville]\n" +
+                "\t\t,[DE_Contact],[DE_Principal],[DE_CatCompta],[DE_Region],[DE_Pays],[DE_EMail]\n" +
+                "\t\t,NULL,[DE_Telephone],[DE_Telecopie],[DE_Replication],null/*[DP_NoDefaut]*/,[cbProt]\n" +
+                "\t\t,[cbCreateur],[cbModification],[cbReplication],[cbFlag],dest.DE_No, dest.cbMarqSource,dest.DatabaseSource \n" +
+                "  FROM F_DEPOT_DEST dest      \n" +
+                "  LEFT JOIN (SELECT [DE_NoSource],DataBaseSource,DE_Intitule FROM F_DEPOT) src      \n" +
+                "  ON (dest.DE_No = src.DE_NoSource\n" +
+                "  AND dest.DataBaseSource = src.DataBaseSource) OR dest.DE_Intitule = src.DE_Intitule\n" +
+                "  WHERE src.DE_Intitule IS NULL ;  \n" +
+                "  \n" +
+                "ENABLE  TRIGGER [TG_INS_F_DEPOT] ON dbo.F_DEPOT; " +
+                " END TRY\n" +
+                " BEGIN CATCH \n" +
+                "INSERT INTO config.DB_Errors\n" +
+                "    VALUES\n" +
+                "  (SUSER_SNAME(),\n" +
+                "   ERROR_NUMBER(),\n" +
+                "   ERROR_STATE(),\n" +
+                "   ERROR_SEVERITY(),\n" +
+                "   ERROR_LINE(),\n" +
+                "   ERROR_PROCEDURE(),\n" +
+                "   ERROR_MESSAGE(),\n" +
+                "   'Insert '+ ' "+filename+"',\n" +
+                "   'F_DEPOT',\n" +
+                "   GETDATE());\n" +
+                "END CATCH";
     }
 
     public static void linkDepot(Connection sqlCon)

@@ -180,9 +180,16 @@ CREATE TABLE config.ListDepotEmpl (
 
 IF OBJECT_ID('config.ListDepot', 'U') IS NULL
 CREATE TABLE config.ListDepot (
-	DE_No INT
+                                  DE_No INT
     ,DataBaseSource NVARCHAR(50)
-	,cbMarq INT
+    ,cbMarq INT
+)
+
+IF OBJECT_ID('config.ListCaisse', 'U') IS NULL
+CREATE TABLE config.ListCaisse (
+     CA_No INT
+    ,DataBaseSource NVARCHAR(50)
+    ,cbMarq INT
 )
 
 IF OBJECT_ID('config.ListTaxe', 'U') IS NULL
@@ -290,6 +297,15 @@ ALTER TABLE F_DEPOT ADD DE_NoSource INT
 
 IF COL_LENGTH('dbo.F_DEPOT', 'cbMarqSource') IS NULL
 ALTER TABLE F_DEPOT ADD cbMarqSource INT
+
+IF COL_LENGTH('dbo.F_CAISSE', 'DataBaseSource') IS NULL
+ALTER TABLE F_CAISSE ADD DataBaseSource NVARCHAR(50)
+
+IF COL_LENGTH('dbo.F_CAISSE', 'CA_NoSource') IS NULL
+ALTER TABLE F_CAISSE ADD CA_NoSource INT
+
+IF COL_LENGTH('dbo.F_CAISSE', 'cbMarqSource') IS NULL
+ALTER TABLE F_CAISSE ADD cbMarqSource INT
 
 IF COL_LENGTH('dbo.F_DEPOTEMPL', 'DataBaseSource') IS NULL
 ALTER TABLE F_DEPOTEMPL ADD DataBaseSource NVARCHAR(50)
