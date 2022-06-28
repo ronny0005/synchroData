@@ -46,8 +46,8 @@ public class DocEntete extends Table {
                 "ON dest.DO_Piece = src.DO_Piece \n" +
                 "AND dest.DO_Domaine = src.DO_Domaine \n" +
                 "AND dest.DO_Type = src.DO_Type \n" +
-                "LEFT JOIN F_DEPOT dep ON dep.DE_NoSource = dest.DE_No AND dep.dataBaseSource = src.dataBaseSource \n" +
-                "LEFT JOIN F_CAISSE cai ON cai.CA_NoSource = dest.CA_No AND cai.dataBaseSource = src.dataBaseSource \n" +
+                "LEFT JOIN F_DEPOT dep ON dep.DE_NoSource = dest.DE_No AND dep.dataBaseSource = dest.dataBaseSource \n" +
+                "LEFT JOIN F_CAISSE cai ON cai.CA_NoSource = dest.CA_No AND cai.dataBaseSource = dest.dataBaseSource \n" +
                 "LEFT JOIN F_LIVRAISON liv ON liv.LI_NoSource = dest.LI_No AND liv.dataBaseSource = dest.dataBaseSource \n" +
                 "" +
                 " IF OBJECT_ID('F_DOCENTETE_DEST') IS NOT NULL\n"+

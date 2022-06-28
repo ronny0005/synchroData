@@ -46,7 +46,7 @@ public class Reglement extends Table {
                 "LEFT JOIN (SELECT RG_No,RG_NoSource,dataBaseSource FROM F_CREGLEMENT) src \n" +
                 "ON dest.RG_No = src.RG_NoSource \n" +
                 "AND dest.dataBaseSource = src.dataBaseSource \n" +
-                "LEFT JOIN F_CAISSE cai ON cai.CA_NoSource = dest.CA_No AND cai.dataBaseSource = src.dataBaseSource  \n" +
+                "LEFT JOIN F_CAISSE cai ON cai.CA_NoSource = dest.CA_No AND cai.dataBaseSource = dest.dataBaseSource  \n" +
                 ""+
                 " IF OBJECT_ID('F_CREGLEMENT_DEST') IS NOT NULL\n"+
                 "UPDATE cre\n" +
