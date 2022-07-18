@@ -1,5 +1,3 @@
-import java.io.File;
-import java.io.FilenameFilter;
 import java.sql.Connection;
 
 public class Caisse extends Table {

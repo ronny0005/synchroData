@@ -1,9 +1,6 @@
 import org.json.simple.JSONObject;
 
-import java.io.File;
-import java.io.FilenameFilter;
 import java.sql.Connection;
-import java.sql.SQLException;
 
 public class DocRegl extends Table {
 
@@ -121,12 +118,12 @@ public class DocRegl extends Table {
     public static void sendDataElement(Connection sqlCon, String path,String database)
     {
         dbSource = database;
-        loadFile( path, database, sqlCon);
+        loadFile( path, sqlCon);
         loadDeleteFile(path,sqlCon);
         DocEntete.loadDeleteFile(path,sqlCon);
     }
 
-    public static void loadFile(String path,String database,Connection sqlCon){
+    public static void loadFile(String path,Connection sqlCon){
         String [] children = getFile(path,file);
         if (children == null) {
             System.out.println("Either dir does not exist or is not a directory");

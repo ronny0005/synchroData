@@ -1,9 +1,6 @@
 import org.json.simple.JSONObject;
 
-import java.io.File;
-import java.io.FilenameFilter;
 import java.sql.Connection;
-import java.sql.SQLException;
 
 public class ReglEch extends Table {
 

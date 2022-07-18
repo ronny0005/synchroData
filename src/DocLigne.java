@@ -1,9 +1,6 @@
 import org.json.simple.JSONObject;
 
-import java.io.File;
-import java.io.FilenameFilter;
 import java.sql.Connection;
-import java.sql.SQLException;
 
 public class DocLigne extends Table {
 
@@ -322,21 +319,6 @@ public class DocLigne extends Table {
         initTableParam(sqlCon,tableName,configList,"DO_Domaine,DO_Type,DO_Piece,DatabaseSource");
         getData(sqlCon, selectSourceTableFilterAgencyEnteteLink(tableName,database,agency), tableName, path, filename);
         listDeleteAllInfo(sqlCon, path, "deleteList" + filename,tableName,configList,database);
-    }
-    public static void initTable(Connection sqlCon)
-    {
-        String query =  " IF NOT EXISTS (SELECT 1 FROM config.SelectTable WHERE tableName='F_DOCLIGNE') " +
-                        " INSERT INTO config.ListDocligne " +
-                        " SELECT DO_Domaine,DO_Type,DO_Piece,DataBaseSource = '" + dbSource + "',cbMarq " +
-                        " FROM F_DOCLIGNE " +
-                        " ELSE " +
-                        "    BEGIN " +
-                        "        INSERT INTO config.ListDocligne" +
-                        " SELECT DO_Domaine,DO_Type,DO_Piece,DataBaseSource = '" + dbSource + "',cbMarq " +
-                        " FROM F_DOCLIGNE " +
-                        " WHERE cbMarq > (SELECT Max(cbMarq) FROM config.ListDocligne)" +
-                        "END ";
-        executeQuery(sqlCon, query);
     }
 
     public static String deleteDocLigne()

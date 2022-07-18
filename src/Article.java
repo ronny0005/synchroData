@@ -80,39 +80,34 @@ public class Article extends Table {
         executeQuery(sqlCon, query);
     }
 
-    public static void sendDataElement(Connection sqlCon, String path,String database)
+    public static void sendDataElement(Connection sqlCon, String path)
     {
         File dir = new File(path);
-        FilenameFilter filter = new FilenameFilter() {
-            public boolean accept(File dir, String name) {
-                return name.startsWith(file);
-            }
-        };
+        FilenameFilter filter = (dir1, name) -> name.startsWith(file);
         String[] children = dir.list(filter);
         if (children == null) {
             System.out.println("Either dir does not exist or is not a directory");
         } else {
-            for (int i = 0; i < children.length; i++) {
-                String filename = children[i];
+            for (String filename : children) {
                 readOnFile(path, filename, tableName + "_DEST", sqlCon);
-                executeQuery(sqlCon, updateTableDest("AR_Ref", "'AR_Ref','AR_SuiviStock'", tableName, tableName + "_DEST",filename));
+                executeQuery(sqlCon, updateTableDest("AR_Ref", "'AR_Ref','AR_SuiviStock'", tableName, tableName + "_DEST", filename));
                 sendData(sqlCon, path, filename, insert(filename));
-                Condition.sendDataElement(sqlCon, path, database);
-                RessourceProd.sendDataElement(sqlCon, path, database);
-                ArticleRessource.sendDataElement(sqlCon, path, database);
-                ArtCompta.sendDataElement(sqlCon, path, database);
-                ArtClient.sendDataElement(sqlCon, path, database);
-                ArtFourniss.sendDataElement(sqlCon, path, database);
+                Condition.sendDataElement(sqlCon, path);
+                RessourceProd.sendDataElement(sqlCon, path);
+                ArticleRessource.sendDataElement(sqlCon, path);
+                ArtCompta.sendDataElement(sqlCon, path);
+                ArtClient.sendDataElement(sqlCon, path);
+                ArtFourniss.sendDataElement(sqlCon, path);
                 linkArticle(sqlCon);
                 readOnFile(path, "deleteList" + filename, "F_ARTCLIENT_SUPPR", sqlCon);
 
-                deleteTempTable(sqlCon, tableName+"_DEST");
+                deleteTempTable(sqlCon, tableName + "_DEST");
                 deleteTempTable(sqlCon, "F_ARTICLERESSOURCE_DEST");
                 deleteTempTable(sqlCon, "F_CONDITION_DEST");
                 deleteTempTable(sqlCon, "F_RESSOURCEPROD_DEST");
 
-                deleteItem(sqlCon, path, filename, tableName);
-                deleteArticle(sqlCon, path,filename);
+                deleteItem(sqlCon, path, filename);
+                deleteArticle(sqlCon, path, filename);
             }
         }
     }

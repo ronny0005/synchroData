@@ -50,27 +50,22 @@ public class Compteg extends Table {
                 "   GETDATE());\n" +
                 "END CATCH";
     }
-    public static void sendDataElement(Connection sqlCon, String path,String database)
+    public static void sendDataElement(Connection sqlCon, String path)
     {
         File dir = new File(path);
-        FilenameFilter filter = new FilenameFilter() {
-            public boolean accept(File dir, String name) {
-                return name.startsWith(file);
-            }
-        };
+        FilenameFilter filter = (dir1, name) -> name.startsWith(file);
         String[] children = dir.list(filter);
         if (children == null) {
             System.out.println("Either dir does not exist or is not a directory");
         } else {
-            for (int i = 0; i < children.length; i++) {
-                String filename = children[i];
+            for (String filename : children) {
                 readOnFile(path, filename, tableName + "_DEST", sqlCon);
                 readOnFile(path, "deleteList" + filename, tableName + "_SUPPR", sqlCon);
-                executeQuery(sqlCon, updateTableDest("CG_Num,CG_Type", "'CG_Num','CG_Type'", tableName, tableName + "_DEST",filename));
+                executeQuery(sqlCon, updateTableDest("CG_Num,CG_Type", "'CG_Num','CG_Type'", tableName, tableName + "_DEST", filename));
                 sendData(sqlCon, path, filename, insert(filename));
 
-                deleteTempTable(sqlCon, tableName+"_DEST");
-                deleteCompteg(sqlCon, path,filename);
+                deleteTempTable(sqlCon, tableName + "_DEST");
+                deleteCompteg(sqlCon, path, filename);
             }
         }
     }

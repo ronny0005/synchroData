@@ -50,27 +50,22 @@ public class ArtFourniss extends Table {
                         "END CATCH";
     }
 
-    public static void sendDataElement(Connection sqlCon, String path,String database)
+    public static void sendDataElement(Connection sqlCon, String path)
     {
         File dir = new File(path);
-        FilenameFilter filter = new FilenameFilter() {
-            public boolean accept(File dir, String name) {
-                return name.startsWith(file);
-            }
-        };
+        FilenameFilter filter = (dir1, name) -> name.startsWith(file);
         String[] children = dir.list(filter);
         if (children == null) {
             System.out.println("Either dir does not exist or is not a directory");
         } else {
-            for (int i = 0; i < children.length; i++) {
-                String filename = children[i];
+            for (String filename : children) {
                 readOnFile(path, filename, tableName + "_DEST", sqlCon);
                 readOnFile(path, "deleteList" + filename, tableName + "_SUPPR", sqlCon);
-                executeQuery(sqlCon, updateTableDest("AR_Ref,CT_Num", "'AR_Ref','CT_Num'", tableName, tableName + "_DEST",filename));
+                executeQuery(sqlCon, updateTableDest("AR_Ref,CT_Num", "'AR_Ref','CT_Num'", tableName, tableName + "_DEST", filename));
                 sendData(sqlCon, path, filename, insert(filename));
 
-                deleteTempTable(sqlCon, tableName+"_DEST");
-                deleteArtFourniss(sqlCon, path,filename);
+                deleteTempTable(sqlCon, tableName + "_DEST");
+                deleteArtFourniss(sqlCon, path, filename);
             }
         }
     }
@@ -81,15 +76,6 @@ public class ArtFourniss extends Table {
         initTableParam(sqlCon,tableName,configList,"AR_Ref,CT_Num");//initTable(sqlCon);
         getData(sqlCon, selectSourceTable(tableName,database)/*list()*/, tableName, path, filename);
         listDeleteAllInfo(sqlCon, path, "deleteList" + filename,tableName,configList,database);
-    }
-
-    public static void initTable(Connection sqlCon)
-    {
-        String query = " IF NOT EXISTS (SELECT 1 FROM config.SelectTable WHERE tableName='F_ARTFOURNISS') \n" +
-                "     INSERT INTO config.ListArtFourniss\n" +
-                "     SELECT AR_Ref,CT_Num,cbMarq \n" +
-                "     FROM F_ARTFOURNISS";
-        executeQuery(sqlCon, query);
     }
 
     public static void deleteArtFourniss(Connection sqlCon, String path,String filename)

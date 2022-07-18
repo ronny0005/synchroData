@@ -45,27 +45,22 @@ public class JMouv extends Table {
                 "END CATCH";
     }
 
-    public static void sendDataElement(Connection sqlCon, String path,String database) {
+    public static void sendDataElement(Connection sqlCon, String path) {
         File dir = new File(path);
-        FilenameFilter filter = new FilenameFilter() {
-            public boolean accept(File dir, String name) {
-                return name.startsWith(file);
-            }
-        };
+        FilenameFilter filter = (dir1, name) -> name.startsWith(file);
         String[] children = dir.list(filter);
         if (children == null) {
             System.out.println("Either dir does not exist or is not a directory");
         } else {
-            for (int i = 0; i < children.length; i++) {
-                String filename = children[i];
+            for (String filename : children) {
                 readOnFile(path, filename, tableName + "_DEST", sqlCon);
 
                 readOnFile(path, "deleteList" + filename, tableName + "_SUPPR", sqlCon);
-                executeQuery(sqlCon, updateTableDest("JO_Num,JM_Date", "'JO_Num','JM_Date'", tableName, tableName + "_DEST",filename));
+                executeQuery(sqlCon, updateTableDest("JO_Num,JM_Date", "'JO_Num','JM_Date'", tableName, tableName + "_DEST", filename));
                 sendData(sqlCon, path, filename, insert(filename));
 
-                deleteTempTable(sqlCon, tableName+"_DEST");
-                deleteArtCompta(sqlCon, path,filename);
+                deleteTempTable(sqlCon, tableName + "_DEST");
+                deleteArtCompta(sqlCon, path, filename);
             }
         }
     }

@@ -105,26 +105,21 @@ public class EcritureC extends Table {
     public static void sendDataElement(Connection  sqlCon, String path,String database)
     {
         File dir = new File(path);
-        FilenameFilter filter = new FilenameFilter() {
-            public boolean accept(File dir, String name) {
-                return name.startsWith(file);
-            }
-        };
+        FilenameFilter filter = (dir1, name) -> name.startsWith(file);
         String[] children = dir.list(filter);
         if (children == null) {
             System.out.println("Either dir does not exist or is not a directory");
         } else {
-            for (int i = 0; i < children.length; i++) {
-                String filename = children[i];
+            for (String filename : children) {
                 dbSource = database;
 
                 readOnFile(path, filename, tableName + "_DEST", sqlCon);
                 readOnFile(path, "deleteList" + filename, tableName + "_SUPPR", sqlCon);
-                executeQuery(sqlCon, updateTableDest("", "'EC_No','JM_Date','JO_Num','EC_CType'", tableName, tableName + "_DEST",filename));
+                executeQuery(sqlCon, updateTableDest("", "'EC_No','JM_Date','JO_Num','EC_CType'", tableName, tableName + "_DEST", filename));
                 sendData(sqlCon, path, filename, insert(filename));
-                deleteTempTable(sqlCon, tableName+"_DEST");
+                deleteTempTable(sqlCon, tableName + "_DEST");
 
-                deleteEcritureC(sqlCon, path,filename);
+                deleteEcritureC(sqlCon, path, filename);
             }
         }
     }

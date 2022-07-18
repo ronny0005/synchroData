@@ -1,8 +1,6 @@
 import java.io.File;
 import java.io.FilenameFilter;
 import java.sql.Connection;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 
 public class Depot extends Table{
 
@@ -67,32 +65,27 @@ public class Depot extends Table{
         //" WHERE F_DEPOTEMPL_DEST.DP_No = F_DEPOTEMPL.DP_No";
         executeQuery(sqlCon, query);
     }
-    public static void sendDataElement(Connection sqlCon, String path,String database)
+    public static void sendDataElement(Connection sqlCon, String path)
     {
 
         File dir = new File(path);
-        FilenameFilter filter = new FilenameFilter() {
-            public boolean accept (File dir, String name) {
-                return name.startsWith(file);
-            }
-        };
+        FilenameFilter filter = (dir1, name) -> name.startsWith(file);
         String[] children = dir.list(filter);
         if (children == null) {
             System.out.println("Either dir does not exist or is not a directory");
         } else {
-            for (int i = 0; i< children.length; i++) {
-                String filename = children[i];
-                readOnFile(path,filename,tableName+"_DEST",sqlCon);
-                readOnFile(path,"deleteList"+filename,tableName+"_SUPPR",sqlCon);
-                executeQuery(sqlCon,updateTableDest( "","'DE_No','DP_NoDefaut','DE_Code','DE_NoSource','DatabaseSource','DE_Intitule'",tableName,tableName+"_DEST",filename));
-                sendData(sqlCon, path, filename,insert(filename));
+            for (String filename : children) {
+                readOnFile(path, filename, tableName + "_DEST", sqlCon);
+                readOnFile(path, "deleteList" + filename, tableName + "_SUPPR", sqlCon);
+                executeQuery(sqlCon, updateTableDest("", "'DE_No','DP_NoDefaut','DE_Code','DE_NoSource','DatabaseSource','DE_Intitule'", tableName, tableName + "_DEST", filename));
+                sendData(sqlCon, path, filename, insert(filename));
 
-                DepotEmpl.sendDataElement(sqlCon, path,database);
+                DepotEmpl.sendDataElement(sqlCon, path);
                 linkDepot(sqlCon);
 
-                deleteTempTable(sqlCon, tableName+"_DEST");
+                deleteTempTable(sqlCon, tableName + "_DEST");
 
-                deleteDepot(sqlCon, path,filename);
+                deleteDepot(sqlCon, path, filename);
             }
         }
 

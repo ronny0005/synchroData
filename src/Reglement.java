@@ -1,7 +1,4 @@
-import java.io.File;
-import java.io.FilenameFilter;
 import java.sql.Connection;
-import java.sql.SQLException;
 
 public class Reglement extends Table {
 
@@ -126,33 +123,7 @@ public class Reglement extends Table {
                 "   GETDATE());\n" +
                 "END CATCH";
     }
-    /*
-    public static void sendDataElement(Connection sqlCon, String path,String database)
-    {
-        File dir = new File(path);
-        FilenameFilter filter = new FilenameFilter() {
-            public boolean accept(File dir, String name) {
-                return name.startsWith(file);
-            }
-        };
-        String[] children = dir.list(filter);
-        if (children == null) {
-            System.out.println("Either dir does not exist or is not a directory");
-        } else {
-            for (int i = 0; i < children.length; i++) {
-                String filename = children[i];
-                dbSource = database;
-                readOnFile(path, filename, tableName + "_DEST", sqlCon);
-                readOnFile(path, "deleteList" + filename, tableName + "_SUPPR", sqlCon);
-                executeQuery(sqlCon, updateTableDest("", "'RG_No'", tableName, tableName + "_DEST",filename));
-                sendData(sqlCon, path, filename, insert(filename));
 
-                deleteTempTable(sqlCon, tableName + "_DEST");
-                deleteReglement(sqlCon, path,filename);
-            }
-        }
-    }
-*/
     public static void sendDataElement(Connection sqlCon, String path,String database)
     {
         dbSource = database;

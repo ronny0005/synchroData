@@ -3,22 +3,19 @@ import org.json.simple.JSONObject;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.sql.*;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Date;
 
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 
 public class Table {
 
-    private static BufferedWriter fileWriter;
-    private static String DATE_FORMAT = "yyyy-MM-dd HH:mm:ss.s";
+    private static final String DATE_FORMAT = "yyyy-MM-dd HH:mm:ss.s";
     private static Statement stmt;
-    private static SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyyMMddHHmmssSSS");
+
     public static String selectSourceTable(String table,String dataSource){
         return "BEGIN \n" +
                 "DECLARE @MaColonne AS VARCHAR(250);\n" +
@@ -336,30 +333,20 @@ public class Table {
 
     public static void loadDeleteFile(String path,Connection sqlCon,String file,String tableName,String query) {
         File dir = new File(path);
-        FilenameFilter filter = new FilenameFilter() {
-            public boolean accept(File dir, String name) {
-                return name.startsWith("deleteList"+file);
-            }
-        };
+        FilenameFilter filter = (dir1, name) -> name.startsWith("deleteList"+file);
         String [] children = dir.list(filter);
         if (children == null) {
             System.out.println("Either dir does not exist or is not a directory");
         } else {
-            for (int i = 0; i < children.length; i++) {
-                String filename = children[i];
-                String deleteDocEntete = query;
-                loadDeleteInfo(path,tableName,filename,sqlCon,deleteDocEntete);
+            for (String filename : children) {
+                loadDeleteInfo(path, tableName, filename, sqlCon, query);
             }
         }
     }
 
     public static String [] getFile(String path,String file){
         File dir = new File(path);
-        FilenameFilter filter = new FilenameFilter() {
-            public boolean accept(File dir, String name) {
-                return name.startsWith(file);
-            }
-        };
+        FilenameFilter filter = (dir1, name) -> name.startsWith(file);
         return dir.list(filter);
     }
 
@@ -374,7 +361,7 @@ public class Table {
         deleteTempTable(sqlCon, tableName+"_SUPPR");
     }
 
-    public static void deleteItem(Connection sqlCon, String path,String file,String table)
+    public static void deleteItem(Connection sqlCon, String path,String file)
     {
         String query =
                 "BEGIN TRY\n" +
@@ -471,15 +458,15 @@ public class Table {
     }
     public static String updateTableDest(String key,String exclude,String tableName,String tableNameDest,String filename){
         String[] keys = key.split(",");
-        String sql =  "\n" +
+        StringBuilder sql = new StringBuilder("\n" +
                 "BEGIN TRY\n" +
                 "SET DATEFORMAT ymd;\n" +
                 "DECLARE @MaColonne AS VARCHAR(250);\n" +
                 "DECLARE @MonSQL AS VARCHAR(MAX) = ''; \n" +
-                "DECLARE @isKey AS INT=CASE WHEN '"+ key +"' = '' THEN 0 ELSE 1 END; \n" +
-                "DECLARE @Key AS NVARCHAR(250) = '"+key+"'; \n" +
-                "DECLARE @TableName AS VARCHAR(100) = '"+tableName+"'; \n" +
-                "DECLARE @TableNameDest AS VARCHAR(100) = '"+tableNameDest+"'; \n" +
+                "DECLARE @isKey AS INT=CASE WHEN '" + key + "' = '' THEN 0 ELSE 1 END; \n" +
+                "DECLARE @Key AS NVARCHAR(250) = '" + key + "'; \n" +
+                "DECLARE @TableName AS VARCHAR(100) = '" + tableName + "'; \n" +
+                "DECLARE @TableNameDest AS VARCHAR(100) = '" + tableNameDest + "'; \n" +
                 "DECLARE @getid CURSOR\n" +
                 "\n" +
                 "SET @getid = CURSOR FOR\n" +
@@ -489,7 +476,7 @@ public class Table {
                 "\tON tab.object_id = col.object_id\n" +
                 "WHERE tab.name = @TableName\n" +
                 "AND col.name NOT LIKE 'cb%'\n" +
-                "AND col.name NOT IN ("+ exclude +")\n" +
+                "AND col.name NOT IN (" + exclude + ")\n" +
                 "\n" +
                 "OPEN @getid\n" +
                 "FETCH NEXT\n" +
@@ -507,41 +494,21 @@ public class Table {
                 "IF @isKey = 0 \n" +
                 "\tSELECT @MonSQL = @MonSQL + @TableName + '.cbMarqSource = '+ @TableNameDest+'.cbMarqSource '\n" +
                 "\t\t\t\t\t\t+' AND '+@TableName + '.DataBaseSource = '+ @TableNameDest+'.DataBaseSource '\n" +
-                "ELSE \n" ;
+                "ELSE \n");
         for (int i = 0;i< keys.length;i++) {
             if(i== 0 ) {
-                sql = sql + " SELECT @MonSQL = @MonSQL ";
-                sql = sql + "+ @TableName + '." + keys[i] + " = '+ @TableNameDest+'." + keys[i] + " '";
+                sql.append(" SELECT @MonSQL = @MonSQL ");
+                sql.append("+ @TableName + '.").append(keys[i]).append(" = '+ @TableNameDest+'.").append(keys[i]).append(" '");
             }
             if(i>0)
-                sql = sql + "+' AND '+@TableName + '."+keys[i]+" = '+ @TableNameDest+'."+keys[i]+" '";
+                sql.append("+' AND '+@TableName + '.").append(keys[i]).append(" = '+ @TableNameDest+'.").append(keys[i]).append(" '");
         }
-        sql =  sql +
-                "\n" +
-                "EXEC (@MonSQL) \n" +
-                "\n" +
-                "END TRY\n" +
-                "BEGIN CATCH \n" +
-                "\tINSERT INTO config.DB_Errors\n" +
-                "\tVALUES\n" +
-                "\t(\n" +
-                "\t\tSUSER_SNAME(),\n" +
-                "\t\tERROR_NUMBER(),\n" +
-                "\t\tERROR_STATE(),\n" +
-                "\t\tERROR_SEVERITY(),\n" +
-                "\t\tERROR_LINE(),\n" +
-                "\t\tERROR_PROCEDURE(),\n" +
-                "\t\tERROR_MESSAGE(),\n" +
-                "\t\t@TableName + ' "+filename+"',\n" +
-                "\t\t@MonSQL,\n" +
-                "\t\tGETDATE()\n" +
-                "\t);\n" +
-                "END CATCH";
-        return sql;
+        sql.append("\n").append("EXEC (@MonSQL) \n").append("\n").append("END TRY\n").append("BEGIN CATCH \n").append("\tINSERT INTO config.DB_Errors\n").append("\tVALUES\n").append("\t(\n").append("\t\tSUSER_SNAME(),\n").append("\t\tERROR_NUMBER(),\n").append("\t\tERROR_STATE(),\n").append("\t\tERROR_SEVERITY(),\n").append("\t\tERROR_LINE(),\n").append("\t\tERROR_PROCEDURE(),\n").append("\t\tERROR_MESSAGE(),\n").append("\t\t@TableName + ' ").append(filename).append("',\n").append("\t\t@MonSQL,\n").append("\t\tGETDATE()\n").append("\t);\n").append("END CATCH");
+        return sql.toString();
     }
     public static void archiveDocument(String archive, String source,String file)
     {
-        String folder[] = file.split("_");
+        String[] folder = file.split("_");
         String year = folder[1].substring(0,4);
         String month = folder[1].substring(4,6);
         String day = folder[1].substring(6,8);
@@ -601,8 +568,8 @@ public class Table {
 
     public static void writeOnFile(String fileName, String query, Connection sqlCon)
     {
-        ResultSet result = null;
-        FileWriter fileWriter = null;
+        ResultSet result;
+        FileWriter fileWriter;
         try {
             result = executeQueryResult(sqlCon,query);
 
@@ -639,21 +606,18 @@ public class Table {
                 fileWriter.close();
                 stmt.close();
             }
-        } catch (SQLException throwables) {
+        } catch (SQLException | IOException throwables) {
             throwables.printStackTrace();
-        }
-        catch (IOException e) {
-            e.printStackTrace();
         }
     }
 
     public static void readOnFile(String path,String fileInfo,String table,Connection sqlCon)
     {
-        String line = "";
-        String sql = "";
-        String sqlCreateTable = "";
+        String line;
+        String sql;
+        StringBuilder sqlCreateTable;
         String header = "";
-        String lineHeader = "";
+        String lineHeader;
         String fileName = path+"\\"+fileInfo;
         try {
             File file = new File(fileName);
@@ -666,20 +630,18 @@ public class Table {
                         lineHeader = line;
                         line = line.replace(";", ",").replace("\"", "");
 
-                        sqlCreateTable = "IF OBJECT_ID('" + table + "') IS NOT NULL \n" +
+                        sqlCreateTable = new StringBuilder("IF OBJECT_ID('" + table + "') IS NOT NULL \n" +
                                 "\tDROP TABLE " + table + "\n" +
                                 "\n" +
-                                "SELECT ";
+                                "SELECT ");
                         String[] value = lineHeader.split(";");
-                        for (String data : value) {
-                            sqlCreateTable = sqlCreateTable +" "+ data + " = CAST('' AS NVARCHAR(150)),";
-                        }
-                        sqlCreateTable = sqlCreateTable.substring(0, sqlCreateTable.length() - 1);
+                        for (String data : value)
+                            sqlCreateTable.append(" ").append(data).append(" = CAST('' AS NVARCHAR(150)),");
 
-                        sqlCreateTable = sqlCreateTable +   " INTO " + table
-                                                        +   /*" FROM " + table.replace("_DEST", "") +*/ ";" +
-                                                            " TRUNCATE TABLE " + table;
-                        executeQuery(sqlCon,sqlCreateTable);
+                        sqlCreateTable = new StringBuilder(sqlCreateTable.substring(0, sqlCreateTable.length() - 1));
+
+                        sqlCreateTable.append(" INTO ").append(table).append(   /*" FROM " + table.replace("_DEST", "") +*/ ";").append(" TRUNCATE TABLE ").append(table);
+                        executeQuery(sqlCon, sqlCreateTable.toString());
                         header = header + line + ")";
                     } else {
                         sql = header + "VALUES (";

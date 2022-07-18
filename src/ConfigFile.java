@@ -41,14 +41,16 @@ public class ConfigFile {
     private JCheckBox SrcJournauxCheckBox;
     private JCheckBox SrcCollaborateurCheckBox;
     private JTextField SrcNomConfig;
-    private JComboBox SrcListConfig;
+    private JComboBox<ComboItem> SrcListConfig;
     private JButton SrcAjoutConfig;
     private JCheckBox EnvoiCheckBox;
     private JCheckBox ReceptionCheckBox;
-    private String databaseSourceFile = "resource/databaseSource.json";
-    private JSONArray infoSource = DataBase.getInfoConnexion(databaseSourceFile);
-    private JSONObject object = (JSONObject) infoSource.get(0);
+    private final String databaseSourceFile = "resource/databaseSource.json";
+    private final JSONArray infoSource = DataBase.getInfoConnexion(databaseSourceFile);
+    private JSONObject object = (JSONObject) (infoSource != null ? infoSource.get(0) : null);
     private ComboItem comboItem;
+    private boolean newItem;
+    private boolean focusOutName;
 
 
     public void fileChooser(){
@@ -57,8 +59,8 @@ public class ConfigFile {
                         .getFileSystemView()
                         .getHomeDirectory()
         );
-        if(!SrcRepertoire.getText().toString().equals(""))
-            choose.setCurrentDirectory(new File(SrcRepertoire.getText().toString()));
+        if(!SrcRepertoire.getText().equals(""))
+            choose.setCurrentDirectory(new File(SrcRepertoire.getText()));
         choose.setDialogTitle("Choisissez un repertoire: ");
         choose.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
         int res = choose.showSaveDialog(null);
@@ -72,10 +74,7 @@ public class ConfigFile {
     }
 
     public void checkBox(int value,JCheckBox checkBox){
-        if(value == 1)
-            checkBox.setSelected(true);
-        else
-            checkBox.setSelected(false);
+        checkBox.setSelected(value == 1);
     }
 
     public String setCheckBox(JCheckBox checkBox){
@@ -85,54 +84,79 @@ public class ConfigFile {
             return "0";
     }
 
-    public void setListConfig(){
+    public void setListConfig(boolean ajout){
+        int selected = ((SrcListConfig.getSelectedIndex() == -1) ? 0 : SrcListConfig.getSelectedIndex());
+        if(ajout)
+            if (infoSource != null) {
+                selected = infoSource.size()-1;
+            }
         SrcListConfig.removeAllItems();
-        for(int i = 0;i<infoSource.size();i++)
-            SrcListConfig.addItem(new ComboItem((String)((JSONObject)infoSource.get(i)).get("nomconfig"), i+""));
-
+        String nomConfig;
+        JSONObject object;
+        if (infoSource != null) {
+            for(int i = 0;i<infoSource.size();i++) {
+                object = ((JSONObject) infoSource.get(i));
+                nomConfig = (String) (object.get("nomconfig"));
+                ComboItem comboItemAdd  = new ComboItem(nomConfig, i + "");
+                if(i==selected)
+                    comboItem = comboItemAdd;
+                SrcListConfig.addItem(comboItemAdd);
+            }
+        }
+        SrcListConfig.setSelectedIndex(selected);
     }
+
+    public void AddItem(){
+        if (infoSource != null) {
+            SrcListConfig.addItem(new ComboItem("", (infoSource.size() - 1) + ""));
+        }
+    }
+
     public void initValue(){
-        setListConfig();
+        newItem = false;
+        setListConfig(false);
         getConfigData(0);
-        comboItem = (ComboItem) SrcListConfig.getSelectedItem();
+        comboItem = SrcListConfig.getItemAt(0);
     }
 
     public void getConfigData(int position) {
-        object = (JSONObject) infoSource.get(position);
-        dossierFTPSource.setText((String)object.get("folderftp"));
-        codeAgence.setText((String)object.get("codeagence"));
-        SrcServerName.setText((String)object.get("servername"));
-        SrcBaseDeDonnees.setText((String)object.get("database"));
-        SrcLogin.setText((String)object.get("username"));
-        SrcMotDePasse.setText((String)object.get("password"));
-        SrcRepertoire.setText((String)object.get("path"));
-        SrcNomConfig.setText((String)object.get("nomconfig"));
-        checkBox(Integer.valueOf((String)object.get("envoi")),EnvoiCheckBox);
-        checkBox(Integer.valueOf((String)object.get("reception")),ReceptionCheckBox);
-        checkBox(Integer.valueOf((String)object.get("article")),SrcArticlesCheckBox);
-        checkBox(Integer.valueOf((String)object.get("tiers")),SrcTiersCheckBox);
-        checkBox(Integer.valueOf((String)object.get("depot")),SrcDepotCheckBox);
-        checkBox(Integer.valueOf((String)object.get("entete")),SrcEnteteCheckBox);
-        checkBox(Integer.valueOf((String)object.get("ligne")),SrcLigneCheckBox);
-        checkBox(Integer.valueOf((String)object.get("reglement")),SrcReglementCheckBox);
-        checkBox(Integer.valueOf((String)object.get("artstock")),SrcArtStockCheckBox);
-        checkBox(Integer.valueOf((String)object.get("ecriturec")),SrcEcritureCCheckBox);
-        checkBox(Integer.valueOf((String)object.get("ecriturea")),SrcEcritureACheckBox);
-        checkBox(Integer.valueOf((String)object.get("compteg")), SrcCompteGeneralCheckBox);
-        checkBox(Integer.valueOf((String)object.get("taxe")), SrcTaxeCheckBox);
-        checkBox(Integer.valueOf((String)object.get("journaux")), SrcJournauxCheckBox);
-        checkBox(Integer.valueOf((String)object.get("collaborateur")), SrcCollaborateurCheckBox);
-        checkBox(Integer.valueOf((String)((JSONObject)object.get("typedocument")).get("facturedevente")), factureDeVenteCheckBox);
-        checkBox(Integer.valueOf((String)((JSONObject)object.get("typedocument")).get("devis")), devisCheckBox);
-        checkBox(Integer.valueOf((String)((JSONObject)object.get("typedocument")).get("bondelivraison")), bonDeLivraisonCheckBox);
-        checkBox(Integer.valueOf((String)((JSONObject)object.get("typedocument")).get("facturedachat")), factureDAchatCheckBox);
-        checkBox(Integer.valueOf((String)((JSONObject)object.get("typedocument")).get("entree")), documentDEntréeCheckBox);
-        checkBox(Integer.valueOf((String)((JSONObject)object.get("typedocument")).get("sortie")), documentDeSortieCheckBox);
-        checkBox(Integer.valueOf((String)((JSONObject)object.get("typedocument")).get("transfert")), documentDeTransfertCheckBox);
-        checkBox(Integer.valueOf((String)((JSONObject)object.get("typedocument")).get("documentinterne1")), documentInterne1CheckBox);
-        checkBox(Integer.valueOf((String)((JSONObject)object.get("typedocument")).get("documentinterne2")), documentInterne2CheckBox);
-        checkBox(Integer.valueOf((String)((JSONObject)object.get("typedocument")).get("vente")), venteCheckBox);
-        checkBox(Integer.valueOf((String)((JSONObject)object.get("typedocument")).get("stock")), stockCheckBox);
+        object = (JSONObject) (infoSource != null ? infoSource.get(position) : null);
+        if (object != null) {
+            dossierFTPSource.setText((String)object.get("folderftp"));
+            codeAgence.setText((String)object.get("codeagence"));
+            SrcServerName.setText((String)object.get("servername"));
+            SrcBaseDeDonnees.setText((String)object.get("database"));
+            SrcLogin.setText((String)object.get("username"));
+            SrcMotDePasse.setText((String)object.get("password"));
+            SrcRepertoire.setText((String)object.get("path"));
+            SrcNomConfig.setText((String)object.get("nomconfig"));
+            checkBox(Integer.parseInt((String)object.get("envoi")),EnvoiCheckBox);
+            checkBox(Integer.parseInt((String)object.get("reception")),ReceptionCheckBox);
+            checkBox(Integer.parseInt((String)object.get("article")),SrcArticlesCheckBox);
+            checkBox(Integer.parseInt((String)object.get("tiers")),SrcTiersCheckBox);
+            checkBox(Integer.parseInt((String)object.get("depot")),SrcDepotCheckBox);
+            checkBox(Integer.parseInt((String)object.get("entete")),SrcEnteteCheckBox);
+            checkBox(Integer.parseInt((String)object.get("ligne")),SrcLigneCheckBox);
+            checkBox(Integer.parseInt((String)object.get("reglement")),SrcReglementCheckBox);
+            checkBox(Integer.parseInt((String)object.get("artstock")),SrcArtStockCheckBox);
+            checkBox(Integer.parseInt((String)object.get("ecriturec")),SrcEcritureCCheckBox);
+            checkBox(Integer.parseInt((String)object.get("ecriturea")),SrcEcritureACheckBox);
+            checkBox(Integer.parseInt((String)object.get("compteg")), SrcCompteGeneralCheckBox);
+            checkBox(Integer.parseInt((String)object.get("taxe")), SrcTaxeCheckBox);
+            checkBox(Integer.parseInt((String)object.get("journaux")), SrcJournauxCheckBox);
+            checkBox(Integer.parseInt((String)object.get("collaborateur")), SrcCollaborateurCheckBox);
+            checkBox(Integer.parseInt((String)((JSONObject)object.get("typedocument")).get("facturedevente")), factureDeVenteCheckBox);
+            checkBox(Integer.parseInt((String)((JSONObject)object.get("typedocument")).get("devis")), devisCheckBox);
+            checkBox(Integer.parseInt((String)((JSONObject)object.get("typedocument")).get("bondelivraison")), bonDeLivraisonCheckBox);
+            checkBox(Integer.parseInt((String)((JSONObject)object.get("typedocument")).get("facturedachat")), factureDAchatCheckBox);
+            checkBox(Integer.parseInt((String)((JSONObject)object.get("typedocument")).get("entree")), documentDEntréeCheckBox);
+            checkBox(Integer.parseInt((String)((JSONObject)object.get("typedocument")).get("sortie")), documentDeSortieCheckBox);
+            checkBox(Integer.parseInt((String)((JSONObject)object.get("typedocument")).get("transfert")), documentDeTransfertCheckBox);
+            checkBox(Integer.parseInt((String)((JSONObject)object.get("typedocument")).get("documentinterne1")), documentInterne1CheckBox);
+            checkBox(Integer.parseInt((String)((JSONObject)object.get("typedocument")).get("documentinterne2")), documentInterne2CheckBox);
+            checkBox(Integer.parseInt((String)((JSONObject)object.get("typedocument")).get("vente")), venteCheckBox);
+            checkBox(Integer.parseInt((String)((JSONObject)object.get("typedocument")).get("stock")), stockCheckBox);
+        }
     }
 
     public JSONObject initJson(){
@@ -158,6 +182,8 @@ public class ConfigFile {
         jsonObject.put("taxe","0");
         jsonObject.put("journaux","0");
         jsonObject.put("collaborateur","0");
+        jsonObject.put("envoi","0");
+        jsonObject.put("reception","0");
         JSONObject typeDocument = new JSONObject();
         typeDocument.put("facturedevente","0");
         typeDocument.put("devis","0");
@@ -170,166 +196,127 @@ public class ConfigFile {
         typeDocument.put("documentinterne2","0");
         typeDocument.put("vente","0");
         typeDocument.put("stock","0");
-        typeDocument.put("envoi","0");
-        typeDocument.put("reception","0");
         jsonObject.put("typedocument",typeDocument);
         return jsonObject;
     }
     public void setConfigData(int position){
-        object = (JSONObject) infoSource.get(position);
-        object.put("servername",SrcServerName.getText());
-        object.put("nomconfig",SrcNomConfig.getText());
-        object.put("database",SrcBaseDeDonnees.getText());
-        object.put("username",SrcLogin.getText());
-        object.put("password",SrcMotDePasse.getText());
-        object.put("path",SrcRepertoire.getText());
-        object.put("folderftp", dossierFTPSource.getText());
-        object.put("codeagence",codeAgence.getText());
-        object.put("article",setCheckBox(SrcArticlesCheckBox));
-        object.put("tiers",setCheckBox(SrcTiersCheckBox));
-        object.put("depot",setCheckBox(SrcDepotCheckBox));
-        object.put("entete",setCheckBox(SrcEnteteCheckBox));
-        object.put("ligne",setCheckBox(SrcLigneCheckBox));
-        object.put("reglement",setCheckBox(SrcReglementCheckBox));
-        object.put("artstock",setCheckBox(SrcArtStockCheckBox));
-        object.put("ecriturec",setCheckBox(SrcEcritureCCheckBox));
-        object.put("ecriturea",setCheckBox(SrcEcritureACheckBox));
-        object.put("compteg",setCheckBox(SrcCompteGeneralCheckBox));
-        object.put("taxe",setCheckBox(SrcTaxeCheckBox));
-        object.put("journaux",setCheckBox(SrcJournauxCheckBox));
-        object.put("collaborateur",setCheckBox(SrcCollaborateurCheckBox));
-        object.put("envoi",setCheckBox(EnvoiCheckBox));
-        object.put("reception",setCheckBox(ReceptionCheckBox));
-        JSONObject typeDocument = new JSONObject();
-        typeDocument.put("facturedevente",setCheckBox(factureDeVenteCheckBox));
-        typeDocument.put("devis",setCheckBox(devisCheckBox));
-        typeDocument.put("bondelivraison",setCheckBox(bonDeLivraisonCheckBox));
-        typeDocument.put("facturedachat",setCheckBox(factureDAchatCheckBox));
-        typeDocument.put("entree",setCheckBox(documentDEntréeCheckBox));
-        typeDocument.put("sortie",setCheckBox(documentDeSortieCheckBox));
-        typeDocument.put("transfert",setCheckBox(documentDeTransfertCheckBox));
-        typeDocument.put("documentinterne1",setCheckBox(documentInterne1CheckBox));
-        typeDocument.put("documentinterne2",setCheckBox(documentInterne2CheckBox));
-        typeDocument.put("vente",setCheckBox(venteCheckBox));
-        typeDocument.put("stock",setCheckBox(stockCheckBox));
-        object.put("typedocument",typeDocument);
-        infoSource.set(position,object);
+        if (infoSource != null) {
+            object = (JSONObject) infoSource.get(position);
+            object.put("servername",SrcServerName.getText());
+            object.put("nomconfig",SrcNomConfig.getText());
+            object.put("database",SrcBaseDeDonnees.getText());
+            object.put("username",SrcLogin.getText());
+            object.put("password",SrcMotDePasse.getText());
+            object.put("path",SrcRepertoire.getText());
+            object.put("folderftp", dossierFTPSource.getText());
+            object.put("codeagence",codeAgence.getText());
+            object.put("article",setCheckBox(SrcArticlesCheckBox));
+            object.put("tiers",setCheckBox(SrcTiersCheckBox));
+            object.put("depot",setCheckBox(SrcDepotCheckBox));
+            object.put("entete",setCheckBox(SrcEnteteCheckBox));
+            object.put("ligne",setCheckBox(SrcLigneCheckBox));
+            object.put("reglement",setCheckBox(SrcReglementCheckBox));
+            object.put("artstock",setCheckBox(SrcArtStockCheckBox));
+            object.put("ecriturec",setCheckBox(SrcEcritureCCheckBox));
+            object.put("ecriturea",setCheckBox(SrcEcritureACheckBox));
+            object.put("compteg",setCheckBox(SrcCompteGeneralCheckBox));
+            object.put("taxe",setCheckBox(SrcTaxeCheckBox));
+            object.put("journaux",setCheckBox(SrcJournauxCheckBox));
+            object.put("collaborateur",setCheckBox(SrcCollaborateurCheckBox));
+            object.put("envoi",setCheckBox(EnvoiCheckBox));
+            object.put("reception",setCheckBox(ReceptionCheckBox));
+            JSONObject typeDocument = new JSONObject();
+            typeDocument.put("facturedevente",setCheckBox(factureDeVenteCheckBox));
+            typeDocument.put("devis",setCheckBox(devisCheckBox));
+            typeDocument.put("bondelivraison",setCheckBox(bonDeLivraisonCheckBox));
+            typeDocument.put("facturedachat",setCheckBox(factureDAchatCheckBox));
+            typeDocument.put("entree",setCheckBox(documentDEntréeCheckBox));
+            typeDocument.put("sortie",setCheckBox(documentDeSortieCheckBox));
+            typeDocument.put("transfert",setCheckBox(documentDeTransfertCheckBox));
+            typeDocument.put("documentinterne1",setCheckBox(documentInterne1CheckBox));
+            typeDocument.put("documentinterne2",setCheckBox(documentInterne2CheckBox));
+            typeDocument.put("vente",setCheckBox(venteCheckBox));
+            typeDocument.put("stock",setCheckBox(stockCheckBox));
+            object.put("typedocument",typeDocument);
+            infoSource.set(position,object);
+        }
     }
 
     public ConfigFile(){
         initValue();
-        validerButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent actionEvent) {
-                DataBase.setInfo((String)infoSource.toJSONString(),databaseSourceFile);
+        validerButton.addActionListener(actionEvent -> {
+            if (infoSource != null) {
+                DataBase.setInfo(infoSource.toJSONString(),databaseSourceFile);
+            }
 
-                JOptionPane.showMessageDialog(null, "Les informations ont été enregistrées");
+            JOptionPane.showMessageDialog(null, "Les informations ont été enregistrées");
+        });
+        venteCheckBox.addItemListener(e -> {
+            if(e.getStateChange() == ItemEvent.SELECTED) {
+                factureDeVenteCheckBox.setSelected(true);
+                devisCheckBox.setSelected(true);
+                bonDeLivraisonCheckBox.setSelected(true);
+            } else {
+                factureDeVenteCheckBox.setSelected(false);
+                devisCheckBox.setSelected(false);
+                bonDeLivraisonCheckBox.setSelected(false);
             }
         });
-        venteCheckBox.addItemListener(new ItemListener() {
-            @Override
-            public void itemStateChanged(ItemEvent e) {
-                if(e.getStateChange() == ItemEvent.SELECTED) {
-                    factureDeVenteCheckBox.setSelected(true);
-                    devisCheckBox.setSelected(true);
-                    bonDeLivraisonCheckBox.setSelected(true);
-                } else {
-                    factureDeVenteCheckBox.setSelected(false);
-                    devisCheckBox.setSelected(false);
-                    bonDeLivraisonCheckBox.setSelected(false);
-                };
+        factureDeVenteCheckBox.addItemListener(e -> {
+            if(e.getStateChange() != ItemEvent.SELECTED) {
+                venteCheckBox.setSelected(false);
             }
         });
-        factureDeVenteCheckBox.addItemListener(new ItemListener() {
-            @Override
-            public void itemStateChanged(ItemEvent e) {
-                if(e.getStateChange() != ItemEvent.SELECTED) {
-                    venteCheckBox.setSelected(false);
-                } else {
-
-                };
-            }
-        });
-        bonDeLivraisonCheckBox.addItemListener(new ItemListener() {
-            @Override
-            public void itemStateChanged(ItemEvent e) {
-                if(e.getStateChange() != ItemEvent.SELECTED) {
-                    venteCheckBox.setSelected(false);
-                } else {
-
-                };
+        bonDeLivraisonCheckBox.addItemListener(e -> {
+            if(e.getStateChange() != ItemEvent.SELECTED) {
+                venteCheckBox.setSelected(false);
             }
         });
 
-        stockCheckBox.addItemListener(new ItemListener() {
-            @Override
-            public void itemStateChanged(ItemEvent e) {
-                if(e.getStateChange() == ItemEvent.SELECTED) {
-                    documentDEntréeCheckBox.setSelected(true);
-                    documentDeSortieCheckBox.setSelected(true);
-                    documentDeTransfertCheckBox.setSelected(true);
-                } else {
-                    documentDEntréeCheckBox.setSelected(false);
-                    documentDeSortieCheckBox.setSelected(false);
-                    documentDeTransfertCheckBox.setSelected(false);
-                };
+        stockCheckBox.addItemListener(e -> {
+            if(e.getStateChange() == ItemEvent.SELECTED) {
+                documentDEntréeCheckBox.setSelected(true);
+                documentDeSortieCheckBox.setSelected(true);
+                documentDeTransfertCheckBox.setSelected(true);
+            } else {
+                documentDEntréeCheckBox.setSelected(false);
+                documentDeSortieCheckBox.setSelected(false);
+                documentDeTransfertCheckBox.setSelected(false);
             }
         });
 
-        documentDEntréeCheckBox.addItemListener(new ItemListener() {
-            @Override
-            public void itemStateChanged(ItemEvent e) {
-                if(e.getStateChange() != ItemEvent.SELECTED) {
-                    stockCheckBox.setSelected(false);
-                } else {
-
-                };
+        documentDEntréeCheckBox.addItemListener(e -> {
+            if(e.getStateChange() != ItemEvent.SELECTED) {
+                stockCheckBox.setSelected(false);
             }
         });
 
-        documentDeSortieCheckBox.addItemListener(new ItemListener() {
-            @Override
-            public void itemStateChanged(ItemEvent e) {
-                if(e.getStateChange() != ItemEvent.SELECTED) {
-                    stockCheckBox.setSelected(false);
-                } else {
-
-                };
+        documentDeSortieCheckBox.addItemListener(e -> {
+            if(e.getStateChange() != ItemEvent.SELECTED) {
+                stockCheckBox.setSelected(false);
             }
         });
 
-        documentDeTransfertCheckBox.addItemListener(new ItemListener() {
-            @Override
-            public void itemStateChanged(ItemEvent e) {
-                if(e.getStateChange() != ItemEvent.SELECTED) {
-                    stockCheckBox.setSelected(false);
-                } else {
-
-                };
+        documentDeTransfertCheckBox.addItemListener(e -> {
+            if(e.getStateChange() != ItemEvent.SELECTED) {
+                stockCheckBox.setSelected(false);
             }
         });
 
-        ReceptionCheckBox.addItemListener(new ItemListener() {
-            @Override
-            public void itemStateChanged(ItemEvent e) {
-                if(e.getStateChange() == ItemEvent.SELECTED) {
-                    EnvoiCheckBox.setSelected(false);
-                    setConfigData(Integer.valueOf(comboItem.getValue()));
-                } else {
-
-                };
+        ReceptionCheckBox.addItemListener(e -> {
+            if(e.getStateChange() == ItemEvent.SELECTED) {
+                EnvoiCheckBox.setSelected(false);
+                if(comboItem != null) {
+                    int value = Integer.parseInt(comboItem.getValue());
+                    setConfigData(value);
+                }
             }
         });
 
-        EnvoiCheckBox.addItemListener(new ItemListener() {
-            @Override
-            public void itemStateChanged(ItemEvent e) {
-                if(e.getStateChange() == ItemEvent.SELECTED) {
-                    ReceptionCheckBox.setSelected(false);
-                    setConfigData(Integer.valueOf(comboItem.getValue()));
-                } else {
-
-                };
+        EnvoiCheckBox.addItemListener(e -> {
+            if(e.getStateChange() == ItemEvent.SELECTED) {
+                ReceptionCheckBox.setSelected(false);
+                setConfigData(Integer.parseInt(comboItem.getValue()));
             }
         });
 
@@ -340,249 +327,135 @@ public class ConfigFile {
             }
         });
 
-        SrcAjoutConfig.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent e) {
+        SrcAjoutConfig.addActionListener(e -> {
+            if (infoSource != null) {
+                newItem = true;
                 infoSource.add(initJson());
-                setListConfig();
+                AddItem();
+                setListConfig(true);
                 getConfigData(infoSource.size()-1);
-                SrcListConfig.setSelectedIndex(SrcListConfig.getItemCount()-1);
-                comboItem = (ComboItem) SrcListConfig.getSelectedItem();
+                newItem = false;
             }
         });
 
-        SrcListConfig.addItemListener(new ItemListener() {
-            @Override
-            public void itemStateChanged(ItemEvent e) {
-                getConfigData(Integer.valueOf(((ComboItem)e.getItem()).getValue()));
-                comboItem = (ComboItem) SrcListConfig.getSelectedItem();
+        SrcListConfig.addActionListener(e -> {
+            if(!focusOutName)
+                comboItem = SrcListConfig.getItemAt(SrcListConfig.getSelectedIndex());
+            if(!newItem) {
+                getConfigData(Integer.parseInt(comboItem.getValue()));
+                setListConfig(false);
             }
         });
 
         SrcNomConfig.addFocusListener(new FocusAdapter() {
             @Override
             public void focusLost(FocusEvent e) {
-                setConfigData(Integer.valueOf(comboItem.getValue()));
-                setListConfig();
+                focusOutName = true;
+                setConfigData(Integer.parseInt(comboItem.getValue()));
+                if (infoSource != null) {
+                    object = ((JSONObject) infoSource.get(Integer.parseInt(comboItem.getValue())));
+                }
+                setListConfig(false);
+                focusOutName = false;
             }
         });
 
         SrcServerName.addFocusListener(new FocusAdapter() {
             @Override
             public void focusLost(FocusEvent e) {
-                setConfigData(Integer.valueOf(comboItem.getValue()));
+                setConfigData(Integer.parseInt(comboItem.getValue()));
             }
         });
 
         SrcBaseDeDonnees.addFocusListener(new FocusAdapter() {
             @Override
             public void focusLost(FocusEvent e) {
-                setConfigData(Integer.valueOf(comboItem.getValue()));
+                setConfigData(Integer.parseInt(comboItem.getValue()));
             }
         });
 
         SrcRepertoire.addFocusListener(new FocusAdapter() {
             @Override
             public void focusLost(FocusEvent e) {
-                setConfigData(Integer.valueOf(comboItem.getValue()));
+                setConfigData(Integer.parseInt(comboItem.getValue()));
             }
         });
 
         dossierFTPSource.addFocusListener(new FocusAdapter() {
             @Override
             public void focusLost(FocusEvent e) {
-                setConfigData(Integer.valueOf(comboItem.getValue()));
+                setConfigData(Integer.parseInt(comboItem.getValue()));
             }
         });
 
         codeAgence.addFocusListener(new FocusAdapter() {
             @Override
             public void focusLost(FocusEvent e) {
-                setConfigData(Integer.valueOf(comboItem.getValue()));
+                setConfigData(Integer.parseInt(comboItem.getValue()));
             }
         });
 
         SrcLogin.addFocusListener(new FocusAdapter() {
             @Override
             public void focusLost(FocusEvent e) {
-                setConfigData(Integer.valueOf(comboItem.getValue()));
+                setConfigData(Integer.parseInt(comboItem.getValue()));
             }
         });
 
         SrcMotDePasse.addFocusListener(new FocusAdapter() {
             @Override
             public void focusLost(FocusEvent e) {
-                setConfigData(Integer.valueOf(comboItem.getValue()));
+                setConfigData(Integer.parseInt(comboItem.getValue()));
             }
         });
 
-        SrcArticlesCheckBox.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                setConfigData(Integer.valueOf(comboItem.getValue()));
-            }
-        });
+        SrcArticlesCheckBox.addActionListener(e -> setConfigData(Integer.parseInt(comboItem.getValue())));
 
-        SrcTiersCheckBox.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                setConfigData(Integer.valueOf(comboItem.getValue()));
-            }
-        });
+        SrcTiersCheckBox.addActionListener(e -> setConfigData(Integer.parseInt(comboItem.getValue())));
 
-        SrcEnteteCheckBox.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                setConfigData(Integer.valueOf(comboItem.getValue()));
-            }
-        });
+        SrcEnteteCheckBox.addActionListener(e -> setConfigData(Integer.parseInt(comboItem.getValue())));
 
-        SrcDepotCheckBox.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                setConfigData(Integer.valueOf(comboItem.getValue()));
-            }
-        });
+        SrcDepotCheckBox.addActionListener(e -> setConfigData(Integer.parseInt(comboItem.getValue())));
 
-        SrcLigneCheckBox.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                setConfigData(Integer.valueOf(comboItem.getValue()));
-            }
-        });
+        SrcLigneCheckBox.addActionListener(e -> setConfigData(Integer.parseInt(comboItem.getValue())));
 
-        SrcReglementCheckBox.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                setConfigData(Integer.valueOf(comboItem.getValue()));
-            }
-        });
+        SrcReglementCheckBox.addActionListener(e -> setConfigData(Integer.parseInt(comboItem.getValue())));
 
-        SrcArtStockCheckBox.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                setConfigData(Integer.valueOf(comboItem.getValue()));
-            }
-        });
+        SrcArtStockCheckBox.addActionListener(e -> setConfigData(Integer.parseInt(comboItem.getValue())));
 
-        SrcEcritureCCheckBox.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                setConfigData(Integer.valueOf(comboItem.getValue()));
-            }
-        });
+        SrcEcritureCCheckBox.addActionListener(e -> setConfigData(Integer.parseInt(comboItem.getValue())));
 
-        SrcEcritureACheckBox.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                setConfigData(Integer.valueOf(comboItem.getValue()));
-            }
-        });
+        SrcEcritureACheckBox.addActionListener(e -> setConfigData(Integer.parseInt(comboItem.getValue())));
 
-        SrcCompteGeneralCheckBox.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                setConfigData(Integer.valueOf(comboItem.getValue()));
-            }
-        });
+        SrcCompteGeneralCheckBox.addActionListener(e -> setConfigData(Integer.parseInt(comboItem.getValue())));
 
-        SrcTaxeCheckBox.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                setConfigData(Integer.valueOf(comboItem.getValue()));
-            }
-        });
+        SrcTaxeCheckBox.addActionListener(e -> setConfigData(Integer.parseInt(comboItem.getValue())));
 
-        SrcJournauxCheckBox.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                setConfigData(Integer.valueOf(comboItem.getValue()));
-            }
-        });
+        SrcJournauxCheckBox.addActionListener(e -> setConfigData(Integer.parseInt(comboItem.getValue())));
 
-        SrcCollaborateurCheckBox.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                setConfigData(Integer.valueOf(comboItem.getValue()));
-            }
-        });
+        SrcCollaborateurCheckBox.addActionListener(e -> setConfigData(Integer.parseInt(comboItem.getValue())));
 
-        venteCheckBox.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                setConfigData(Integer.valueOf(comboItem.getValue()));
-            }
-        });
+        venteCheckBox.addActionListener(e -> setConfigData(Integer.parseInt(comboItem.getValue())));
 
-        factureDeVenteCheckBox.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                setConfigData(Integer.valueOf(comboItem.getValue()));
-            }
-        });
+        factureDeVenteCheckBox.addActionListener(e -> setConfigData(Integer.parseInt(comboItem.getValue())));
 
-        devisCheckBox.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                setConfigData(Integer.valueOf(comboItem.getValue()));
-            }
-        });
+        devisCheckBox.addActionListener(e -> setConfigData(Integer.parseInt(comboItem.getValue())));
 
-        bonDeLivraisonCheckBox.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                setConfigData(Integer.valueOf(comboItem.getValue()));
-            }
-        });
+        bonDeLivraisonCheckBox.addActionListener(e -> setConfigData(Integer.parseInt(comboItem.getValue())));
 
-        factureDAchatCheckBox.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                setConfigData(Integer.valueOf(comboItem.getValue()));
-            }
-        });
+        factureDAchatCheckBox.addActionListener(e -> setConfigData(Integer.parseInt(comboItem.getValue())));
 
-        stockCheckBox.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                setConfigData(Integer.valueOf(comboItem.getValue()));
-            }
-        });
+        stockCheckBox.addActionListener(e -> setConfigData(Integer.parseInt(comboItem.getValue())));
 
-        documentDEntréeCheckBox.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                setConfigData(Integer.valueOf(comboItem.getValue()));
-            }
-        });
+        documentDEntréeCheckBox.addActionListener(e -> setConfigData(Integer.parseInt(comboItem.getValue())));
 
-        documentDeSortieCheckBox.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                setConfigData(Integer.valueOf(comboItem.getValue()));
-            }
-        });
+        documentDeSortieCheckBox.addActionListener(e -> setConfigData(Integer.parseInt(comboItem.getValue())));
 
-        documentDeTransfertCheckBox.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                setConfigData(Integer.valueOf(comboItem.getValue()));
-            }
-        });
+        documentDeTransfertCheckBox.addActionListener(e -> setConfigData(Integer.parseInt(comboItem.getValue())));
 
-        documentInterne1CheckBox.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                setConfigData(Integer.valueOf(comboItem.getValue()));
-            }
-        });
+        documentInterne1CheckBox.addActionListener(e -> setConfigData(Integer.parseInt(comboItem.getValue())));
 
-        documentInterne2CheckBox.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                setConfigData(Integer.valueOf(comboItem.getValue()));
-            }
-        });
+        documentInterne2CheckBox.addActionListener(e -> setConfigData(Integer.parseInt(comboItem.getValue())));
 
     }
 
@@ -623,11 +496,7 @@ public class ConfigFile {
     }
 
     public void setArticle(int valSelect){
-        if(valSelect == 1){
-            SrcArticlesCheckBox.setSelected(true);
-        }else{
-            SrcArticlesCheckBox.setSelected(false);
-        }
+        SrcArticlesCheckBox.setSelected(valSelect == 1);
     }
 
     public void setArtStock(int valSelect){
@@ -666,10 +535,10 @@ public class ConfigFile {
         }
     }
 
-    class ComboItem
+    static class ComboItem
     {
-        private String key;
-        private String value;
+        private final String key;
+        private final String value;
 
         public ComboItem(String key, String value)
         {
