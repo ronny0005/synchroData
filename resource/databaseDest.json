@@ -1,1 +1,34 @@
-{"compteg":"0","codeagence":"GAR","typedocument":{"sortie":"1","transfert":"1","facturedachat":"1","entree":"1","documentinterne2":"1","bondelivraison":"1","documentinterne1":"1","facturedevente":"1","devis":"1"},"tiers":"0","ligne":"0","depot":"0","folderftp":"FOKA_CONSTRUCTION_NEW","artstock":"1","taxe":"0","article":"1","path":"D:\\source","database":"FOKAHILA_NEW","password":"reports2012","reglement":"0","entete":"0","servername":"localhost","ecriturea":"0","ecriturec":"0","livraison":"0","famille":"0","username":"reports"}
+{
+  "compteg": "0",
+  "codeagence": "GAR",
+  "typedocument": {
+    "sortie": "1",
+    "transfert": "1",
+    "facturedachat": "1",
+    "entree": "1",
+    "documentinterne2": "1",
+    "bondelivraison": "1",
+    "documentinterne1": "1",
+    "facturedevente": "1",
+    "devis": "1"
+  },
+  "tiers": "0",
+  "ligne": "0",
+  "depot": "0",
+  "folderftp": "FOKA_CONSTRUCTION_NEW",
+  "artstock": "1",
+  "taxe": "0",
+  "article": "1",
+  "path": "D:\\source",
+  "database": "FOKAHILA_NEW",
+  "password": "reports2012",
+  "reglement": "0",
+  "entete": "0",
+  "servername": "localhost",
+  "ecriturea": "0",
+  "ecriturec": "0",
+  "livraison": "0",
+  "famille": "0",
+  "username": "reports",
+  "active" : "1"
+}

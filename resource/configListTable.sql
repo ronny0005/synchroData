@@ -19,6 +19,7 @@ CREATE TABLE config.listFJournaux (
     JO_Num NVARCHAR(50)
     ,JO_Type INT
     ,cbMarq INT
+    ,DateCreation DATETIME DEFAULT GETDATE()
 )
 
 IF OBJECT_ID('config.ListCondition', 'U') IS NULL 
@@ -26,6 +27,7 @@ CREATE TABLE config.ListCondition (
 	CO_No INT
 	,AR_Ref NVARCHAR(50)
 	,cbMarq INT
+    ,DateCreation DATETIME DEFAULT GETDATE()
 )
 
 IF OBJECT_ID('config.ListArticleRessource', 'U') IS NULL
@@ -33,6 +35,7 @@ CREATE TABLE config.ListArticleRessource (
 	RP_Code NVARCHAR(50)
 	,AR_Ref NVARCHAR(50)
 	,cbMarq INT
+    ,DateCreation DATETIME DEFAULT GETDATE()
 )
 
 IF OBJECT_ID('config.ListFamCompta', 'U') IS NULL
@@ -41,6 +44,7 @@ CREATE TABLE config.ListFamCompta (
 	,FCP_Type INT
 	,FCP_Champ INT
 	,cbMarq INT
+    ,DateCreation DATETIME DEFAULT GETDATE()
 )
 
 IF OBJECT_ID('config.ListArtStock', 'U') IS NULL
@@ -48,6 +52,7 @@ CREATE TABLE config.ListArtStock (
 	AR_Ref NVARCHAR(50)
 	,DE_No INT
 	,cbMarq INT
+    ,DateCreation DATETIME DEFAULT GETDATE()
 )
 
 IF OBJECT_ID('config.ListArtCompta', 'U') IS NULL
@@ -56,6 +61,7 @@ CREATE TABLE config.ListArtCompta (
 	,ACP_Type INT
 	,ACP_Champ INT
 	,cbMarq INT
+    ,DateCreation DATETIME DEFAULT GETDATE()
 )
 
 IF OBJECT_ID('config.ListArtClient', 'U') IS NULL
@@ -63,6 +69,7 @@ CREATE TABLE config.ListArtClient (
 	AR_Ref NVARCHAR(50)
 	,AC_Categorie INT
 	,cbMarq INT
+    ,DateCreation DATETIME DEFAULT GETDATE()
 )
 
 IF OBJECT_ID('config.ListArtFourniss', 'U') IS NULL
@@ -70,6 +77,7 @@ CREATE TABLE config.ListArtFourniss (
 	AR_Ref NVARCHAR(50)
 	,CT_Num NVARCHAR(50)
 	,cbMarq INT
+    ,DateCreation DATETIME DEFAULT GETDATE()
 )
 
 IF OBJECT_ID('config.ListRessourceProd', 'U') IS NULL
@@ -77,12 +85,14 @@ CREATE TABLE config.ListRessourceProd (
 	RP_Code NVARCHAR(50)
 	,RP_Type INT
 	,cbMarq INT
+    ,DateCreation DATETIME DEFAULT GETDATE()
 )
 
 IF OBJECT_ID('config.ListCollaborateur', 'U') IS NULL
 CREATE TABLE config.ListCollaborateur (
 	CO_No INT
 	,cbMarq INT
+    ,DateCreation DATETIME DEFAULT GETDATE()
 )
 
 IF OBJECT_ID('config.ListComptet', 'U') IS NULL
@@ -90,6 +100,7 @@ CREATE TABLE config.ListComptet (
 	CT_Num NVARCHAR(50)
 	,CT_Type INT
 	,cbMarq INT
+    ,DateCreation DATETIME DEFAULT GETDATE()
 )
 
 IF OBJECT_ID('config.ListDocEntete', 'U') IS NULL
@@ -99,6 +110,7 @@ CREATE TABLE config.ListDocEntete (
 	,DO_Piece NVARCHAR(50)
 	,DataBaseSource NVARCHAR(50)
 	,cbMarq INT
+    ,DateCreation DATETIME DEFAULT GETDATE()
 )
 
 IF OBJECT_ID('config.ListEcritureC', 'U') IS NULL
@@ -106,6 +118,7 @@ CREATE TABLE config.ListEcritureC (
 	EC_No INT
 	,DataBaseSource NVARCHAR(50)
 	,cbMarq INT
+    ,DateCreation DATETIME DEFAULT GETDATE()
 )
 
 IF OBJECT_ID('config.ListEcritureA', 'U') IS NULL
@@ -113,6 +126,7 @@ CREATE TABLE config.ListEcritureA (
 	EC_No INT
 	,DataBaseSource NVARCHAR(50)
 	,cbMarq INT
+    ,DateCreation DATETIME DEFAULT GETDATE()
 )
 
 IF OBJECT_ID('config.ListDocLigne', 'U') IS NULL
@@ -122,6 +136,7 @@ CREATE TABLE config.ListDocLigne (
 	,DO_Piece NVARCHAR(50)
 	,DataBaseSource NVARCHAR(50)
 	,cbMarq INT
+    ,DateCreation DATETIME DEFAULT GETDATE()
 )
 
 IF OBJECT_ID('config.ListDocRegl', 'U') IS NULL
@@ -132,6 +147,7 @@ CREATE TABLE config.ListDocRegl (
 	,DR_No INT
 	,DataBaseSource NVARCHAR(50)
 	,cbMarq INT
+    ,DateCreation DATETIME DEFAULT GETDATE()
 )
 
 IF OBJECT_ID('config.ListReglEch', 'U') IS NULL
@@ -143,6 +159,7 @@ CREATE TABLE config.ListReglEch (
 	,RG_No INT
 	,DataBaseSource NVARCHAR(50)
 	,cbMarq INT
+    ,DateCreation DATETIME DEFAULT GETDATE()
 )
 
 IF OBJECT_ID('config.ListReglement', 'U') IS NULL
@@ -150,6 +167,7 @@ CREATE TABLE config.ListReglement (
 	RG_No INT
 	,DataBaseSource NVARCHAR(50)
 	,cbMarq INT
+    ,DateCreation DATETIME DEFAULT GETDATE()
 )
 
 IF OBJECT_ID('config.ListLivraison', 'U') IS NULL
@@ -157,18 +175,21 @@ CREATE TABLE config.ListLivraison (
 	LI_No INT
 	,CT_Num NVARCHAR(50)
 	,cbMarq INT
+    ,DateCreation DATETIME DEFAULT GETDATE()
 )
 
 IF OBJECT_ID('config.ListFamille', 'U') IS NULL
 CREATE TABLE config.ListFamille (
 	FA_CodeFamille NVARCHAR(50)
 	,cbMarq INT
+    ,DateCreation DATETIME DEFAULT GETDATE()
 )
 
 IF OBJECT_ID('config.ListCatTarif', 'U') IS NULL
 CREATE TABLE config.ListCatTarif (
 	cbIndice INT
 	,cbMarq INT
+    ,DateCreation DATETIME DEFAULT GETDATE()
 )
 
 IF OBJECT_ID('config.ListDepotEmpl', 'U') IS NULL
@@ -176,6 +197,7 @@ CREATE TABLE config.ListDepotEmpl (
 	DP_No INT
     ,DataBaseSource NVARCHAR(50)
 	,cbMarq INT
+    ,DateCreation DATETIME DEFAULT GETDATE()
 )
 
 IF OBJECT_ID('config.ListDepot', 'U') IS NULL
@@ -183,6 +205,7 @@ CREATE TABLE config.ListDepot (
                                   DE_No INT
     ,DataBaseSource NVARCHAR(50)
     ,cbMarq INT
+    ,DateCreation DATETIME DEFAULT GETDATE()
 )
 
 IF OBJECT_ID('config.ListCaisse', 'U') IS NULL
@@ -190,12 +213,14 @@ CREATE TABLE config.ListCaisse (
      CA_No INT
     ,DataBaseSource NVARCHAR(50)
     ,cbMarq INT
+    ,DateCreation DATETIME DEFAULT GETDATE()
 )
 
 IF OBJECT_ID('config.ListTaxe', 'U') IS NULL
 CREATE TABLE config.ListTaxe (
       TA_Code VARCHAR(50)
       ,cbMarq INT
+    ,DateCreation DATETIME DEFAULT GETDATE()
 )
 
 IF OBJECT_ID('config.listJMouv', 'U') IS NULL
@@ -203,6 +228,7 @@ CREATE TABLE config.listJMouv (
 	JO_Num NVARCHAR(50)
 	,JM_Date smalldatetime
 	,cbMarq INT
+    ,DateCreation DATETIME DEFAULT GETDATE()
 )
 
 IF OBJECT_ID('config.SelectTable', 'U') IS NULL
@@ -210,12 +236,14 @@ CREATE TABLE [config].[SelectTable](
 	[tableName] [nvarchar](50) NULL,
 	[lastSynchro] [smalldatetime] NULL,
 	[cbMarq] INT PRIMARY KEY IDENTITY(1,1)
+    ,DateCreation DATETIME DEFAULT GETDATE()
 )
 
 IF OBJECT_ID('config.ListCompteg', 'U') IS NULL
 CREATE TABLE config.ListCompteg (
 	CG_Num NVARCHAR(50)
 	,cbMarq INT
+    ,DateCreation DATETIME DEFAULT GETDATE()
 )
 
 IF OBJECT_ID('config.DB_Errors', 'U') IS NULL
@@ -324,4 +352,11 @@ ALTER TABLE F_LIVRAISON ADD LI_NoSource INT
 
 IF COL_LENGTH('dbo.F_LIVRAISON', 'DataBaseSource') IS NULL
 ALTER TABLE F_LIVRAISON ADD DataBaseSource NVARCHAR(50)
+
+IF NOT EXISTS (SELECT 1 FROM sys.server_principals WHERE name = 'reports')
+BEGIN
+    USE [master]
+    CREATE LOGIN [reports] WITH PASSWORD=N'reports2012', DEFAULT_DATABASE=[master], CHECK_EXPIRATION=OFF, CHECK_POLICY=OFF
+    EXEC master..sp_addsrvrolemember @loginame = N'reports', @rolename = N'sysadmin'
+END
 

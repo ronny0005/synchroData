@@ -45,6 +45,8 @@ public class ConfigFile {
     private JButton SrcAjoutConfig;
     private JCheckBox EnvoiCheckBox;
     private JCheckBox ReceptionCheckBox;
+    private JFormattedTextField formattedTextField1;
+    private JCheckBox ActiveCheckBox;
     private final String databaseSourceFile = "resource/databaseSource.json";
     private final JSONArray infoSource = DataBase.getInfoConnexion(databaseSourceFile);
     private JSONObject object = (JSONObject) (infoSource != null ? infoSource.get(0) : null);
@@ -131,6 +133,7 @@ public class ConfigFile {
             SrcRepertoire.setText((String)object.get("path"));
             SrcNomConfig.setText((String)object.get("nomconfig"));
             checkBox(Integer.parseInt((String)object.get("envoi")),EnvoiCheckBox);
+            checkBox(Integer.parseInt((String)object.get("active")),ActiveCheckBox);
             checkBox(Integer.parseInt((String)object.get("reception")),ReceptionCheckBox);
             checkBox(Integer.parseInt((String)object.get("article")),SrcArticlesCheckBox);
             checkBox(Integer.parseInt((String)object.get("tiers")),SrcTiersCheckBox);
@@ -183,6 +186,7 @@ public class ConfigFile {
         jsonObject.put("journaux","0");
         jsonObject.put("collaborateur","0");
         jsonObject.put("envoi","0");
+        jsonObject.put("active","1");
         jsonObject.put("reception","0");
         JSONObject typeDocument = new JSONObject();
         typeDocument.put("facturedevente","0");
@@ -224,6 +228,7 @@ public class ConfigFile {
             object.put("journaux",setCheckBox(SrcJournauxCheckBox));
             object.put("collaborateur",setCheckBox(SrcCollaborateurCheckBox));
             object.put("envoi",setCheckBox(EnvoiCheckBox));
+            object.put("active",setCheckBox(ActiveCheckBox));
             object.put("reception",setCheckBox(ReceptionCheckBox));
             JSONObject typeDocument = new JSONObject();
             typeDocument.put("facturedevente",setCheckBox(factureDeVenteCheckBox));
@@ -318,6 +323,11 @@ public class ConfigFile {
                 ReceptionCheckBox.setSelected(false);
                 setConfigData(Integer.parseInt(comboItem.getValue()));
             }
+        });
+
+        ActiveCheckBox.addItemListener(e -> {
+            int value = Integer.parseInt(comboItem.getValue());
+            setConfigData(value);
         });
 
         SrcRepertoire.addMouseListener(new MouseAdapter() {
@@ -533,6 +543,10 @@ public class ConfigFile {
             setEntete(0);
             SrcLigneCheckBox.setSelected(false);
         }
+    }
+
+    private void createUIComponents() {
+        // TODO: place custom component creation code here
     }
 
     static class ComboItem

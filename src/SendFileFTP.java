@@ -22,7 +22,7 @@ public class SendFileFTP {
             for (Object o : listObject) {
                 JSONObject list = (JSONObject) o;
 
-                if (list.get("envoi").equals("1")) {
+                if (list.get("envoi").equals("1") && list.get("active").equals("1")) {
                     try {
                         session = jsch.getSession("u85460117-upload", "home631778145.1and1-data.host", 22);
                         session.setConfig("StrictHostKeyChecking", "no");
