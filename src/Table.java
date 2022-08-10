@@ -21,6 +21,8 @@ public class Table {
                 "DECLARE @MaColonne AS VARCHAR(250);\n" +
                 "DECLARE @MonSQL AS VARCHAR(MAX)=''; \n" +
                 "DECLARE @TableName AS VARCHAR(100) = '"+table+"'; \n" +
+                "DECLARE @databaseSource AS VARCHAR(150) = '"+dataSource+"'; \n" +
+                "DECLARE @cbModification AS VARCHAR(150) =  CONVERT(nvarchar(150),ISNULL((SELECT LastSynchro FROM config.SelectTable WHERE tableName= @TableName),'1900-01-01'),20); \n"+
                 "DECLARE @getid CURSOR\n" +
                 "\n" +
                 "SET @getid = CURSOR FOR\n" +
@@ -46,14 +48,14 @@ public class Table {
                 "DEALLOCATE @getid\n" +
                 "SELECT @MonSQL = SUBSTRING(@MonSQL,2,LEN(@MonSQL)) \n" +
                 "\n" +
-                "SELECT @MonSQL = 'SELECT ' + @MonSQL + ',[cbProt],[cbCreateur],[cbModification],[cbReplication],[cbFlag],cbMarqSource = [cbMarq],[DataBaseSource] = ''"+dataSource+"''  FROM '+ @TableName " +
-                "+ ' WHERE cbModification > ISNULL((SELECT LastSynchro FROM config.SelectTable WHERE tableName='''+ @TableName +'''),''1900-01-01'')' \n" +
+                "SELECT @MonSQL = 'DECLARE @databaseSource AS VARCHAR (150) = '''+@databaseSource+'''; SELECT ' + @MonSQL + ',[cbProt],[cbCreateur],[cbModification],[cbReplication],[cbFlag],cbMarqSource = [cbMarq],[DataBaseSource] = @databaseSource  FROM '+ @TableName " +
+                "+ ' WHERE cbModification > CONVERT(DATETIME,''' + @cbModification +''',20)' \n" +
                 "IF EXISTS (\tSELECT\tcol.name  \n" +
                 "\t\t\tFROM\tsys.tables tab  \n" +
                 "\t\t\tINNER JOIN sys.columns col\tON\ttab.object_id = col.object_id  \n" +
                 "\t\t\tWHERE\ttab.name = @TableName  \n" +
                 "\t\t\tAND\t\tcol.name = 'DataBaseSource') \n" +
-                "\t SELECT @MonSQL = @MonSQL + ' AND ISNULL(DataBaseSource,''"+dataSource+"'') = ''"+dataSource+"''' \n" +
+                "\t SELECT @MonSQL = @MonSQL + ' AND ISNULL(DataBaseSource,''' + @databaseSource +''') = ''' + @databaseSource +''''\n" +
                 "EXEC(@MonSQL)\n" +
                 "\n" +
                 "END";
@@ -693,19 +695,25 @@ public class Table {
 
     public static void updateSelectTable(String table, Connection sqlCon)
     {
-        String query = "IF EXISTS(SELECT 1 FROM config.SelectTable WHERE tableName = '"+table+"') \n" +
+        executeQuery(sqlCon,updateSelectTableQuery(table));
+    }
+
+    public static String updateSelectTableQuery(String table)
+    {
+        return  "DECLARE @cbModification DATETIME = (SELECT MAX(cbModification) FROM " + table + ");" +
+                "DECLARE @table VARCHAR(150) = '" + table + "'" +
+                "IF EXISTS(SELECT 1 FROM config.SelectTable WHERE tableName = @table) \n" +
                 " UPDATE config.SelectTable " +
-                "     SET lastSynchro = (SELECT MAX(cbModification) FROM " + table + ") \n" +
-                " WHERE tableName = '" + table + "'; \n" +
+                "     SET lastSynchro =  @cbModification \n" +
+                " WHERE tableName = @table; \n" +
                 "         ELSE \n" +
-                "             INSERT INTO config.SelectTable(tableName,lastSynchro) VALUES('"+ table + "',(SELECT MAX(cbModification) FROM " + table + ")) \n";
-            executeQuery(sqlCon,query);
+                "             INSERT INTO config.SelectTable(tableName,lastSynchro) VALUES(@table,@cbModification) \n";
     }
 
     public static void getData(Connection sqlCon, String query,String table,String path,String file)
     {
-        writeOnFile(path+"\\"+file, query, sqlCon);
         updateSelectTable(table, sqlCon);
+        writeOnFile(path+"\\"+file, query, sqlCon);
     }
 
     public static void executeQuery(Connection sqlCon, String query)

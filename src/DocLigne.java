@@ -23,7 +23,9 @@ public class DocLigne extends Table {
                 "      ,[DE_No],[DL_NoRef],[DL_TypePL],[DL_PUDevise] ,[DL_PUTTC] ,[DL_No],[DO_DateLivr],[CA_Num],[DL_Taxe3] ,[DL_TypeTaux3],[DL_TypeTaxe3],[DL_Frais] \n" +
                 "      ,[DL_Valorise],[AR_RefCompose],[DL_NonLivre],[AC_RefClient],[DL_MontantHT] ,[DL_MontantTTC] ,[DL_FactPoids],[DL_Escompte],[DL_PiecePL],[DL_DatePL],[DL_QtePL] ,[DL_NoColis],[DL_NoLink]\n" +
                 "      ,[RP_Code],[DL_QteRessource],[DL_DateAvancement],[cbProt],[cbCreateur],[cbModification],[cbReplication],[cbFlag]" +
-                "      ,[DATEMODIF],[CONTROLE],[NBJ],[NOM_CLIENT],[PMIN],[PMAX],[CONTROLEDATE],[PGROS],[DL_QTE_SUPER_PRIX]" +
+                "      ,[DATEMODIF]" +
+                //",[CONTROLE],[NBJ],[NOM_CLIENT],[PMIN],[PMAX],[CONTROLEDATE],[PGROS]" +
+                ",[DL_QTE_SUPER_PRIX]" +
                 "      ,[DL_SUPER_PRIX],[USERGESCOM],[NOMCLIENT],[ORDONATEUR_REMISE],[GROUPEUSER],[Qte_LivreeBL],[Qte_RestantBL],[DL_COMM],[cbMarqSource],[DataBaseSource]" +
                 "      )\n" +
                 "            \n" +
@@ -41,7 +43,9 @@ public class DocLigne extends Table {
                 "       ,dest.[DL_Taxe3] ,dest.[DL_TypeTaux3],dest.[DL_TypeTaxe3],dest.[DL_Frais] \n" +
                 "      ,[DL_Valorise],[AR_RefCompose],[DL_NonLivre],[AC_RefClient],[DL_MontantHT] ,[DL_MontantTTC] ,[DL_FactPoids],[DL_Escompte],[DL_PiecePL],[DL_DatePL],[DL_QtePL] ,[DL_NoColis],[DL_NoLink]\n" +
                 "      ,[RP_Code],[DL_QteRessource],[DL_DateAvancement],[cbProt],[cbCreateur],[cbModification],[cbReplication],[cbFlag]" +
-                "      ,[DATEMODIF],[CONTROLE],[NBJ],[NOM_CLIENT],[PMIN],[PMAX],[CONTROLEDATE],[PGROS],[DL_QTE_SUPER_PRIX]"+
+                "      ,[DATEMODIF]" +
+               // "       ,[CONTROLE],[NBJ],[NOM_CLIENT],[PMIN],[PMAX],[CONTROLEDATE],[PGROS]" +
+                "       ,[DL_QTE_SUPER_PRIX]"+
                 "      ,[DL_SUPER_PRIX],[USERGESCOM],[NOMCLIENT],[ORDONATEUR_REMISE],[GROUPEUSER],[Qte_LivreeBL],[Qte_RestantBL],[DL_COMM],dest.[cbMarqSource],dest.[DataBaseSource]\n" +
                 "FROM F_DOCLIGNE_DEST dest\n" +
                 "LEFT JOIN (SELECT cbMarqSource,dataBaseSource,DO_Piece,DO_Type,DO_Domaine FROM F_DOCLIGNE) src\n" +
@@ -212,13 +216,13 @@ public class DocLigne extends Table {
                 "\t\t\t,DL_QteRessource = docL.DL_QteRessource\n" +
                 "\t\t\t,DL_DateAvancement = docL.DL_DateAvancement\n" +
                 "\t\t\t,DATEMODIF = docL.DATEMODIF\n" +
-                "\t\t\t,CONTROLE = docL.CONTROLE\n" +
+                /*"\t\t\t,CONTROLE = docL.CONTROLE\n" +
                 "\t\t\t,NBJ = docL.NBJ\n" +
                 "\t\t\t,NOM_CLIENT = docL.NOM_CLIENT\n" +
                 "\t\t\t,PMIN = docL.PMIN\n" +
                 "\t\t\t,PMAX = docL.PMAX\n" +
                 "\t\t\t,CONTROLEDATE = docL.CONTROLEDATE\n" +
-                "\t\t\t,PGROS = docL.PGROS\n" +
+                "\t\t\t,PGROS = docL.PGROS\n" +*/
                 "\t\t\t,DL_QTE_SUPER_PRIX = docL.DL_QTE_SUPER_PRIX\n" +
                 "\t\t\t,DL_SUPER_PRIX = docL.DL_SUPER_PRIX\n" +
                 "\t\t\t,NOMCLIENT = docL.NOMCLIENT\n" +
