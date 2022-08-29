@@ -138,7 +138,7 @@ public class DocLigne extends Table {
         }
     }
 
-    public static String updateDocLigne (String filename){
+    public static String updateDocLigne(String filename){
         return "BEGIN TRY\n" +
                 "\tSET DATEFORMAT ymd;\n" +
                 "\n" +
@@ -316,6 +316,7 @@ public class DocLigne extends Table {
         getData(sqlCon, selectSourceTable(tableName,database,type), tableName, path, filename);
         listDeleteAllInfo(sqlCon, path, "deleteList" + filename,tableName,configList,database);
     }
+
     public static void getDataElementFilterAgency(Connection sqlCon, String path,String database,String time,String agency)
     {
         String filename =  file+time+".csv";

@@ -1,14 +1,53 @@
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
+import java.io.*;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Properties;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 public class BackupData {
+
+    public static void zip(File path,String creationDate){
+
+        FileFilter csvFileFilter = (file) -> {
+            return file.getName().endsWith(".csv");
+        };
+
+        File[] files = path.listFiles(csvFileFilter);
+
+        if(files.length == 0 )
+            throw new IllegalArgumentException("No files in path"+path.getAbsolutePath());
+
+        try {
+            FileOutputStream fos = new FileOutputStream(path.getAbsolutePath() + "/file_"+creationDate+".zip");
+            ZipOutputStream zos = new ZipOutputStream(fos);
+            for(File zipThis : files){
+                FileInputStream fis = new FileInputStream(zipThis);
+                ZipEntry zipEntry = new ZipEntry(zipThis.getName());
+                zos.putNextEntry(zipEntry);
+                byte[] bytes = new byte[2048];
+                int length;
+                while((length = fis.read(bytes)) >= 0){
+                    zos.write(bytes,0,length);
+                }
+                fis.close();
+            }
+            zos.close();
+            fos.close();
+
+            for(File file : files){
+                file.delete();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
     public static void main(String[] args){
         String databaseSourceFile = "resource/databaseSource.json";
@@ -107,6 +146,7 @@ public class BackupData {
                         /*if (((String) list.get("caisse")).equals("1")) {
                         }*/
 
+                        zip(new File((String) list.get("path")),simpleDateFormat.format(new Date()));
                     } catch (SQLException throwables) {
                         throwables.printStackTrace();
                     }

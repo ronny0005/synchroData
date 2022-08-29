@@ -1,14 +1,36 @@
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
+import java.io.*;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.Properties;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 
 public class UpdateData {
 
+    public static void unzip(File path,File source){
 
+        try {
+            ZipInputStream zis = new ZipInputStream(new FileInputStream(path.getAbsolutePath()));
+            ZipEntry entry = null;
+            while((entry = zis.getNextEntry()) != null){
+                int len;
+                byte[] data = new byte[1024];
+                FileOutputStream fos = new FileOutputStream(source.getPath()+"\\"+entry.getName());
+                while((len = zis.read(data))!= -1){
+                    fos.write(data,0,len);
+                }
+                fos.close();
+                zis.closeEntry();
+            }
+            zis.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
     public static void main(String[] args){
         String databaseDestFile = "resource/databaseSource.json";
@@ -27,7 +49,16 @@ public class UpdateData {
 
                 if (list.get("reception").equals("1")) {
                     String path = ((String) list.get("path"));
+                    FileFilter zipFileFilter = (file) -> {
+                        return file.getName().endsWith(".zip");
+                    };
 
+                    File[] files = (new File(path)).listFiles(zipFileFilter);
+                    File sourcePath = new File(path);
+                    for(File file : files) {
+                        unzip(file, sourcePath);
+                        file.delete();
+                    }
                     try {
                         String dbURL = "jdbc:sqlserver://" + list.get("servername") + ";databaseName=" + list.get("database");
                         Properties properties = new Properties();

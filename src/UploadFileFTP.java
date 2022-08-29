@@ -32,7 +32,7 @@ public class UploadFileFTP {
                         File dir = new File((String) list.get("path"));
                         sftpChannel.cd((String) list.get("folderftp"));
 
-                        Vector<ChannelSftp.LsEntry> listFiles = sftpChannel.ls("*.csv");
+                        Vector<ChannelSftp.LsEntry> listFiles = sftpChannel.ls("*.zip");
                         for (ChannelSftp.LsEntry entry : listFiles) {
                             if (!(dir).isDirectory())
                                 dir.mkdir();

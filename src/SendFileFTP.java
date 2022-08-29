@@ -6,8 +6,7 @@ import com.jcraft.jsch.Session;
 import com.jcraft.jsch.SftpException;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
-
-import java.io.File;
+import java.io.*;
 
 public class SendFileFTP {
 
@@ -33,6 +32,7 @@ public class SendFileFTP {
                         channel.connect();
                         ChannelSftp sftpChannel = (ChannelSftp) channel;
                         File dir = new File((String) list.get("path"));
+
                         File[] directoryListing = dir.listFiles();
                         try {
                             sftpChannel.mkdir((String) list.get("folderftp"));
