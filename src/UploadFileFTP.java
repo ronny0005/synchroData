@@ -40,6 +40,14 @@ public class UploadFileFTP {
                             sftpChannel.get(entry.getFilename(), dir.getAbsolutePath() + "\\" + entry.getFilename());
                             sftpChannel.rm(entry.getFilename());
                         }
+                        listFiles = sftpChannel.ls("*.csv");
+                        for (ChannelSftp.LsEntry entry : listFiles) {
+                            if (!(dir).isDirectory())
+                                dir.mkdir();
+                            System.out.println(dir.getAbsolutePath() + "\\" + entry.getFilename());
+                            sftpChannel.get(entry.getFilename(), dir.getAbsolutePath() + "\\" + entry.getFilename());
+                            sftpChannel.rm(entry.getFilename());
+                        }
                         sftpChannel.exit();
                         session.disconnect();
                     } catch (JSchException | SftpException e) {

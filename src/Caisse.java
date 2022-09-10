@@ -130,7 +130,7 @@ public class Caisse extends Table {
     public static void getDataElement(Connection sqlCon, String path,String database,String time)
     {
         String filename =  file+time+".csv";
-        initTableParam(sqlCon,tableName,configList,"CA_No");
+        initTableParam(sqlCon,tableName,configList,"CA_No,DatabaseSource");
         getData(sqlCon, selectSourceTable(tableName,database), tableName, path, filename);
         listDeleteAllInfo(sqlCon, path, "deleteList" + filename,tableName,configList,database);
     }

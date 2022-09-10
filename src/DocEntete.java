@@ -200,7 +200,7 @@ public class DocEntete extends Table {
     {
         dbSource = database;
         loadFile(path,sqlCon);
-        //loadDeleteFile(path,sqlCon);
+        loadDeleteFile(path,sqlCon);
     }
 
     public static void loadFile(String path,Connection sqlCon){
@@ -221,6 +221,7 @@ public class DocEntete extends Table {
 
     public static void loadDeleteFile(String path,Connection sqlCon) {
         String [] children = getFile(path,"deleteList"+file);
+        disableTrigger(sqlCon,tableName);
         if (children == null) {
             System.out.println("Either dir does not exist or is not a directory");
         } else {
@@ -229,6 +230,7 @@ public class DocEntete extends Table {
                 loadDeleteInfo(path,tableName,filename,sqlCon,deleteDocEntete);
             }
         }
+        enableTrigger(sqlCon,tableName);
     }
 
     public static void getDataElement(Connection sqlCon, String path,String database,String time,JSONObject type)

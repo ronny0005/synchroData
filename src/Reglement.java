@@ -129,11 +129,12 @@ public class Reglement extends Table {
         dbSource = database;
         loadFile(path,sqlCon);
         loadDeleteFile(path,sqlCon);
-        DocEntete.loadDeleteFile(path,sqlCon);
+//        DocEntete.loadDeleteFile(path,sqlCon);
     }
 
     public static void loadDeleteFile(String path,Connection sqlCon) {
         String [] children = getFile(path,"deleteList"+file);
+        disableTrigger(sqlCon,tableName);
         if (children == null) {
             System.out.println("Either dir does not exist or is not a directory");
         } else {
@@ -142,6 +143,7 @@ public class Reglement extends Table {
                 loadDeleteInfo(path,tableName,filename,sqlCon,deleteReglement);
             }
         }
+        enableTrigger(sqlCon,tableName);
     }
 
     public static void loadFile(String path,Connection sqlCon){
