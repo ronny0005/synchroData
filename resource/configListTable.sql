@@ -234,7 +234,8 @@ CREATE TABLE config.listJMouv (
 IF OBJECT_ID('config.SelectTable', 'U') IS NULL
 CREATE TABLE [config].[SelectTable](
 	[tableName] [nvarchar](50) NULL,
-	[lastSynchro] [smalldatetime] NULL,
+    [lastSynchro] [smalldatetime] NULL,
+    [isLoaded] [int] NULL,
 	[cbMarq] INT PRIMARY KEY IDENTITY(1,1)
     ,DateCreation DATETIME DEFAULT GETDATE()
 )
@@ -352,6 +353,9 @@ ALTER TABLE F_LIVRAISON ADD LI_NoSource INT
 
 IF COL_LENGTH('dbo.F_LIVRAISON', 'DataBaseSource') IS NULL
 ALTER TABLE F_LIVRAISON ADD DataBaseSource NVARCHAR(50)
+
+IF COL_LENGTH('config.SelectTable', 'isLoaded') IS NULL
+ALTER TABLE [config].[SelectTable] ADD [isLoaded] [int] NULL
 
 IF NOT EXISTS (SELECT 1 FROM sys.server_principals WHERE name = 'reports')
 BEGIN

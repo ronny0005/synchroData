@@ -20,13 +20,17 @@ public class Table {
         return "BEGIN \n" +
                 "DECLARE @TableName AS VARCHAR(100) = '"+table+"'; \n" +
                 "DECLARE @cbModification VARCHAR(100) = ISNULL((SELECT CONVERT(NVARCHAR(100),(SELECT MAX(cbModification) FROM " + table + "),25)),'1901-01-01');" +
-                "DECLARE @lastSynchro VARCHAR(100) = ISNULL((SELECT CONVERT(NVARCHAR(100),(SELECT lastSynchro FROM config.SelectTable WHERE tableName = @TableName),25)),'1901-01-01');" +
+                "DECLARE @lastSynchro VARCHAR(100) = ISNULL((SELECT CONVERT(NVARCHAR(100),(SELECT CASE WHEN ISNULL(isLoaded,0) = 2 THEN lastSynchro ELSE DATEADD(HOUR,-1,lastSynchro) END FROM config.SelectTable WHERE tableName = @TableName),25)),'1901-01-01');" +
+
                 "IF EXISTS(SELECT 1 FROM config.SelectTable WHERE tableName = @TableName) \n" +
                 " UPDATE config.SelectTable " +
                 "     SET lastSynchro =  CONVERT(DATETIME,@cbModification,20) \n" +
+                "     , isLoaded =  CASE WHEN CONVERT(DATETIME,@cbModification,20) = lastSynchro THEN " +
+                "                               CASE WHEN ISNULL(isLoaded,0) < 2 THEN  ISNULL(isLoaded,0) + 1 ELSE  ISNULL(isLoaded,0) END" +
+                "                       ELSE 0 END\n" +
                 " WHERE tableName = @TableName; \n" +
                 "         ELSE \n" +
-                "             INSERT INTO config.SelectTable(tableName,lastSynchro) VALUES(@TableName,CONVERT(DATETIME,@cbModification,20)); \n"+
+                "             INSERT INTO config.SelectTable(tableName,lastSynchro,isLoaded) VALUES(@TableName,CONVERT(DATETIME,@cbModification,20),0); \n"+
                 "DECLARE @MaColonne AS VARCHAR(250);\n" +
                 "DECLARE @MonSQL AS VARCHAR(MAX)=''; \n" +
                 "DECLARE @databaseSource AS VARCHAR(150) = '"+dataSource+"'; \n" +
@@ -72,14 +76,17 @@ public class Table {
         return "BEGIN \n" +
                 "DECLARE @TableName AS VARCHAR(100) = '"+table+"'; \n" +
                 "DECLARE @cbModification VARCHAR(100) = ISNULL((SELECT CONVERT(NVARCHAR(100),(SELECT MAX(cbModification) FROM " + table + "),25)),'1901-01-01');" +
-                "DECLARE @lastSynchro VARCHAR(100) = ISNULL((SELECT CONVERT(NVARCHAR(100),(SELECT lastSynchro FROM config.SelectTable WHERE tableName = @TableName),25)),'1901-01-01');" +
+                "DECLARE @lastSynchro VARCHAR(100) = ISNULL((SELECT CONVERT(NVARCHAR(100),(SELECT CASE WHEN ISNULL(isLoaded,0) = 2 THEN lastSynchro ELSE DATEADD(HOUR,-1,lastSynchro) END FROM config.SelectTable WHERE tableName = @TableName),25)),'1901-01-01');" +
 
                 "IF EXISTS(SELECT 1 FROM config.SelectTable WHERE tableName = @TableName) \n" +
                 " UPDATE config.SelectTable " +
                 "     SET lastSynchro =  CONVERT(DATETIME,@cbModification,20) \n" +
+                "     , isLoaded =  CASE WHEN CONVERT(DATETIME,@cbModification,20) = lastSynchro THEN " +
+                "                               CASE WHEN  ISNULL(isLoaded,0) < 2 THEN  ISNULL(isLoaded,0) + 1 ELSE  ISNULL(isLoaded,0) END" +
+                "                       ELSE 0 END\n" +
                 " WHERE tableName = @TableName; \n" +
                 "         ELSE \n" +
-                "             INSERT INTO config.SelectTable(tableName,lastSynchro) VALUES(@TableName,CONVERT(DATETIME,@cbModification,20)); \n"+
+                "             INSERT INTO config.SelectTable(tableName,lastSynchro,isLoaded) VALUES(@TableName,CONVERT(DATETIME,@cbModification,20),0); \n"+
                 "DECLARE @MaColonne AS VARCHAR(250);\n" +
                 "DECLARE @MonSQL AS VARCHAR(MAX)=''; \n" +
                 "DECLARE @facturevente AS VARCHAR(1) = "+ type.get("facturedevente") +"; \n" +
@@ -364,7 +371,7 @@ public class Table {
 
     public static String [] getFile(String path,String file){
         File dir = new File(path);
-        FilenameFilter filter = (dir1, name) -> name.startsWith(file);
+        FilenameFilter filter = (dir1, name) -> name.startsWith(file) ;
         return dir.list(filter);
     }
 
@@ -775,10 +782,8 @@ public class Table {
                 "DECLARE @configTable AS VARCHAR(100) = '"+configTable+"';\n" +
                 "DECLARE @keyColumn AS VARCHAR(250) = '"+keyColumn+"';\n" +
                 "\n" +
-                "SELECT @MonSQL = 'IF NOT EXISTS (SELECT 1 FROM config.SelectTable WHERE tableName='''+@TableName+''')'\n" +
-                "+' INSERT INTO config.'+@configTable+' SELECT '+@keyColumn+',cbMarq FROM '+@TableName+' ELSE BEGIN '+\n" +
-                "' INSERT INTO config.'+@configTable+' SELECT '+@keyColumn+',cbMarq FROM '+@TableName+' WHERE cbMarq '+\n" +
-                "' > (SELECT max(cbMarq) FROM config.'+@configTable+') END'\n" +
+                "SELECT @MonSQL = ' INSERT INTO config.'+@configTable+' SELECT DISTINCT '+@keyColumn+',cbMarq FROM '+@TableName\n" +
+                "+' EXCEPT SELECT '+@keyColumn+',cbMarq FROM config.'+@configTable" +
                 "\n" +
                 "EXEC (@MonSQL)\n" +
                 "\n" +
