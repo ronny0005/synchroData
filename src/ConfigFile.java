@@ -5,6 +5,11 @@ import javax.swing.*;
 import javax.swing.filechooser.FileSystemView;
 import java.awt.event.*;
 import java.io.File;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.Date;
 
 public class ConfigFile {
     private JPanel panel1;
@@ -45,8 +50,9 @@ public class ConfigFile {
     private JButton SrcAjoutConfig;
     private JCheckBox EnvoiCheckBox;
     private JCheckBox ReceptionCheckBox;
-    private JFormattedTextField formattedTextField1;
+    private JFormattedTextField dateMajConfig;
     private JCheckBox ActiveCheckBox;
+    private JScrollPane panelScroll;
     private final String databaseSourceFile = "resource/databaseSource.json";
     private final JSONArray infoSource = DataBase.getInfoConnexion(databaseSourceFile);
     private JSONObject object = (JSONObject) (infoSource != null ? infoSource.get(0) : null);
@@ -121,6 +127,35 @@ public class ConfigFile {
         comboItem = SrcListConfig.getItemAt(0);
     }
 
+    public String GetdateFormat(String inputDateStr){
+        SimpleDateFormat inputFormat = new SimpleDateFormat("yyyy-MM-dd");
+        SimpleDateFormat outputFormat = new SimpleDateFormat("dd/MM/yyyy");
+
+        Date date = null;
+        String outputDateStr;
+        try {
+            date = inputFormat.parse(inputDateStr);
+            outputDateStr = outputFormat.format(date);
+        } catch (ParseException e) {
+            throw new RuntimeException(e);
+        }
+        return outputDateStr;
+    }
+
+    public String ReturnDateFormat(String inputDateStr){
+        SimpleDateFormat outputFormat = new SimpleDateFormat("yyyy-MM-dd");
+        SimpleDateFormat inputFormat = new SimpleDateFormat("dd/MM/yyyy");
+
+        Date date = null;
+        String outputDateStr;
+        try {
+            date = inputFormat.parse(inputDateStr);
+            outputDateStr = outputFormat.format(date);
+        } catch (ParseException e) {
+            throw new RuntimeException(e);
+        }
+        return outputDateStr;
+    }
     public void getConfigData(int position) {
         object = (JSONObject) (infoSource != null ? infoSource.get(position) : null);
         if (object != null) {
@@ -132,6 +167,11 @@ public class ConfigFile {
             SrcMotDePasse.setText((String)object.get("password"));
             SrcRepertoire.setText((String)object.get("path"));
             SrcNomConfig.setText((String)object.get("nomconfig"));
+            String dateMaj = ReturnDateFormat( DateTimeFormatter.ofPattern("dd/MM/yyyy").format(LocalDate.now()));
+            if(!(object.get("datemaj")).equals(""))
+                dateMaj = ((String)object.get("datemaj"));
+            dateMajConfig.setText(GetdateFormat(dateMaj));
+
             checkBox(Integer.parseInt((String)object.get("envoi")),EnvoiCheckBox);
             checkBox(Integer.parseInt((String)object.get("active")),ActiveCheckBox);
             checkBox(Integer.parseInt((String)object.get("reception")),ReceptionCheckBox);
@@ -200,6 +240,7 @@ public class ConfigFile {
         typeDocument.put("documentinterne2","0");
         typeDocument.put("vente","0");
         typeDocument.put("stock","0");
+        typeDocument.put("datemaj",ReturnDateFormat( DateTimeFormatter.ofPattern("dd/MM/yyyy").format(LocalDate.now())));
         jsonObject.put("typedocument",typeDocument);
         return jsonObject;
     }
@@ -210,6 +251,7 @@ public class ConfigFile {
             object.put("nomconfig",SrcNomConfig.getText());
             object.put("database",SrcBaseDeDonnees.getText());
             object.put("username",SrcLogin.getText());
+            object.put("datemaj",ReturnDateFormat(dateMajConfig.getText()));
             object.put("password",SrcMotDePasse.getText());
             object.put("path",SrcRepertoire.getText());
             object.put("folderftp", dossierFTPSource.getText());
@@ -251,6 +293,7 @@ public class ConfigFile {
         initValue();
         validerButton.addActionListener(actionEvent -> {
             if (infoSource != null) {
+                setConfigData(Integer.parseInt(comboItem.getValue()));
                 DataBase.setInfo(infoSource.toJSONString(),databaseSourceFile);
             }
 
@@ -471,7 +514,7 @@ public class ConfigFile {
 
     public static void main(String[] args){
         JFrame frame = new JFrame("Config");
-        frame.setContentPane(new ConfigFile().panel1);
+        frame.setContentPane(new ConfigFile().panelScroll);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.pack();
         frame.setVisible(true);

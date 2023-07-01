@@ -36,6 +36,8 @@ public class UpdateDatabase {
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
         }
+
+        String dateSynchro = "";
         JSONArray listObject = DataBase.getInfoConnexion(databaseSourceFile);
         if (listObject != null) {
             for (Object o : listObject) {
@@ -47,7 +49,15 @@ public class UpdateDatabase {
                         properties.put("user", list.get("username"));
                         properties.put("password", list.get("password"));
                         Connection sqlCon = DriverManager.getConnection(dbURL, properties);
+                        dateSynchro = (String) list.get("datemaj");
                         executeSQL(new File("resource/configListTable.sql"), sqlCon);
+                        try {
+                            Statement stmt = sqlCon.createStatement();
+                            stmt.execute("UPDATE config.selectTable SET lastSynchro='"+dateSynchro+"'");
+                            stmt.close();
+                        } catch (SQLException throwables) {
+                            throwables.printStackTrace();
+                        }
                     } catch (Exception throwables) {
                         throwables.printStackTrace();
                     }
