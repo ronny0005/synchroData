@@ -1,1 +1,44 @@
-[{"compteg":"1","typedocument":{"sortie":"1","transfert":"1","facturedachat":"1","entree":"1","documentinterne2":"1","bondelivraison":"1","documentinterne1":"1","facturedevente":"1","stock":"1","vente":"1","devis":"1"},"tiers":"1","envoi":"0","depot":"1","folderftp":"SOMBACAM_NDERE","artstock":"1","journaux":"1","collaborateur":"1","path":"C:\\sourceNdere","database":"SOMBACAM_CENTRALE","password":"ylXabThBx44rPMPEMJH1","reglement":"1","entete":"1","ecriturea":"0","ecriturec":"0","reception":"1","famille":"1","nomconfig":"importNdere","codeagence":"GAR","ligne":"1","active":"1","taxe":"1","article":"1","datemaj":"2022-07-01","servername":"itsolution2.ddns.net\\ITSOLUTION:3354","livraison":"1","username":"reports"},{"compteg":"1","typedocument":{"sortie":"1","transfert":"1","facturedachat":"1","entree":"1","documentinterne2":"1","bondelivraison":"1","documentinterne1":"1","facturedevente":"1","stock":"1","vente":"1","devis":"1"},"tiers":"1","envoi":"0","depot":"1","folderftp":"SOMBACAM_GAROUA","artstock":"1","journaux":"1","collaborateur":"1","path":"C:\\sourceGaroua","database":"SOMBACAM_CENTRALE","password":"ylXabThBx44rPMPEMJH1","reglement":"1","entete":"1","ecriturea":"0","ecriturec":"0","reception":"1","famille":"1","nomconfig":"importGaroua","codeagence":"GAR","ligne":"1","active":"1","taxe":"1","article":"1","datemaj":"","servername":"itsolution2.ddns.net\\ITSOLUTION:3354","livraison":"1","username":"reports"},{"compteg":"1","typedocument":{"sortie":"1","transfert":"1","facturedachat":"1","entree":"1","documentinterne2":"1","bondelivraison":"1","documentinterne1":"1","facturedevente":"1","stock":"1","vente":"1","devis":"1"},"tiers":"1","envoi":"0","depot":"1","folderftp":"SOMBACAM_MAROUA","artstock":"1","journaux":"1","collaborateur":"1","path":"C:\\sourceMaroua","database":"SOMBACAM_CENTRALE","password":"ylXabThBx44rPMPEMJH1","reglement":"1","entete":"1","ecriturea":"0","ecriturec":"0","reception":"1","famille":"1","nomconfig":"importMaroua","codeagence":"MAR","ligne":"1","active":"1","taxe":"1","article":"1","datemaj":"","servername":"itsolution2.ddns.net\\ITSOLUTION:3354","livraison":"1","username":"reports"},{"compteg":"1","typedocument":{"sortie":"1","transfert":"1","facturedachat":"1","entree":"1","documentinterne2":"1","bondelivraison":"1","documentinterne1":"1","facturedevente":"1","stock":"1","vente":"1","devis":"1"},"tiers":"1","envoi":"0","depot":"1","folderftp":"SOMBACAM_BERTOUA","artstock":"1","journaux":"1","collaborateur":"1","path":"C:\\sourceBertoua","database":"SOMBACAM_CENTRALE","password":"ylXabThBx44rPMPEMJH1","reglement":"1","entete":"1","ecriturea":"0","ecriturec":"0","reception":"1","famille":"1","nomconfig":"importBertoua","codeagence":"BTA","ligne":"1","active":"1","taxe":"1","article":"1","datemaj":"","servername":"itsolution2.ddns.net\\ITSOLUTION","livraison":"1","username":"reports"}]
+[
+  {
+    "compteg": "1",
+    "typedocument": {
+      "sortie": "1",
+      "transfert": "1",
+      "facturedachat": "1",
+      "entree": "1",
+      "documentinterne2": "1",
+      "bondelivraison": "1",
+      "documentinterne1": "1",
+      "facturedevente": "1",
+      "stock": "1",
+      "vente": "1",
+      "devis": "1"
+    },
+    "tiers": "1",
+    "envoi": "0",
+    "depot": "1",
+    "folderftp": "SOMBACAM_NDERE",
+    "artstock": "1",
+    "journaux": "1",
+    "collaborateur": "1",
+    "path": "C:\\sourceNdere",
+    "database": "CMI",
+    "password": "reports2012",
+    "reglement": "1",
+    "entete": "1",
+    "ecriturea": "0",
+    "ecriturec": "0",
+    "reception": "1",
+    "famille": "1",
+    "nomconfig": "importNdere",
+    "codeagence": "GAR",
+    "ligne": "1",
+    "active": "1",
+    "taxe": "1",
+    "article": "1",
+    "datemaj": "2023-07-01",
+    "servername": "localhost",
+    "livraison": "1",
+    "username": "reports"
+  }
+]
