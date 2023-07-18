@@ -227,8 +227,8 @@ public class DocLigne extends Table {
                 "\t\t\t,NOMCLIENT = docL.NOMCLIENT\n" +
                 "\t\t\t,ORDONATEUR_REMISE = docL.ORDONATEUR_REMISE\n" +
                 "\t\t\t,GROUPEUSER = docL.GROUPEUSER\n" +
-                "\t\t\t,Qte_LivreeBL = docL.Qte_LivreeBL\n" +
-                "\t\t\t,Qte_RestantBL = docL.Qte_RestantBL\n" +
+//                "\t\t\t,Qte_LivreeBL = docL.Qte_LivreeBL\n" +
+//                "\t\t\t,Qte_RestantBL = docL.Qte_RestantBL\n" +
                 "\t\t\t,DL_COMM = docL.DL_COMM\n" +
                 "\t\t\t,DataBaseSource = docL.DataBaseSource\n" +
                 "\t\t\t,USERGESCOM = docL.USERGESCOM\n" +
