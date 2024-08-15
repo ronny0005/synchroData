@@ -94,7 +94,7 @@ public class Caisse extends Table {
                         "\n";
     }
 
-    public static void sendDataElement(Connection sqlCon, String path,String database)
+    public static void sendDataElement(Connection sqlCon, String path,String database,int unibase)
     {
         dbSource = database;
         loadFile(path,sqlCon);
@@ -141,7 +141,7 @@ public class Caisse extends Table {
                 " DELETE src\n" +
                 " FROM F_CAISSE src\n" +
                 " INNER JOIN F_CAISSE_SUPPR del\n" +
-                " ON src.CA_No = del.CA_No ;\n" +
+                " ON src.CA_No = del.CA_No \n" +
                 " AND src.DatabaseSource = del.DatabaseSource ;\n" +
                 " IF OBJECT_ID('F_CAISSE_SUPPR') IS NOT NULL\n" +
                 " DROP TABLE F_CAISSE_SUPPR ;";

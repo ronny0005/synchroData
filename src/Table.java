@@ -1,5 +1,9 @@
+import org.apache.avro.file.DataFileReader;
+import org.apache.avro.generic.GenericDatumReader;
+import org.apache.avro.io.DatumReader;
 import org.json.simple.JSONObject;
 
+import javax.xml.validation.Schema;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -8,6 +12,13 @@ import java.sql.*;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import org.apache.avro.file.DataFileWriter;
+import org.apache.avro.generic.GenericData;
+import org.apache.avro.generic.GenericDatumWriter;
+import org.apache.avro.generic.GenericRecord;
+
+import java.io.File;
+import java.util.List;
 
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 
@@ -334,7 +345,7 @@ public class Table {
     public static void listDeleteAllInfo(Connection sqlCon, String path, String file,String table,String listTable,String database)
     {
         String query = listDelete(table,listTable,database);
-
+        writeToFileAvro(path + "\\" + file, query, sqlCon);
         writeOnFile(path + "\\" + file, query, sqlCon);
 
         query = listDeleteItem(table,listTable);
@@ -481,13 +492,14 @@ public class Table {
                 "\t);\n" +
                 "END CATCH\n";
     }
-    public static String updateTableDest(String key,String exclude,String tableName,String tableNameDest,String filename){
+    public static String updateTableDest(String key,String exclude,String tableName,String tableNameDest,String filename,int unibase){
         String[] keys = key.split(",");
         StringBuilder sql = new StringBuilder("\n" +
                 "BEGIN TRY\n" +
                 "SET DATEFORMAT ymd;\n" +
                 "DECLARE @MaColonne AS VARCHAR(250);\n" +
                 "DECLARE @MonSQL AS VARCHAR(MAX) = ''; \n" +
+                "DECLARE @UniBase AS INT = "+unibase+"; \n" +
                 "DECLARE @isKey AS INT=CASE WHEN '" + key + "' = '' THEN 0 ELSE 1 END; \n" +
                 "DECLARE @Key AS NVARCHAR(250) = '" + key + "'; \n" +
                 "DECLARE @TableName AS VARCHAR(100) = '" + tableName + "'; \n" +
@@ -518,7 +530,8 @@ public class Table {
                 " SELECT @MonSQL = @MonSQL + ' FROM ' + @TableNameDest  +' WHERE '\n" +
                 "IF @isKey = 0 \n" +
                 "\tSELECT @MonSQL = @MonSQL + @TableName + '.cbMarqSource = '+ @TableNameDest+'.cbMarqSource '\n" +
-                "\t\t\t\t\t\t+' AND '+@TableName + '.DataBaseSource = '+ @TableNameDest+'.DataBaseSource '\n" +
+                "\t\t\t\t\t\t+' AND CASE WHEN '+CAST(@UniBase AS VARCHAR(150))+'= 0 AND '+@TableName + '.DataBaseSource = '+ @TableNameDest+'.DataBaseSource THEN 1'\n" +
+                "\t\t\t\t\t\t+'             WHEN '+CAST(@UniBase AS VARCHAR(150))+'= 1 THEN 1 ELSE 0 END = 1'\n" +
                 "ELSE \n");
         for (int i = 0;i< keys.length;i++) {
             if(i== 0 ) {
@@ -591,6 +604,124 @@ public class Table {
         }
     }
 
+    // Fonction de mappage SQL -> Avro
+    private static String mapSQLTypeToAvroType(String sqlType) {
+        switch (sqlType.toLowerCase()) {
+            case "int":
+            case "integer":
+                return "[\"null\", \"int\"]";
+            case "bigint":
+                return "[\"null\", \"long\"]";
+            case "float":
+            case "real":
+                return "[\"null\", \"float\"]";
+            case "double":
+            case "numeric":
+            case "decimal":
+                return "[\"null\", \"double\"]";
+            case "bit":
+            case "boolean":
+                return "[\"null\", \"boolean\"]";
+            case "char":
+            case "varchar":
+            case "nvarchar":
+            case "text":
+                return "[\"null\", \"string\"]";
+            case "date":
+            case "time":
+            case "timestamp":
+                return "[\"null\", {\"type\": \"string\", \"logicalType\": \"timestamp-millis\"}]";
+            case "smallint":
+                return "[\"null\", \"int\"]";
+            case "tinyint":
+                return "[\"null\", \"int\"]";
+            default:
+                return "[\"null\", \"string\"]";
+        }
+    }
+
+
+    // Méthode principale pour écrire le résultat de la requête dans un fichier Avro
+    public static void writeToFileAvro(String fileName, String query, Connection sqlCon) {
+        try (Statement statement = sqlCon.createStatement();
+             ResultSet resultSet = statement.executeQuery(query)) {
+
+            // Récupérer les métadonnées pour construire le schéma Avro
+            ResultSetMetaData metaData = resultSet.getMetaData();
+            int columnCount = metaData.getColumnCount();
+
+            StringBuilder schemaBuilder = new StringBuilder();
+            schemaBuilder.append("{\"type\":\"record\",\"name\":\"ResultSetRecord\",\"fields\":[");
+
+            for (int i = 1; i <= columnCount; i++) {
+                String columnName = metaData.getColumnName(i);
+                String columnType = mapSQLTypeToAvroType(metaData.getColumnTypeName(i));
+                schemaBuilder.append("{\"name\":\"").append(columnName)
+                        .append("\",\"type\":").append(columnType)
+                        .append("}");
+                if (i < columnCount) {
+                    schemaBuilder.append(",");
+                }
+            }
+            schemaBuilder.append("]}");
+
+            org.apache.avro.Schema schema = new org.apache.avro.Schema.Parser().parse(schemaBuilder.toString());
+
+            // Créer un Avro DataFileWriter
+            File file = new File(fileName.replace(".csv",".avro"));
+            DataFileWriter<GenericRecord> dataFileWriter = new DataFileWriter<>(new GenericDatumWriter<GenericRecord>());
+            dataFileWriter.create(schema, file);
+
+            // Ecrire les résultats dans le fichier Avro
+            while (resultSet.next()) {
+                GenericRecord record = new GenericData.Record(schema);
+                for (int i = 1; i <= columnCount; i++) {
+                    Object value = resultSet.getObject(i);
+                    String columnName = metaData.getColumnName(i);
+
+                    if (value == null) {
+                        record.put(columnName, null);
+                    } else {
+                        // Récupération du type Avro attendu pour cette colonne
+                        String avroType = schema.getField(columnName).schema().getTypes().get(1).getType().getName();
+
+                        switch (avroType) {
+                            case "int":
+                                record.put(columnName, ((Number) value).intValue());
+                                break;
+                            case "long":
+                                record.put(columnName, ((Number) value).longValue());
+                                break;
+                            case "float":
+                                record.put(columnName, ((Number) value).floatValue());
+                                break;
+                            case "double":
+                                record.put(columnName, ((Number) value).doubleValue());
+                                break;
+                            case "boolean":
+                                record.put(columnName, value);
+                                break;
+                            case "string":
+                                record.put(columnName, value.toString());
+                                break;
+                            default:
+                                record.put(columnName, value.toString());
+                                break;
+                        }
+                    }
+                }
+                dataFileWriter.append(record);
+            }
+
+            // Fermer le writer
+            dataFileWriter.close();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+
     public static void writeOnFile(String fileName, String query, Connection sqlCon)
     {
         ResultSet result;
@@ -636,9 +767,189 @@ public class Table {
         }
     }
 
+    // Method to map Avro types to SQL Server types
+    private static String mapAvroTypeToSQLType(org.apache.avro.Schema schema) {
+        org.apache.avro.Schema.Type avroType = schema.getType();
+        if (avroType == org.apache.avro.Schema.Type.UNION) {
+            // If it's a union, find the non-null type
+            List<org.apache.avro.Schema> types = schema.getTypes();
+            for (org.apache.avro.Schema type : types) {
+                if (!type.getType().equals(org.apache.avro.Schema.Type.NULL)) {
+                    avroType = type.getType();
+                    break;
+                }
+            }
+        }
+
+        switch (avroType) {
+            case INT:
+                return "INT";
+            case LONG:
+                return "BIGINT";
+            case FLOAT:
+                return "REAL";
+            case DOUBLE:
+                return "FLOAT";
+            case BOOLEAN:
+                return "BIT";
+            case STRING:
+                return "NVARCHAR(MAX)";
+            case BYTES:
+                return "VARBINARY(MAX)";
+            default:
+                return "NVARCHAR(MAX)";
+        }
+    }
+
+
+    // Lire le fichier Avro et insérer les données dans la base de données
+    public static void insertAvroDataToSqlServer(String avroFilePath, String tableName, Connection conn) {
+        File avroFile = new File(avroFilePath);
+        DatumReader<GenericRecord> datumReader = new GenericDatumReader<>();
+
+        try (org.apache.avro.file.FileReader<GenericRecord> dataFileReader = DataFileReader.openReader(avroFile, datumReader)) {
+            // Get Avro schema
+            org.apache.avro.Schema schema = dataFileReader.getSchema();
+
+            // Create table dynamically
+            createTableFromSchema(conn, schema, tableName);
+
+            // Prepare insert query
+            String sqlInsertQuery = generateInsertQuery(schema, tableName);
+            try (PreparedStatement preparedStatement = conn.prepareStatement(sqlInsertQuery)) {
+
+                // Read each Avro record and insert into the database
+                while (dataFileReader.hasNext()) {
+                    GenericRecord record = dataFileReader.next();
+                    setPreparedStatementParameters(preparedStatement, record);
+                    preparedStatement.executeUpdate();
+                }
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    // Method to create a SQL Server table from Avro schema
+    private static void createTableFromSchema(Connection conn, org.apache.avro.Schema schema, String tableName) throws SQLException {
+        StringBuilder createTableQuery = new StringBuilder("DROP TABLE IF EXISTS ").append(tableName).append("; CREATE TABLE ");
+        createTableQuery.append(tableName).append(" (");
+
+        for (org.apache.avro.Schema.Field field : schema.getFields()) {
+            createTableQuery.append(field.name()).append(" ");
+            createTableQuery.append(mapAvroTypeToSQLType(field.schema())).append(",");
+        }
+
+        // Remove the last comma
+        createTableQuery.setLength(createTableQuery.length() - 1);
+        createTableQuery.append(");");
+
+        try (Statement stmt = conn.createStatement()) {
+            stmt.execute(createTableQuery.toString());
+        }
+    }
+
+    // Method to generate the SQL insert query from Avro schema
+    private static String generateInsertQuery(org.apache.avro.Schema schema, String tableName) {
+        StringBuilder insertQuery = new StringBuilder("INSERT INTO ");
+        insertQuery.append(tableName).append(" (");
+
+        StringBuilder valuesPart = new StringBuilder(" VALUES (");
+
+        for (org.apache.avro.Schema.Field field : schema.getFields()) {
+            insertQuery.append(field.name()).append(",");
+            valuesPart.append("?,");
+        }
+
+        // Remove the last comma
+        insertQuery.setLength(insertQuery.length() - 1);
+        valuesPart.setLength(valuesPart.length() - 1);
+
+        insertQuery.append(") ").append(valuesPart).append(");");
+        return insertQuery.toString();
+    }
+
+    // Method to set parameters for PreparedStatement from GenericRecord
+    private static void setPreparedStatementParameters(PreparedStatement preparedStatement, GenericRecord record) throws SQLException {
+        int index = 1;
+        for (org.apache.avro.Schema.Field field : record.getSchema().getFields()) {
+            Object value = record.get(field.name());
+            org.apache.avro.Schema fieldSchema = field.schema();
+            org.apache.avro.Schema.Type fieldType = fieldSchema.getType();
+
+            // Handle union types by finding the non-null type
+            if (fieldType == org.apache.avro.Schema.Type.UNION) {
+                List<org.apache.avro.Schema> types = fieldSchema.getTypes();
+                for (org.apache.avro.Schema type : types) {
+                    if (!type.getType().equals(org.apache.avro.Schema.Type.NULL)) {
+                        fieldType = type.getType();
+                        break;
+                    }
+                }
+            }
+
+            if (value == null) {
+                preparedStatement.setNull(index, getSqlType(fieldType));
+            } else {
+                switch (fieldType) {
+                    case INT:
+                        preparedStatement.setInt(index, (Integer) value);
+                        break;
+                    case LONG:
+                        preparedStatement.setLong(index, (Long) value);
+                        break;
+                    case FLOAT:
+                        preparedStatement.setFloat(index, (Float) value);
+                        break;
+                    case DOUBLE:
+                        preparedStatement.setDouble(index, (Double) value);
+                        break;
+                    case BOOLEAN:
+                        preparedStatement.setBoolean(index, (Boolean) value);
+                        break;
+                    case STRING:
+                        preparedStatement.setString(index, value.toString());
+                        break;
+                    case BYTES:
+                        preparedStatement.setBytes(index, (byte[]) value);
+                        break;
+                    default:
+                        preparedStatement.setObject(index, value.toString());
+                        break;
+                }
+            }
+            index++;
+        }
+    }
+
+    // Helper method to get SQL type from Avro schema type
+    private static int getSqlType(org.apache.avro.Schema.Type avroType) {
+        switch (avroType) {
+            case INT:
+                return java.sql.Types.INTEGER;
+            case LONG:
+                return java.sql.Types.BIGINT;
+            case FLOAT:
+                return java.sql.Types.FLOAT;
+            case DOUBLE:
+                return java.sql.Types.DOUBLE;
+            case BOOLEAN:
+                return java.sql.Types.BIT;
+            case STRING:
+                return java.sql.Types.NVARCHAR;
+            case BYTES:
+                return java.sql.Types.VARBINARY;
+            default:
+                return java.sql.Types.VARCHAR;
+        }
+    }
+
     public static void readOnFile(String path,String fileInfo,String table,Connection sqlCon)
     {
-        String line;
+
+        insertAvroDataToSqlServer(path.concat("\\").concat(fileInfo),table,sqlCon);
+        /*
         String sql;
         StringBuilder sqlCreateTable;
         String header = "";
@@ -665,7 +976,7 @@ public class Table {
 
                         sqlCreateTable = new StringBuilder(sqlCreateTable.substring(0, sqlCreateTable.length() - 1));
 
-                        sqlCreateTable.append(" INTO ").append(table).append(   /*" FROM " + table.replace("_DEST", "") +*/ ";").append(" TRUNCATE TABLE ").append(table);
+                        sqlCreateTable.append(" INTO ").append(table).append(   /*" FROM " + table.replace("_DEST", "") +*/ /*";").append(" TRUNCATE TABLE ").append(table);
                         executeQuery(sqlCon, sqlCreateTable.toString());
                         header = header + line + ")";
                     } else {
@@ -693,6 +1004,7 @@ public class Table {
         catch (IOException e) {
             e.printStackTrace();
         }
+        */
     }
 
     private static String escapeDoubleQuotes(String value) {
@@ -736,7 +1048,9 @@ public class Table {
     public static void getData(Connection sqlCon, String query,String table,String path,String file)
     {
         //updateSelectTable(table, sqlCon);
-        writeOnFile(path+"\\"+file, query, sqlCon);
+
+        writeToFileAvro(path + "\\" + file, query, sqlCon);
+        //writeOnFile(path+"\\"+file, query, sqlCon);
     }
 
     public static void executeQuery(Connection sqlCon, String query)
@@ -782,8 +1096,8 @@ public class Table {
                 "DECLARE @configTable AS VARCHAR(100) = '"+configTable+"';\n" +
                 "DECLARE @keyColumn AS VARCHAR(250) = '"+keyColumn+"';\n" +
                 "\n" +
-                "SELECT @MonSQL = ' INSERT INTO config.'+@configTable+' SELECT DISTINCT '+@keyColumn+',cbMarq FROM '+@TableName\n" +
-                "+' EXCEPT SELECT '+@keyColumn+',cbMarq FROM config.'+@configTable" +
+                "SELECT @MonSQL = ' INSERT INTO config.'+@configTable+' SELECT '+@keyColumn+',cbMarq,GETDATE() FROM ( SELECT DISTINCT '+@keyColumn+',cbMarq FROM '+@TableName\n" +
+                "+' EXCEPT SELECT '+@keyColumn+',cbMarq FROM config.'+@configTable + ')A'" +
                 "\n" +
                 "EXEC (@MonSQL)\n" +
                 "\n" +

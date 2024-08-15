@@ -14,6 +14,44 @@ public class DocLigne extends Table {
         return  "BEGIN TRY " +
                 " SET DATEFORMAT ymd;\n" +
                 " IF OBJECT_ID('F_DOCLIGNE_DEST') IS NOT NULL\n"+
+                "BEGIN \n"+
+                "IF OBJECT_ID('tempdb..#DocLigne') IS NOT NULL\n" +
+                "    DROP TABLE #DocLigne\n" +
+                "\n" +
+                " SELECT dest.[DO_Domaine],dest.[DO_Type],dest.[CT_Num],dest.[DO_Piece],dest.[DL_PieceBC],dest.[DL_PieceBL],dest.[DO_Date],dest.[DL_DateBC] \n" +
+                "        ,dest.[DL_DateBL],dest.[DL_Ligne]\n" +
+                "\t\t,[DO_Ref] = LEFT(CAST(dest.[DO_Ref] AS VARCHAR(150)),17),dest.[DL_TNomencl]  \n" +
+                "        ,dest.[DL_TRemPied],dest.[DL_TRemExep],dest.[AR_Ref]\n" +
+                "\t\t,[DL_Design] = LEFT(dest.[DL_Design],69),dest.[DL_Qte],dest.[DL_QteBC],dest.[DL_QteBL] \n" +
+                "        ,dest.[DL_PoidsNet] ,dest.[DL_PoidsBrut]   \n" +
+                "       ,dest.[DL_Remise01REM_Valeur] ,dest.[DL_Remise01REM_Type],dest.[DL_Remise02REM_Valeur],dest.[DL_Remise02REM_Type],dest.[DL_Remise03REM_Valeur]  \n" +
+                "        ,dest.[DL_Remise03REM_Type]  \n" +
+                "        ,dest.[DL_PrixUnitaire] ,dest.[DL_PUBC] ,dest.[DL_Taxe1] ,dest.[DL_TypeTaux1],dest.[DL_TypeTaxe1],dest.[DL_Taxe2] ,dest.[DL_TypeTaux2] \n" +
+                "        ,dest.[DL_TypeTaxe2],dest.[CO_No]/*,[AG_No1],[AG_No2]*/  \n" +
+                "       ,dest.[DL_PrixRU] ,dest.[DL_CMUP] ,dest.[DL_MvtStock],dest.[DT_No],dest.[AF_RefFourniss],dest.[EU_Enumere],dest.[EU_Qte] ,dest.[DL_TTC]  \n" +
+                "        ,DE_No = ISNULL(dsrc.[DE_No],dest.DE_No)\n" +
+                "\t\t,dest.[DL_NoRef],dest.[DL_TypePL],dest.[DL_PUDevise] ,dest.[DL_PUTTC]  \n" +
+                "        ,[DL_No] = ISNULL((SELECT MAX(DL_No) FROM F_DOCLIGNE),0)+ ROW_NUMBER() OVER (ORDER BY dest.[cbMarqSource])\n" +
+                "\t\t,dest.[DO_DateLivr],dest.[CA_Num] \n" +
+                "        ,dest.[DL_Taxe3] ,dest.[DL_TypeTaux3],dest.[DL_TypeTaxe3],dest.[DL_Frais]   \n" +
+                "       ,[DL_Valorise],[AR_RefCompose],[DL_NonLivre],[AC_RefClient],[DL_MontantHT] \n" +
+                "\t   ,[DL_MontantTTC] ,[DL_FactPoids],[DL_Escompte],[DL_PiecePL],[DL_DatePL],[DL_QtePL] ,[DL_NoColis],[DL_NoLink]  \n" +
+                "       ,[RP_Code],[DL_QteRessource],[DL_DateAvancement],[cbProt],[cbCreateur],[cbModification],[cbReplication],[cbFlag] \n" +
+                "       ,[DATEMODIF] \n" +
+                "        /*,[CONTROLE],[NBJ],[NOM_CLIENT],[PMIN],[PMAX],[CONTROLEDATE],[PGROS] */\n" +
+                "        ,[DL_QTE_SUPER_PRIX] \n" +
+                "       ,[DL_SUPER_PRIX],[USERGESCOM],[NOMCLIENT],[ORDONATEUR_REMISE],[GROUPEUSER],[MACHINEPC]\n" +
+                "\t   ,[Qte_LivreeBL],[Qte_RestantBL],[DL_COMM],dest.[cbMarqSource],dest.[DataBaseSource]  \n" +
+                "\t   ,[cbMarqSourceSrc] = src.cbMarqSource\n" +
+                "\t   INTO #DocLigne\n" +
+                " FROM F_DOCLIGNE_DEST dest  \n" +
+                " LEFT JOIN (SELECT cbMarqSource,dataBaseSource,DO_Piece,DO_Type,DO_Domaine FROM F_DOCLIGNE) src  \n" +
+                "  ON dest.cbMarqSource = src.cbMarqSource  \n" +
+                "  AND dest.dataBaseSource = src.dataBaseSource  \n" +
+                " LEFT JOIN (SELECT DE_NoSource,dataBaseSource,DE_No FROM F_DEPOT) dsrc  \n" +
+                "  ON dsrc.DE_NoSource = dest.DE_No  \n" +
+                "  AND dsrc.dataBaseSource = dest.dataBaseSource  \n"+
+                "\n"+
                 "INSERT INTO F_DOCLIGNE (\n" +
                 "[DO_Domaine],[DO_Type],[CT_Num],[DO_Piece],[DL_PieceBC],[DL_PieceBL],[DO_Date],[DL_DateBC],[DL_DateBL],[DL_Ligne],[DO_Ref],[DL_TNomencl]\n" +
                 "      ,[DL_TRemPied],[DL_TRemExep],[AR_Ref],[DL_Design],[DL_Qte],[DL_QteBC],[DL_QteBL],[DL_PoidsNet] ,[DL_PoidsBrut] \n" +
@@ -29,37 +67,27 @@ public class DocLigne extends Table {
                 "      ,[DL_SUPER_PRIX],[USERGESCOM],[NOMCLIENT],[ORDONATEUR_REMISE],[GROUPEUSER],[Qte_LivreeBL],[Qte_RestantBL],[DL_COMM],[cbMarqSource],[DataBaseSource]" +
                 "      )\n" +
                 "            \n" +
-                "SELECT\tdest.[DO_Domaine],dest.[DO_Type],dest.[CT_Num],dest.[DO_Piece],dest.[DL_PieceBC],dest.[DL_PieceBL],dest.[DO_Date],dest.[DL_DateBC]" +
-                "       ,dest.[DL_DateBL],dest.[DL_Ligne],LEFT(CAST(dest.[DO_Ref] AS VARCHAR(150)),17),dest.[DL_TNomencl]\n" +
-                "       ,dest.[DL_TRemPied],dest.[DL_TRemExep],dest.[AR_Ref],LEFT(dest.[DL_Design],69),dest.[DL_Qte],dest.[DL_QteBC],dest.[DL_QteBL]" +
-                "       ,dest.[DL_PoidsNet] ,dest.[DL_PoidsBrut] \n" +
-                "\t     ,dest.[DL_Remise01REM_Valeur] ,dest.[DL_Remise01REM_Type],dest.[DL_Remise02REM_Valeur],dest.[DL_Remise02REM_Type],dest.[DL_Remise03REM_Valeur] " +
-                "       ,dest.[DL_Remise03REM_Type]\n" +
-                "       ,dest.[DL_PrixUnitaire] ,dest.[DL_PUBC] ,dest.[DL_Taxe1] ,dest.[DL_TypeTaux1],dest.[DL_TypeTaxe1],dest.[DL_Taxe2] ,dest.[DL_TypeTaux2]" +
-                "       ,dest.[DL_TypeTaxe2],dest.[CO_No]/*,[AG_No1],[AG_No2]*/\n" +
-                "\t     ,dest.[DL_PrixRU] ,dest.[DL_CMUP] ,dest.[DL_MvtStock],dest.[DT_No],dest.[AF_RefFourniss],dest.[EU_Enumere],dest.[EU_Qte] ,dest.[DL_TTC]\n" +
-                "       ,ISNULL(dsrc.[DE_No],dest.DE_No),dest.[DL_NoRef],dest.[DL_TypePL],dest.[DL_PUDevise] ,dest.[DL_PUTTC] " +
-                "       ,ISNULL((SELECT MAX(DL_No) FROM F_DOCLIGNE),0)+ ROW_NUMBER() OVER (ORDER BY dest.[cbMarqSource]),dest.[DO_DateLivr],dest.[CA_Num]" +
-                "       ,dest.[DL_Taxe3] ,dest.[DL_TypeTaux3],dest.[DL_TypeTaxe3],dest.[DL_Frais] \n" +
+                "SELECT\t[DO_Domaine],[DO_Type],[CT_Num],[DO_Piece],[DL_PieceBC],[DL_PieceBL],[DO_Date],[DL_DateBC]" +
+                "       ,[DL_DateBL],[DL_Ligne],[DO_Ref],[DL_TNomencl]\n" +
+                "       ,[DL_TRemPied],[DL_TRemExep],[AR_Ref],[DL_Design],[DL_Qte],[DL_QteBC],[DL_QteBL]" +
+                "       ,[DL_PoidsNet] ,[DL_PoidsBrut] \n" +
+                "\t     ,[DL_Remise01REM_Valeur] ,[DL_Remise01REM_Type],[DL_Remise02REM_Valeur],[DL_Remise02REM_Type],[DL_Remise03REM_Valeur] " +
+                "       ,[DL_Remise03REM_Type]\n" +
+                "       ,[DL_PrixUnitaire] ,[DL_PUBC] ,[DL_Taxe1] ,[DL_TypeTaux1],[DL_TypeTaxe1],[DL_Taxe2] ,[DL_TypeTaux2]" +
+                "       ,[DL_TypeTaxe2],[CO_No]/*,[AG_No1],[AG_No2]*/\n" +
+                "\t     ,[DL_PrixRU] ,[DL_CMUP] ,[DL_MvtStock],[DT_No],[AF_RefFourniss],[EU_Enumere],[EU_Qte] ,[DL_TTC]\n" +
+                "       ,DE_No,[DL_NoRef],[DL_TypePL],[DL_PUDevise] ,[DL_PUTTC] " +
+                "       ,DL_No,[DO_DateLivr],[CA_Num]" +
+                "       ,[DL_Taxe3] ,[DL_TypeTaux3],[DL_TypeTaxe3],[DL_Frais] \n" +
                 "      ,[DL_Valorise],[AR_RefCompose],[DL_NonLivre],[AC_RefClient],[DL_MontantHT] ,[DL_MontantTTC] ,[DL_FactPoids],[DL_Escompte],[DL_PiecePL],[DL_DatePL],[DL_QtePL] ,[DL_NoColis],[DL_NoLink]\n" +
                 "      ,[RP_Code],[DL_QteRessource],[DL_DateAvancement],[cbProt],[cbCreateur],[cbModification],[cbReplication],[cbFlag]" +
                 "      ,[DATEMODIF]" +
-               // "       ,[CONTROLE],[NBJ],[NOM_CLIENT],[PMIN],[PMAX],[CONTROLEDATE],[PGROS]" +
+                // "       ,[CONTROLE],[NBJ],[NOM_CLIENT],[PMIN],[PMAX],[CONTROLEDATE],[PGROS]" +
                 "       ,[DL_QTE_SUPER_PRIX]"+
-                "      ,[DL_SUPER_PRIX],[USERGESCOM],[NOMCLIENT],[ORDONATEUR_REMISE],[GROUPEUSER],[Qte_LivreeBL],[Qte_RestantBL],[DL_COMM],dest.[cbMarqSource],dest.[DataBaseSource]\n" +
-                "FROM F_DOCLIGNE_DEST dest\n" +
-                "LEFT JOIN (SELECT cbMarqSource,dataBaseSource,DO_Piece,DO_Type,DO_Domaine FROM F_DOCLIGNE) src\n" +
-                "\tON\tdest.cbMarqSource = src.cbMarqSource\n" +
-                "\tAND\tdest.dataBaseSource = src.dataBaseSource\n" +
-                "LEFT JOIN (SELECT DE_NoSource,dataBaseSource,DE_No FROM F_DEPOT) dsrc\n" +
-                "\tON\tdsrc.DE_NoSource = dest.DE_No\n" +
-                "\tAND\tdsrc.dataBaseSource = dest.dataBaseSource\n" +
-                "WHERE src.cbMarqSource IS NULL\n" +
-                "AND EXISTS (   SELECT 1\n" +
-                "               FROM F_DOCENTETE ent\n" +
-                "               WHERE ent.DO_Piece = dest.DO_Piece\n" +
-                "               AND ent.DO_Type = dest.DO_Type\n" +
-                "               AND ent.DO_Domaine = dest.DO_Domaine);\n" +
+                "      ,[DL_SUPER_PRIX],[USERGESCOM],[NOMCLIENT],[ORDONATEUR_REMISE],[GROUPEUSER],[Qte_LivreeBL],[Qte_RestantBL],[DL_COMM],[cbMarqSource],[DataBaseSource]\n" +
+                "FROM #DocLigne \n" +
+                "WHERE cbMarqSourceSrc IS NULL\n" +
+                "END\n" +
                 "\n" +
                 "INSERT INTO config.DB_Errors(\n" +
                 "          UserName,\n" +
@@ -79,25 +107,13 @@ public class DocLigne extends Table {
                 "           NULL," +
                 "           NULL," +
                 "           NULL," +
-                "           NULL,'Domaine : '+[DO_Domaine]+' Type : ' + [DO_Type] + ' Piece : ' + [DO_Piece]" +
-                "           +' cbMarq : ' + dest.[cbMarqSource] + ' database : ' + dest.[DataBaseSource]" +
+                "           NULL,'Domaine : '+CAST([DO_Domaine] AS VARCHAR(150))+' Type : ' + CAST([DO_Type] AS VARCHAR(150)) + ' Piece : ' + CAST([DO_Piece] AS VARCHAR(150))" +
+                "           +' cbMarq : ' + CAST([cbMarqSource] AS VARCHAR(150)) + ' database : ' + CAST([DataBaseSource] AS VARCHAR(150))" +
                 "           + 'fileName : "+filename+" '" +
                 "           ,'Insert F_DOCLIGNE'\n" +
                 "           ,GETDATE()\n" +
-                "FROM F_DOCLIGNE_DEST dest\n" +
-                "LEFT JOIN (SELECT cbMarqSource,dataBaseSource FROM F_DOCLIGNE) src\n" +
-                "\tON\tdest.cbMarqSource = src.cbMarqSource\n" +
-                "\tAND\tdest.dataBaseSource = src.dataBaseSource\n" +
-                "LEFT JOIN (SELECT DE_NoSource,dataBaseSource,DE_No FROM F_DEPOT) dsrc\n" +
-                "\tON\tdsrc.DE_NoSource = dest.DE_No\n" +
-                "\tAND\tdsrc.dataBaseSource = dest.dataBaseSource\n" +
-                "WHERE src.cbMarqSource IS NULL\n" +
-                "AND NOT EXISTS (   SELECT 1\n" +
-                "               FROM F_DOCENTETE ent\n" +
-                "               WHERE ent.DO_Piece = dest.DO_Piece\n" +
-                "               AND ent.DO_Type = dest.DO_Type\n" +
-                "               AND ent.DO_Domaine = dest.DO_Domaine);\n" +
-                "            \n" +
+                "FROM #DocLigne\n" +
+                "WHERE cbMarqSourceSrc IS NULL\n" +
                 " END TRY\n" +
                 " BEGIN CATCH \n" +
                 "INSERT INTO config.DB_Errors\n" +
@@ -114,7 +130,7 @@ public class DocLigne extends Table {
                 "   GETDATE());\n" +
                 "END CATCH";
     }
-    public static void sendDataElement(Connection sqlCon, String path,String database)
+    public static void sendDataElement(Connection sqlCon, String path,String database,int unibase)
     {
         dbSource = database;
         loadFile(path,sqlCon);
@@ -143,7 +159,44 @@ public class DocLigne extends Table {
                 "\n" +
                 "\tIF OBJECT_ID('F_DOCLIGNE_DEST') IS NOT NULL\n" +
                 "\tBEGIN\n" +
-                "\t\tUPDATE F_DOCLIGNE\n" +
+                "IF OBJECT_ID('tempdb..#DocLigne') IS NOT NULL\n" +
+                "    DROP TABLE #DocLigne\n" +
+                "\n" +
+                " SELECT dest.[DO_Domaine],dest.[DO_Type],dest.[CT_Num],dest.[DO_Piece],dest.[DL_PieceBC],dest.[DL_PieceBL],dest.[DO_Date],dest.[DL_DateBC] \n" +
+                "        ,dest.[DL_DateBL],dest.[DL_Ligne]\n" +
+                "\t\t,[DO_Ref] = LEFT(CAST(dest.[DO_Ref] AS VARCHAR(150)),17),dest.[DL_TNomencl]  \n" +
+                "        ,dest.[DL_TRemPied],dest.[DL_TRemExep],dest.[AR_Ref]\n" +
+                "\t\t,[DL_Design] = LEFT(dest.[DL_Design],69),dest.[DL_Qte],dest.[DL_QteBC],dest.[DL_QteBL] \n" +
+                "        ,dest.[DL_PoidsNet] ,dest.[DL_PoidsBrut]   \n" +
+                "       ,dest.[DL_Remise01REM_Valeur] ,dest.[DL_Remise01REM_Type],dest.[DL_Remise02REM_Valeur],dest.[DL_Remise02REM_Type],dest.[DL_Remise03REM_Valeur]  \n" +
+                "        ,dest.[DL_Remise03REM_Type]  \n" +
+                "        ,dest.[DL_PrixUnitaire] ,dest.[DL_PUBC] ,dest.[DL_Taxe1] ,dest.[DL_TypeTaux1],dest.[DL_TypeTaxe1],dest.[DL_Taxe2] ,dest.[DL_TypeTaux2] \n" +
+                "        ,dest.[DL_TypeTaxe2],dest.[CO_No]/*,[AG_No1],[AG_No2]*/  \n" +
+                "       ,dest.[DL_PrixRU] ,dest.[DL_CMUP] ,dest.[DL_MvtStock],dest.[DT_No],dest.[AF_RefFourniss],dest.[EU_Enumere],dest.[EU_Qte] ,dest.[DL_TTC]  \n" +
+                "        ,DE_No = ISNULL(dsrc.[DE_No],dest.DE_No)\n" +
+                "\t\t,dest.[DL_NoRef],dest.[DL_TypePL],dest.[DL_PUDevise] ,dest.[DL_PUTTC]  \n" +
+                "        ,[DL_No] = ISNULL((SELECT MAX(DL_No) FROM F_DOCLIGNE),0)+ ROW_NUMBER() OVER (ORDER BY dest.[cbMarqSource])\n" +
+                "\t\t,dest.[DO_DateLivr],dest.[CA_Num] \n" +
+                "        ,dest.[DL_Taxe3] ,dest.[DL_TypeTaux3],dest.[DL_TypeTaxe3],dest.[DL_Frais]   \n" +
+                "       ,[DL_Valorise],[AR_RefCompose],[DL_NonLivre],[AC_RefClient],[DL_MontantHT] \n" +
+                "\t   ,[DL_MontantTTC] ,[DL_FactPoids],[DL_Escompte],[DL_PiecePL],[DL_DatePL],[DL_QtePL] ,[DL_NoColis],[DL_NoLink]  \n" +
+                "       ,[RP_Code],[DL_QteRessource],[DL_DateAvancement],[cbProt],[cbCreateur],[cbModification],[cbReplication],[cbFlag] \n" +
+                "       ,[DATEMODIF] \n" +
+                "        /*,[CONTROLE],[NBJ],[NOM_CLIENT],[PMIN],[PMAX],[CONTROLEDATE],[PGROS] */\n" +
+                "        ,[DL_QTE_SUPER_PRIX] \n" +
+                "       ,[DL_SUPER_PRIX],[USERGESCOM],[NOMCLIENT],[ORDONATEUR_REMISE],[GROUPEUSER],[MACHINEPC]\n" +
+                "\t   ,[Qte_LivreeBL],[Qte_RestantBL],[DL_COMM],dest.[cbMarqSource],dest.[DataBaseSource]  \n" +
+                "\t   ,[cbMarqSourceSrc] = src.cbMarqSource\n" +
+                "\t   INTO #DocLigne\n" +
+                " FROM F_DOCLIGNE_DEST dest  \n" +
+                " LEFT JOIN (SELECT cbMarqSource,dataBaseSource,DO_Piece,DO_Type,DO_Domaine FROM F_DOCLIGNE) src  \n" +
+                "  ON dest.cbMarqSource = src.cbMarqSource  \n" +
+                "  AND dest.dataBaseSource = src.dataBaseSource  \n" +
+                " LEFT JOIN (SELECT DE_NoSource,dataBaseSource,DE_No FROM F_DEPOT) dsrc  \n" +
+                "  ON dsrc.DE_NoSource = dest.DE_No  \n" +
+                "  AND dsrc.dataBaseSource = dest.dataBaseSource  \n"+
+                "\n"+
+                "\t\tUPDATE doc\n" +
                 "\t\tSET DO_Domaine = docL.DO_Domaine\n" +
                 "\t\t\t,DO_Type = docL.DO_Type\n" +
                 "\t\t\t,CT_Num = docL.CT_Num\n" +
@@ -233,16 +286,9 @@ public class DocLigne extends Table {
                 "\t\t\t,DataBaseSource = docL.DataBaseSource\n" +
                 "\t\t\t,USERGESCOM = docL.USERGESCOM\n" +
                 "\t\t\t,MACHINEPC = docL.MACHINEPC\n" +
-                "\t\tFROM F_DOCLIGNE_DEST docL\n" +
-                "\t\tWHERE F_DOCLIGNE.cbMarqSource = docL.cbMarqSource\n" +
-                "\t\t\tAND F_DOCLIGNE.DataBaseSource = docL.DataBaseSource\n" +
-                "\t\t\tAND EXISTS (\n" +
-                "\t\t\t\tSELECT 1\n" +
-                "\t\t\t\tFROM F_DOCENTETE docE\n" +
-                "\t\t\t\tWHERE docE.DO_Type = docL.DO_Type\n" +
-                "\t\t\t\t\tAND docE.DO_Piece = docL.DO_Piece\n" +
-                "\t\t\t\t\tAND docE.DO_Domaine = docL.DO_Domaine\n" +
-                "\t\t\t\t)\n" +
+                "FROM F_DOCLIGNE doc\n"+
+                "\t\tINNER JOIN #DocLigne docL ON doc.cbMarqSource = docL.cbMarqSource\n" +
+                "AND doc.[DataBaseSource] = docL.[DataBaseSource]\n"+
                 "\n" +
                 "\t\tINSERT INTO config.DB_Errors (\n" +
                 "\t\t\tUserName\n" +
@@ -263,12 +309,15 @@ public class DocLigne extends Table {
                 "\t\t\t,NULL\n" +
                 "\t\t\t,NULL\n" +
                 "\t\t\t,NULL\n" +
-                "\t\t\t,'Domaine : ' + dest.[DO_Domaine] + ' Type : ' + dest.[DO_Type] + ' Piece : ' + dest.[DO_Piece] + ' cbMarq : ' + dest.[cbMarqSource] + ' database : ' + dest.[DataBaseSource] + 'fileName : "+filename+" '\n" +
+                "\t\t\t,'Domaine : ' + CAST(dest.[DO_Domaine] AS VARCHAR(150)) + ' Type : ' + CAST(dest.[DO_Type] AS VARCHAR(150)) + ' Piece : ' + CAST(dest.[DO_Piece] AS VARCHAR(150)) + ' cbMarq : ' + CAST(dest.[cbMarqSource] AS VARCHAR(150)) + ' database : ' + CAST(dest.[DataBaseSource] AS VARCHAR(150)) + 'fileName : "+filename+" '\n" +
                 "\t\t\t,'Update F_DOCLIGNE'\n" +
                 "\t\t\t,GETDATE()\n" +
                 "\t\tFROM F_DOCLIGNE_DEST dest\n" +
                 "\t\tINNER JOIN F_DOCLIGNE docL ON docL.cbMarqSource = dest.cbMarqSource\n" +
                 "\t\t\tAND docL.DataBaseSource = dest.DataBaseSource\n" +
+                "LEFT JOIN (SELECT DE_NoSource,dataBaseSource,DE_No FROM F_DEPOT) dsrc\n" +
+                "ON\tdsrc.DE_NoSource = dest.DE_No\n" +
+                "AND\tdsrc.dataBaseSource = dest.dataBaseSource\n"+
                 "\t\t\tAND NOT EXISTS (\n" +
                 "\t\t\t\tSELECT 1\n" +
                 "\t\t\t\tFROM F_DOCENTETE docE\n" +

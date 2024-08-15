@@ -85,7 +85,7 @@ public class Comptet extends Table {
                 "   GETDATE());\n" +
                 "END CATCH";
     }
-    public static void sendDataElement(Connection sqlCon, String path)
+    public static void sendDataElement(Connection sqlCon, String path,int unibase)
     {
         File dir = new File(path);
         FilenameFilter filter = (dir1, name) -> name.startsWith(file);
@@ -96,7 +96,7 @@ public class Comptet extends Table {
             for (String filename : children) {
                 readOnFile(path, filename, tableName + "_DEST", sqlCon);
                 readOnFile(path, "deleteList" + filename, tableName + "_SUPPR", sqlCon);
-                executeQuery(sqlCon, updateTableDest("CT_Num,CT_Type", "'CT_Num','CT_Type'", tableName, tableName + "_DEST", filename));
+                executeQuery(sqlCon, updateTableDest("CT_Num,CT_Type", "'CT_Num','CT_Type','DE_No'", tableName, tableName + "_DEST", filename,unibase));
                 sendData(sqlCon, path, filename, insert(filename));
 
                 deleteTempTable(sqlCon, tableName + "_DEST");

@@ -102,7 +102,7 @@ public class EcritureC extends Table {
     }
 
 
-    public static void sendDataElement(Connection  sqlCon, String path,String database)
+    public static void sendDataElement(Connection  sqlCon, String path,String database,int unibase)
     {
         File dir = new File(path);
         FilenameFilter filter = (dir1, name) -> name.startsWith(file);
@@ -115,7 +115,7 @@ public class EcritureC extends Table {
 
                 readOnFile(path, filename, tableName + "_DEST", sqlCon);
                 readOnFile(path, "deleteList" + filename, tableName + "_SUPPR", sqlCon);
-                executeQuery(sqlCon, updateTableDest("", "'EC_No','JM_Date','JO_Num','EC_CType'", tableName, tableName + "_DEST", filename));
+                executeQuery(sqlCon, updateTableDest("", "'EC_No','JM_Date','JO_Num','EC_CType'", tableName, tableName + "_DEST", filename,unibase));
                 sendData(sqlCon, path, filename, insert(filename));
                 deleteTempTable(sqlCon, tableName + "_DEST");
 

@@ -2,10 +2,7 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
 import java.io.*;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
 import java.util.Properties;
 
 public class UpdateDatabase {
@@ -51,12 +48,22 @@ public class UpdateDatabase {
                         Connection sqlCon = DriverManager.getConnection(dbURL, properties);
                         dateSynchro = (String) list.get("datemaj");
                         executeSQL(new File("resource/configListTable.sql"), sqlCon);
+                        PreparedStatement pstmt = null;
+                        String sql = "UPDATE config.selectTable SET lastSynchro = ?";
                         try {
-                            Statement stmt = sqlCon.createStatement();
-                            stmt.execute("UPDATE config.selectTable SET lastSynchro='"+dateSynchro+"'");
-                            stmt.close();
+                                pstmt = sqlCon.prepareStatement(sql);
+                                pstmt.setString(1, dateSynchro); // Assuming dateSynchro is already in the correct format
+                                pstmt.executeUpdate();
                         } catch (SQLException throwables) {
                             throwables.printStackTrace();
+                        } finally {
+                            if (pstmt != null) {
+                                try {
+                                    pstmt.close();
+                                } catch (SQLException e) {
+                                    e.printStackTrace();
+                                }
+                            }
                         }
                     } catch (Exception throwables) {
                         throwables.printStackTrace();

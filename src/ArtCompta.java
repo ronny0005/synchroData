@@ -47,7 +47,7 @@ public class ArtCompta extends Table {
                 "END CATCH";
     }
 
-    public static void sendDataElement(Connection sqlCon, String path) {
+    public static void sendDataElement(Connection sqlCon, String path,int unibase) {
         File dir = new File(path);
         FilenameFilter filter = (dir1, name) -> name.startsWith(file);
         String[] children = dir.list(filter);
@@ -58,7 +58,7 @@ public class ArtCompta extends Table {
                 readOnFile(path, filename, tableName + "_DEST", sqlCon);
 
                 readOnFile(path, "deleteList" + filename, tableName + "_SUPPR", sqlCon);
-                executeQuery(sqlCon, updateTableDest("AR_Ref,ACP_Type,ACP_Champ", "'AR_Ref','ACP_Type','ACP_Champ'", tableName, tableName + "_DEST", filename));
+                executeQuery(sqlCon, updateTableDest("AR_Ref,ACP_Type,ACP_Champ", "'AR_Ref','ACP_Type','ACP_Champ'", tableName, tableName + "_DEST", filename,unibase));
                 sendData(sqlCon, path, filename, insert(filename));
 
                 deleteTempTable(sqlCon, tableName + "_DEST");

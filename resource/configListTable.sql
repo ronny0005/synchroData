@@ -12,6 +12,7 @@ IF OBJECT_ID('config.ListArticle', 'U') IS NULL
 CREATE TABLE config.ListArticle (
     AR_Ref NVARCHAR(50)
     ,cbMarq INT
+    ,DateCreation DATETIME DEFAULT GETDATE()
 )
 
 IF OBJECT_ID('config.listFJournaux', 'U') IS NULL

@@ -49,7 +49,7 @@ public class ArticleRessource extends Table {
                 "END CATCH";
     }
 
-    public static void sendDataElement(Connection sqlCon, String path)
+    public static void sendDataElement(Connection sqlCon, String path,int unibase)
     {
         File dir = new File(path);
         FilenameFilter filter = (dir1, name) -> name.startsWith(file);
@@ -60,7 +60,7 @@ public class ArticleRessource extends Table {
             for (String filename : children) {
                 readOnFile(path, filename, tableName + "_DEST", sqlCon);
                 readOnFile(path, "deleteList" + filename, tableName + "_SUPPR", sqlCon);
-                executeQuery(sqlCon, updateTableDest("RP_Code,AR_Ref", "'RP_Code'", tableName, tableName + "_DEST", filename));
+                executeQuery(sqlCon, updateTableDest("RP_Code,AR_Ref", "'RP_Code'", tableName, tableName + "_DEST", filename,unibase));
                 sendData(sqlCon, path, filename, insert(filename));
 
                 deleteArticleRessource(sqlCon, path, filename);

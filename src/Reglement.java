@@ -124,7 +124,7 @@ public class Reglement extends Table {
                 "END CATCH";
     }
 
-    public static void sendDataElement(Connection sqlCon, String path,String database)
+    public static void sendDataElement(Connection sqlCon, String path,String database,int unibase)
     {
         dbSource = database;
         loadFile(path,sqlCon);

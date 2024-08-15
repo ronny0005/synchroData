@@ -16,9 +16,12 @@ public class UploadFileFTP {
 
         JSONArray listObject = DataBase.getInfoConnexion(databaseSourceFile);
         try {
-            session = jsch.getSession("u85460117-upload", "home631778145.1and1-data.host", 22);
+            session = jsch.getSession("u94723657", "home751918776.1and1-data.host", 22);
+            session.setPassword("ilIBWTvZme4CZD5BzMez");
+
+            //session = jsch.getSession("u85460117-upload", "home631778145.1and1-data.host", 22);
             session.setConfig("StrictHostKeyChecking", "no");
-            session.setPassword("FyK6cIAgpeNOSbEdfrpC*");
+            //session.setPassword("FyK6cIAgpeNOSbEdfrpC*");
             session.connect();
         ChannelSftp sftpChannel = (ChannelSftp) session.openChannel("sftp");
         sftpChannel.connect();

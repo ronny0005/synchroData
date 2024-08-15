@@ -80,7 +80,7 @@ public class Article extends Table {
         executeQuery(sqlCon, query);
     }
 
-    public static void sendDataElement(Connection sqlCon, String path)
+    public static void sendDataElement(Connection sqlCon, String path,int unibase)
     {
         File dir = new File(path);
         FilenameFilter filter = (dir1, name) -> name.startsWith(file);
@@ -90,14 +90,14 @@ public class Article extends Table {
         } else {
             for (String filename : children) {
                 readOnFile(path, filename, tableName + "_DEST", sqlCon);
-                executeQuery(sqlCon, updateTableDest("AR_Ref", "'AR_Ref','AR_SuiviStock'", tableName, tableName + "_DEST", filename));
+                executeQuery(sqlCon, updateTableDest("AR_Ref", "'AR_Ref','AR_SuiviStock'", tableName, tableName + "_DEST", filename,unibase));
                 sendData(sqlCon, path, filename, insert(filename));
-                Condition.sendDataElement(sqlCon, path);
-                RessourceProd.sendDataElement(sqlCon, path);
-                ArticleRessource.sendDataElement(sqlCon, path);
-                ArtCompta.sendDataElement(sqlCon, path);
-                ArtClient.sendDataElement(sqlCon, path);
-                ArtFourniss.sendDataElement(sqlCon, path);
+                Condition.sendDataElement(sqlCon, path,unibase);
+                RessourceProd.sendDataElement(sqlCon, path,unibase);
+                ArticleRessource.sendDataElement(sqlCon, path,unibase);
+                ArtCompta.sendDataElement(sqlCon, path,unibase);
+                ArtClient.sendDataElement(sqlCon, path,unibase);
+                ArtFourniss.sendDataElement(sqlCon, path,unibase);
                 linkArticle(sqlCon);
                 readOnFile(path, "deleteList" + filename, "F_ARTCLIENT_SUPPR", sqlCon);
 

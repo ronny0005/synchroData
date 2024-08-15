@@ -45,7 +45,7 @@ public class JMouv extends Table {
                 "END CATCH";
     }
 
-    public static void sendDataElement(Connection sqlCon, String path) {
+    public static void sendDataElement(Connection sqlCon, String path,int unibase) {
         File dir = new File(path);
         FilenameFilter filter = (dir1, name) -> name.startsWith(file);
         String[] children = dir.list(filter);
@@ -56,7 +56,7 @@ public class JMouv extends Table {
                 readOnFile(path, filename, tableName + "_DEST", sqlCon);
 
                 readOnFile(path, "deleteList" + filename, tableName + "_SUPPR", sqlCon);
-                executeQuery(sqlCon, updateTableDest("JO_Num,JM_Date", "'JO_Num','JM_Date'", tableName, tableName + "_DEST", filename));
+                executeQuery(sqlCon, updateTableDest("JO_Num,JM_Date", "'JO_Num','JM_Date'", tableName, tableName + "_DEST", filename,unibase));
                 sendData(sqlCon, path, filename, insert(filename));
 
                 deleteTempTable(sqlCon, tableName + "_DEST");

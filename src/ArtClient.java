@@ -52,7 +52,7 @@ public class ArtClient extends Table{
     }
 
 
-    public static void sendDataElement(Connection sqlCon, String path)
+    public static void sendDataElement(Connection sqlCon, String path,int unibase)
     {
         File dir = new File(path);
         FilenameFilter filter = (dir1, name) -> name.startsWith(file);
@@ -63,7 +63,7 @@ public class ArtClient extends Table{
             for (String filename : children) {
                 readOnFile(path, filename, tableName + "_DEST", sqlCon);
                 readOnFile(path, "deleteList" + filename, tableName + "_SUPPR", sqlCon);
-                executeQuery(sqlCon, updateTableDest("AR_Ref,AC_Categorie", "'AR_Ref','AC_Categorie','CT_Num'", tableName, tableName + "_DEST", filename));
+                executeQuery(sqlCon, updateTableDest("AR_Ref,AC_Categorie", "'AR_Ref','AC_Categorie','CT_Num'", tableName, tableName + "_DEST", filename,unibase));
                 sendData(sqlCon, path, filename, insert(filename));
 
                 deleteTempTable(sqlCon, tableName + "_DEST");

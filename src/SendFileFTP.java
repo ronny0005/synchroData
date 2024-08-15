@@ -23,9 +23,11 @@ public class SendFileFTP {
 
                 if (list.get("envoi").equals("1") && list.get("active").equals("1")) {
                     try {
-                        session = jsch.getSession("u85460117-upload", "home631778145.1and1-data.host", 22);
+                        //session = jsch.getSession("u85460117-upload", "home631778145.1and1-data.host", 22);
+                        session = jsch.getSession("u94723657", "home751918776.1and1-data.host", 22);
+                        session.setPassword("ilIBWTvZme4CZD5BzMez");
+                        //session.setPassword("FyK6cIAgpeNOSbEdfrpC*");
                         session.setConfig("StrictHostKeyChecking", "no");
-                        session.setPassword("FyK6cIAgpeNOSbEdfrpC*");
                         session.connect();
 
                         Channel channel = session.openChannel("sftp");

@@ -58,7 +58,7 @@ public class EcritureA extends Table {
                 "END CATCH";
     }
 
-    public static void sendDataElement(Connection  sqlCon, String path,String database)
+    public static void sendDataElement(Connection  sqlCon, String path,String database,int unibase)
     {
         File dir = new File(path);
         FilenameFilter filter = (dir1, name) -> name.startsWith(file);
@@ -70,7 +70,7 @@ public class EcritureA extends Table {
                 dbSource = database;
                 readOnFile(path, filename, tableName + "_DEST", sqlCon);
                 readOnFile(path, "deleteList" + filename, tableName + "_SUPPR", sqlCon);
-                executeQuery(sqlCon, updateTableDest("", "'EC_No','N_Analytique'", tableName, tableName + "_DEST", filename));
+                executeQuery(sqlCon, updateTableDest("", "'EC_No','N_Analytique'", tableName, tableName + "_DEST", filename,unibase));
                 sendData(sqlCon, path, filename, insert(filename));
                 deleteTempTable(sqlCon, tableName + "_DEST");
                 deleteEcritureA(sqlCon, path, filename);
@@ -110,6 +110,7 @@ public class EcritureA extends Table {
                 " WHERE fart.cbMarq IS NULL " +
                 ";";
 
+        writeToFileAvro(path + "\\deleteList" + file, query, sqlCon);
         writeOnFile(path + "\\deleteList" + file, query, sqlCon);
 
         query = " DELETE FROM config.ListEcritureA " +

@@ -16,7 +16,7 @@ public class BackupData {
     public static void zip(File path,String creationDate){
 
         FileFilter csvFileFilter = (file) -> {
-            return file.getName().endsWith(".csv");
+            return file.getName().endsWith(".avro");
         };
 
         File[] files = path.listFiles(csvFileFilter);

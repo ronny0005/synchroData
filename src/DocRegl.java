@@ -84,8 +84,8 @@ public class DocRegl extends Table {
                 "           NULL," +
                 "           NULL," +
                 "           NULL," +
-                "           NULL,'Domaine : '+dest.[DO_Domaine]+' Type : ' + dest.[DO_Type] + ' Piece : ' + dest.[DO_Piece]" +
-                "           +' cbMarq : ' + dest.[cbMarqSource] + ' database : ' + dest.[DataBaseSource]" +
+                "           NULL,'Domaine : '+CAST(dest.[DO_Domaine] AS VARCHAR(150))+' Type : ' + CAST(dest.[DO_Type]  AS VARCHAR(150)) + ' Piece : ' + CAST(dest.[DO_Piece] AS VARCHAR(150))" +
+                "           +' cbMarq : ' + CAST(dest.[cbMarqSource] AS VARCHAR(150)) + ' database : ' + CAST(dest.[DataBaseSource] AS VARCHAR(150))" +
                 "           + 'fileName : "+filename+" '" +
                 "           ,'F_DOCREGL'\n" +
                 "           ,GETDATE()\n" +
@@ -115,15 +115,15 @@ public class DocRegl extends Table {
                 "   GETDATE());\n" +
                 "END CATCH";
     }
-    public static void sendDataElement(Connection sqlCon, String path,String database)
+    public static void sendDataElement(Connection sqlCon, String path,String database,int unibase)
     {
         dbSource = database;
-        loadFile( path, sqlCon);
+        loadFile( path, sqlCon,unibase);
         loadDeleteFile(path,sqlCon);
 //        DocEntete.loadDeleteFile(path,sqlCon);
     }
 
-    public static void loadFile(String path,Connection sqlCon){
+    public static void loadFile(String path,Connection sqlCon,int unibase){
         String [] children = getFile(path,file);
         if (children == null) {
             System.out.println("Either dir does not exist or is not a directory");
@@ -131,7 +131,7 @@ public class DocRegl extends Table {
             for (String filename : children){
                 disableTrigger(sqlCon,tableName);
                 readOnFile(path, filename, tableName + "_DEST", sqlCon);
-                executeQuery(sqlCon, updateTableDest("", "'DR_No'", tableName, tableName + "_DEST",filename));
+                executeQuery(sqlCon, updateTableDest("", "'DR_No'", tableName, tableName + "_DEST",filename,unibase));
                 sendData(sqlCon, path, filename, insert(filename));
                // deleteTempTable(sqlCon, tableName+"_DEST");
                 enableTrigger(sqlCon,tableName);

@@ -88,7 +88,7 @@ public class ArtStock extends Table {
                         "END CATCH";
     }
 
-    public static void sendDataElement(Connection  sqlCon, String path,String database)
+    public static void sendDataElement(Connection  sqlCon, String path,String database,int unibase)
     {
         File dir = new File(path);
         FilenameFilter filter = (dir1, name) -> name.startsWith(file);

@@ -48,6 +48,7 @@ public class UpdateData {
                 JSONObject list = (JSONObject) o;
 
                 if (list.get("reception").equals("1")) {
+                    int unibase = 0;
                     String path = ((String) list.get("path"));
                     FileFilter zipFileFilter = (file) -> {
                         return file.getName().endsWith(".zip");
@@ -74,76 +75,76 @@ public class UpdateData {
 
                         if ((list.get("compteg")).equals("1")) {
                             System.out.println("--Chargement Compte Général--");
-                            Compteg.sendDataElement(sqlCon, path);
+                            Compteg.sendDataElement(sqlCon, path,unibase);
                         }
                         if ((list.get("taxe")).equals("1")) {
                             System.out.println("--Chargement Taxe--");
-                            Taxe.sendDataElement(sqlCon, path);
+                            Taxe.sendDataElement(sqlCon, path,unibase);
                         }
                         if ((list.get("collaborateur")).equals("1")) {
                             System.out.println("--Chargement Collaborateur--");
-                            Collaborateur.sendDataElement(sqlCon, path);
+                            Collaborateur.sendDataElement(sqlCon, path,unibase);
                         }
                         if ((list.get("journaux")).equals("1")) {
                             System.out.println("--Chargement Journaux--");
-                            FJournaux.sendDataElement(sqlCon, path);
+                            FJournaux.sendDataElement(sqlCon, path,unibase);
                         }
                         if ((list.get("depot")).equals("1")) {
                             System.out.println("--Chargement Depot--");
-                            Depot.sendDataElement(sqlCon, path);
+                            Depot.sendDataElement(sqlCon, path,unibase);
                         }
 
                         if ((list.get("tiers")).equals("1")) {
                             System.out.println("--Chargement Compte Tiers--");
-                            Comptet.sendDataElement(sqlCon, path);
+                            Comptet.sendDataElement(sqlCon, path,unibase);
                             System.out.println("--Chargement Livraison--");
-                            Livraison.sendDataElement(sqlCon, path);
+                            Livraison.sendDataElement(sqlCon, path,unibase);
                         }
 
                         if ((list.get("article")).equals("1")) {
                             System.out.println("--Chargement Famille--");
-                            Famille.sendDataElement(sqlCon, path);
+                            Famille.sendDataElement(sqlCon, path,unibase);
                             System.out.println("--Chargement Article--");
-                            Article.sendDataElement(sqlCon, path);
+                            Article.sendDataElement(sqlCon, path,unibase);
                         }
 
                         if ((list.get("entete")).equals("1")) {
                             System.out.println("--Chargement Caisse--");
-                            Caisse.sendDataElement(sqlCon, path, database);
+                            Caisse.sendDataElement(sqlCon, path, database,unibase);
                             System.out.println("--Chargement Entete--");
-                            DocEntete.sendDataElement(sqlCon, path, database);
+                            DocEntete.sendDataElement(sqlCon, path, database,unibase);
                             System.out.println("--Chargement DocRegl--");
-                            DocRegl.sendDataElement(sqlCon, path, database);
+                            DocRegl.sendDataElement(sqlCon, path, database,unibase);
                         }
 
                         if ((list.get("ligne")).equals("1")) {
                             System.out.println("--Chargement Ligne--");
-                            DocLigne.sendDataElement(sqlCon, path, database);
+                            DocLigne.sendDataElement(sqlCon, path, database,unibase);
                         }
 
                         if ((list.get("reglement")).equals("1")) {
                             System.out.println("--Chargement Reglement--");
-                            Reglement.sendDataElement(sqlCon, path, database);
+                            Reglement.sendDataElement(sqlCon, path, database,unibase);
                             System.out.println("--Chargement ReglEch--");
-                            ReglEch.sendDataElement(sqlCon, path, database);
+                            ReglEch.sendDataElement(sqlCon, path, database,unibase);
                         }
 
                         if ((list.get("artstock")).equals("1")) {
                             System.out.println("--Chargement ArtStock--");
-                            ArtStock.sendDataElement(sqlCon, path, database);
+                            ArtStock.sendDataElement(sqlCon, path, database,unibase);
                         }
 
                         if (list.get("ecriturec").equals("1")) {
                             System.out.println("--Chargement JMouv--");
-                            JMouv.sendDataElement(sqlCon, path);
+                            JMouv.sendDataElement(sqlCon, path,unibase);
 
                             System.out.println("--Chargement Ecriture Comptable--");
-                            EcritureC.sendDataElement(sqlCon, path, database);
+                            EcritureC.sendDataElement(sqlCon, path, database,unibase);
                         }
 
                         if (list.get("ecriturea").equals("1")) {
                             System.out.println("--Chargement Ecriture Analytique--");
-                            EcritureA.sendDataElement(sqlCon, path, database);
+                            EcritureA.sendDataElement(sqlCon, path, database,unibase);
                         }
 
                     } catch (SQLException throwables) {

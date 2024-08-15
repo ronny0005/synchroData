@@ -65,7 +65,7 @@ public class Depot extends Table{
         //" WHERE F_DEPOTEMPL_DEST.DP_No = F_DEPOTEMPL.DP_No";
         executeQuery(sqlCon, query);
     }
-    public static void sendDataElement(Connection sqlCon, String path)
+    public static void sendDataElement(Connection sqlCon, String path,int unibase)
     {
 
         File dir = new File(path);
@@ -77,10 +77,10 @@ public class Depot extends Table{
             for (String filename : children) {
                 readOnFile(path, filename, tableName + "_DEST", sqlCon);
                 readOnFile(path, "deleteList" + filename, tableName + "_SUPPR", sqlCon);
-                executeQuery(sqlCon, updateTableDest("", "'DE_No','DP_NoDefaut','DE_Code','DE_NoSource','DatabaseSource','DE_Intitule'", tableName, tableName + "_DEST", filename));
+                executeQuery(sqlCon, updateTableDest("", "'DE_No','DP_NoDefaut','DE_Code','DE_NoSource','DatabaseSource','DE_Intitule'", tableName, tableName + "_DEST", filename,unibase));
                 sendData(sqlCon, path, filename, insert(filename));
 
-                DepotEmpl.sendDataElement(sqlCon, path);
+                DepotEmpl.sendDataElement(sqlCon, path,unibase);
                 linkDepot(sqlCon);
 
                 deleteTempTable(sqlCon, tableName + "_DEST");
