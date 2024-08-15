@@ -172,7 +172,7 @@ public class ConfigFile {
             SrcRepertoire.setText((String)object.get("path"));
             SrcNomConfig.setText((String)object.get("nomconfig"));
             String dateMaj = ReturnDateFormat( DateTimeFormatter.ofPattern("dd/MM/yyyy").format(LocalDate.now()));
-            if(!(object.get("datemaj")).equals(""))
+            if((object.get("datemaj")) != null)
                 dateMaj = ((String)object.get("datemaj"));
             dateMajConfig.setText(GetdateFormat(dateMaj));
 
@@ -192,10 +192,12 @@ public class ConfigFile {
             checkBox(Integer.parseInt((String)object.get("taxe")), SrcTaxeCheckBox);
             checkBox(Integer.parseInt((String)object.get("journaux")), SrcJournauxCheckBox);
             checkBox(Integer.parseInt((String)object.get("collaborateur")), SrcCollaborateurCheckBox);
+            /*
             checkBox(Integer.parseInt((String)object.get("ftarifcond")), SrcTarifCondCheckBox);
             checkBox(Integer.parseInt((String)object.get("fenumcond")), SrcEnumCondCheckBox);
             checkBox(Integer.parseInt((String)object.get("pconditionnement")), SrcPConditionnementCheckBox);
             checkBox(Integer.parseInt((String)object.get("punite")), SrcPUniteCheckBox);
+             */
             checkBox(Integer.parseInt((String)((JSONObject)object.get("typedocument")).get("facturedevente")), factureDeVenteCheckBox);
             checkBox(Integer.parseInt((String)((JSONObject)object.get("typedocument")).get("devis")), devisCheckBox);
             checkBox(Integer.parseInt((String)((JSONObject)object.get("typedocument")).get("bondelivraison")), bonDeLivraisonCheckBox);

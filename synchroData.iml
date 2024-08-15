@@ -8,10 +8,5 @@
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" name="lib" level="project" />
-    <orderEntry type="library" name="apache.hadoop.mapreduce.client.core" level="project" />
-    <orderEntry type="library" name="apache.hadoop.client" level="project" />
-    <orderEntry type="library" name="apache.avro" level="project" />
-    <orderEntry type="library" name="apache.parquet.avro" level="project" />
-    <orderEntry type="library" name="apache.hadoop.common" level="project" />
   </component>
 </module>
