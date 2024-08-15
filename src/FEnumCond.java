@@ -2,31 +2,26 @@ import java.io.File;
 import java.io.FilenameFilter;
 import java.sql.Connection;
 
-public class Condition extends Table{
+public class FEnumCond extends Table{
 
-    public static String file = "condition_";
-    public static String tableName = "F_CONDITION";
-    public static String configList = "listCondition";
+    public static String file = "fenumcond_";
+    public static String tableName = "F_ENUMCOND";
+    public static String configList = "listFEnumCond";
 
     public static String insert(String filename)
     {
         return  " BEGIN TRY " +
                 " SET DATEFORMAT ymd;\n" +
-                " IF OBJECT_ID('F_CONDITION_DEST') IS NOT NULL\n"+
-                "\tINSERT INTO F_CONDITION (\n" +
-                "\t[AR_Ref],[CO_No],[EC_Enumere],[EC_Quantite]\n" +
-                "\t\t\t,[CO_Ref],[CO_CodeBarre],[CO_Principal],[cbProt],[cbCreateur]\n" +
-                "\t\t\t,[cbModification],[cbReplication],[cbFlag])\n" +
+                " IF OBJECT_ID('F_ENUMCOND_DEST') IS NOT NULL\n"+
+                "\tINSERT INTO F_ENUMCOND (\n" +
+                "\t[EC_Champ],[EC_Enumere],[EC_Quantite],[cbProt],[cbCreateur],[cbModification],[cbReplication],[cbFlag])\n" +
                 "                                \n" +
-                "\tSELECT dest.[AR_Ref],dest.[CO_No],dest.[EC_Enumere],[EC_Quantite]\n" +
-                "\t\t\t,[CO_Ref],[CO_CodeBarre],[CO_Principal],[cbProt],[cbCreateur]\n" +
-                "\t\t\t,[cbModification],[cbReplication],[cbFlag]\n" +
-                "\tFROM F_CONDITION_DEST dest\n" +
-                "\tLEFT JOIN (SELECT AR_Ref,CO_No,EC_Enumere FROM F_CONDITION) src\n" +
-                "\t\tON dest.CO_No = src.CO_No\n" +
+                "\tSELECT dest.[EC_Champ],dest.[EC_Enumere],dest.[EC_Quantite],dest.[cbProt],dest.[cbCreateur],dest.[cbModification],dest.[cbReplication],dest.[cbFlag]\n" +
+                "\tFROM F_ENUMCOND_DEST dest\n" +
+                "\tLEFT JOIN (SELECT EC_Champ,EC_Enumere FROM F_ENUMCOND) src\n" +
+                "\t\tON dest.EC_Champ = src.EC_Champ\n" +
                 "\t\tAND dest.EC_Enumere = src.EC_Enumere\n" +
-                "\t\tAND dest.AR_Ref = src.AR_Ref\n" +
-                "\tWHERE src.CO_No IS NULL\n" +
+                "\tWHERE src.EC_Enumere IS NULL\n" +
                 " END TRY\n" +
                 " BEGIN CATCH \n" +
                 "INSERT INTO config.DB_Errors\n" +
@@ -39,7 +34,7 @@ public class Condition extends Table{
                 "   ERROR_PROCEDURE(),\n" +
                 "   ERROR_MESSAGE(),\n" +
                 "   'Insert '+ ' "+filename+"',\n" +
-                "   'F_CONDITION',\n" +
+                "   'F_ENUMCOND',\n" +
                 "   GETDATE());\n" +
                 "END CATCH";
     }
@@ -54,7 +49,7 @@ public class Condition extends Table{
             for (String filename : children) {
                 readOnFile(path, filename, tableName + "_DEST", sqlCon);
                 readOnFile(path, "deleteList" + filename, tableName + "_SUPPR", sqlCon);
-                executeQuery(sqlCon, updateTableDest("CO_No,AR_Ref", "'CO_No','AR_Ref'", tableName, tableName + "_DEST", filename,unibase));
+                executeQuery(sqlCon, updateTableDest("EC_Enumere,EC_Champ", "'EC_Enumere','EC_Champ'", tableName, tableName + "_DEST", filename,unibase));
                 sendData(sqlCon, path, filename, insert(filename));
 
                 deleteCondition(sqlCon, path, filename);
@@ -64,7 +59,7 @@ public class Condition extends Table{
     public static void getDataElement(Connection sqlCon, String path,String database,String time)
     {
         String filename =  file+time+".csv";
-        initTableParam(sqlCon,tableName,configList,"CO_No,AR_Ref");
+        initTableParam(sqlCon,tableName,configList,"EC_Enumere,EC_Champ");
         getData(sqlCon, selectSourceTable(tableName,database,true), tableName, path, filename);
         listDeleteAllInfo(sqlCon, path, "deleteList" + filename,tableName,configList,database);
 
@@ -72,11 +67,15 @@ public class Condition extends Table{
     public static void deleteCondition(Connection sqlCon, String path,String filename)
     {
         String query =
-                " DELETE FROM F_CONDITION \n" +
-                " WHERE CO_No IN(SELECT CO_No FROM F_CONDITION_SUPPR) \n" +
-                " \n" +
-                " IF OBJECT_ID('F_CONDITION_SUPPR') IS NOT NULL \n" +
-                " DROP TABLE F_CONDITION_SUPPR \n";
+
+                " DELETE src\n" +
+                " FROM F_ENUMCOND src\n" +
+                " INNER JOIN F_ENUMCOND_SUPPR del\n" +
+                " ON src.EC_Enumere = del.EC_Enumere \n" +
+                " AND src.EC_Champ = del.EC_Champ ;\n" +
+                " IF OBJECT_ID('F_ENUMCOND_SUPPR') IS NOT NULL\n" +
+                " DROP TABLE F_ENUMCOND_SUPPR ;";
+
         if ((new File(path + "\\deleteList" + filename)).exists())
         {
             executeQuery(sqlCon, query);

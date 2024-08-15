@@ -2,8 +2,6 @@ import org.apache.avro.file.DataFileReader;
 import org.apache.avro.generic.GenericDatumReader;
 import org.apache.avro.io.DatumReader;
 import org.json.simple.JSONObject;
-
-import javax.xml.validation.Schema;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -27,11 +25,11 @@ public class Table {
     private static final String DATE_FORMAT = "yyyy-MM-dd HH:mm:ss.s";
     private static Statement stmt;
 
-    public static String selectSourceTable(String table,String dataSource){
+    public static String selectSourceTable(String table,String dataSource,boolean existsCbModification){
         return "BEGIN \n" +
-                "DECLARE @TableName AS VARCHAR(100) = '"+table+"'; \n" +
-                "DECLARE @cbModification VARCHAR(100) = ISNULL((SELECT CONVERT(NVARCHAR(100),(SELECT MAX(cbModification) FROM " + table + "),25)),'1901-01-01');" +
-                "DECLARE @lastSynchro VARCHAR(100) = ISNULL((SELECT CONVERT(NVARCHAR(100),(SELECT CASE WHEN ISNULL(isLoaded,0) = 2 THEN lastSynchro ELSE DATEADD(HOUR,-1,lastSynchro) END FROM config.SelectTable WHERE tableName = @TableName),25)),'1901-01-01');" +
+                "\nDECLARE @TableName AS VARCHAR(100) = '"+table+"'; \n" +
+                "\nDECLARE @cbModification VARCHAR(100) = "+ ((!existsCbModification) ? "NULL" : "ISNULL((SELECT CONVERT(NVARCHAR(100),(SELECT MAX(cbModification) FROM " + table + "),25)),'1901-01-01');\n") +
+                "\nDECLARE @lastSynchro VARCHAR(100) = ISNULL((SELECT CONVERT(NVARCHAR(100),(SELECT CASE WHEN ISNULL(isLoaded,0) = 2 THEN lastSynchro ELSE DATEADD(HOUR,-1,lastSynchro) END FROM config.SelectTable WHERE tableName = @TableName),25)),'1901-01-01');" +
 
                 "IF EXISTS(SELECT 1 FROM config.SelectTable WHERE tableName = @TableName) \n" +
                 " UPDATE config.SelectTable " +
@@ -53,7 +51,7 @@ public class Table {
                 "INNER JOIN sys.columns col\n" +
                 "\tON tab.object_id = col.object_id\n" +
                 "WHERE tab.name = @TableName\n" +
-                "AND col.name NOT LIKE 'cb%'" +
+                "AND (col.name NOT LIKE 'cb%' OR col.Name = 'cbIndice')" +
                 "AND col.name NOT IN ('DataBaseSource','cbMarqSource')\n" +
                 "\n" +
                 "OPEN @getid\n" +
@@ -70,8 +68,9 @@ public class Table {
                 "DEALLOCATE @getid\n" +
                 "SELECT @MonSQL = SUBSTRING(@MonSQL,2,LEN(@MonSQL)) \n" +
                 "\n" +
-                "SELECT @MonSQL = 'DECLARE @databaseSource AS VARCHAR (150) = '''+@databaseSource+'''; SELECT ' + @MonSQL + ',[cbProt],[cbCreateur],[cbModification],[cbReplication],[cbFlag],cbMarqSource = [cbMarq],[DataBaseSource] = @databaseSource  FROM '+ @TableName " +
-                "+ ' WHERE cbModification > CONVERT(DATETIME,''' + @lastSynchro +''',20)' \n" +
+                "SELECT @MonSQL = 'DECLARE @databaseSource AS VARCHAR (150) = '''+@databaseSource+'''; SELECT ' + @MonSQL \n" +
+                "+ CASE WHEN @cbModification IS NOT NULL THEN ',[cbProt],[cbCreateur],[cbModification],[cbReplication],[cbFlag]' ELSE '' END +',cbMarqSource = [cbMarq],[DataBaseSource] = @databaseSource  FROM '\n" +
+                "+ @TableName +  CASE WHEN @cbModification IS NOT NULL THEN ' WHERE cbModification > CONVERT(DATETIME,''' + @lastSynchro +''',20)' ELSE '' END\n" +
                 "IF EXISTS (\tSELECT\tcol.name  \n" +
                 "\t\t\tFROM\tsys.tables tab  \n" +
                 "\t\t\tINNER JOIN sys.columns col\tON\ttab.object_id = col.object_id  \n" +

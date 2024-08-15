@@ -85,7 +85,7 @@ public class DepotEmpl extends Table {
     {
         String filename =  file+time+".csv";
         initTableParam(sqlCon,tableName,configList,"DP_No,DatabaseSource");
-        getData(sqlCon, selectSourceTable(tableName,database), tableName, path, filename);
+        getData(sqlCon, selectSourceTable(tableName,database,true), tableName, path, filename);
         listDeleteAllInfo(sqlCon, path, "deleteList" + filename,tableName,configList,database);
     }
     public static void deleteDepot(Connection sqlCon, String path,String filename)

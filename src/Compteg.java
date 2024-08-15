@@ -73,7 +73,7 @@ public class Compteg extends Table {
     {
         String filename =  file+time+".csv";
         initTableParam(sqlCon,tableName,configList,"CG_Num");
-        getData(sqlCon, selectSourceTable(tableName,database), tableName, path, filename);
+        getData(sqlCon, selectSourceTable(tableName,database,true), tableName, path, filename);
         listDeleteAllInfo(sqlCon, path, "deleteList" + filename,tableName,configList,database);
     }
 

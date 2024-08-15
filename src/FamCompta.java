@@ -72,7 +72,7 @@ public class FamCompta extends Table {
     {
         String filename =  file+time+".csv";
         initTableParam(sqlCon,tableName,configList,"FA_CodeFamille,FCP_Type,FCP_Champ");
-        getData(sqlCon, selectSourceTable(tableName,database), tableName, path, filename);
+        getData(sqlCon, selectSourceTable(tableName,database,true), tableName, path, filename);
         listDeleteAllInfo(sqlCon, path, "deleteList" + filename,tableName,configList,database);
     }
     public static void deleteFamCompta(Connection sqlCon, String path,String filename)

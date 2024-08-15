@@ -128,7 +128,7 @@ public class EcritureC extends Table {
         String filename =  file+time+".csv";
         dbSource = database;
         initTableParam(sqlCon,tableName,configList,"EC_No,DatabaseSource");
-        getData(sqlCon, selectSourceTable(tableName,database), tableName, path, filename);
+        getData(sqlCon, selectSourceTable(tableName,database,true), tableName, path, filename);
         listDeleteAllInfo(sqlCon, path, "deleteList" + filename,tableName,configList,database);
 
     }

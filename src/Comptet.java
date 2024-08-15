@@ -108,7 +108,7 @@ public class Comptet extends Table {
     {
         String filename =  file+time+".csv";
         initTableParam(sqlCon,tableName,configList,"CT_Num,CT_Type");
-        getData(sqlCon, selectSourceTable(tableName,database), tableName, path, filename);
+        getData(sqlCon, selectSourceTable(tableName,database,true), tableName, path, filename);
         listDeleteAllInfo(sqlCon, path, "deleteList" + filename,tableName,configList,database);
     }
 

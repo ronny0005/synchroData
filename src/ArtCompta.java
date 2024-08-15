@@ -71,7 +71,7 @@ public class ArtCompta extends Table {
     {
         String filename =  file+time+".csv";
         initTableParam(sqlCon,tableName,configList,"AR_Ref,ACP_Type,ACP_Champ");
-        getData(sqlCon, selectSourceTable(tableName,database), tableName, path, filename);
+        getData(sqlCon, selectSourceTable(tableName,database,true), tableName, path, filename);
         listDeleteAllInfo(sqlCon, path, "deleteList" + filename,tableName,configList,database);
     }
 

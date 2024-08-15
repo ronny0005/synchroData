@@ -77,28 +77,34 @@ public class BackupData {
 
     //            ReglEch.getDataElement(sqlCon, path,list.get(1));
                         String database = (String) list.get("database");
+                        Object valueSelect = list.get("taxe");
 
-                        if (list.get("taxe").equals("1")) {
+                        valueSelect = list.get("taxe");
+                        if (valueSelect != null && valueSelect.equals("1")) {
                             System.out.println("--Sauvegarde taxe--");
                             Taxe.getDataElement(sqlCon, path, database, simpleDateFormat.format(new Date()));
                         }
-                        if (list.get("depot").equals("1")) {
+                        valueSelect = list.get("depot");
+                        if (valueSelect != null && valueSelect.equals("1")) {
                             System.out.println("--Sauvegarde depot--");
                             Depot.getDataElement(sqlCon, path, database, simpleDateFormat.format(new Date()));
                         }
-                        if (list.get("tiers").equals("1")) {
+                        valueSelect = list.get("tiers");
+                        if (valueSelect != null && valueSelect.equals("1")) {
                             System.out.println("--Sauvegarde tiers--");
                             Comptet.getDataElement(sqlCon, path, database, simpleDateFormat.format(new Date()));
                             System.out.println("--Sauvegarde livraison--");
                             Livraison.getDataElement(sqlCon, path, database, simpleDateFormat.format(new Date()));
                         }
-                        if (list.get("article").equals("1")) {
+                        valueSelect = list.get("article");
+                        if (valueSelect != null && valueSelect.equals("1")) {
                             System.out.println("--Sauvegarde famille--");
                             Famille.getDataElement(sqlCon, path, database, simpleDateFormat.format(new Date()));
                             System.out.println("--Sauvegarde article--");
                             Article.getDataElement(sqlCon, path, database, simpleDateFormat.format(new Date()));
                         }
-                        if (list.get("entete").equals("1")) {
+                        valueSelect = list.get("entete");
+                        if (valueSelect != null && valueSelect.equals("1")) {
                             System.out.println("--Sauvegarde Caisse--");
                             Caisse.getDataElement(sqlCon, path, database, simpleDateFormat.format(new Date()));
                             System.out.println("--Sauvegarde entete--");
@@ -106,45 +112,72 @@ public class BackupData {
                             System.out.println("--Sauvegarde DocRegl--");
                             DocRegl.getDataElement(sqlCon, path, database, simpleDateFormat.format(new Date()), (JSONObject) list.get("typedocument"));
                         }
-                        if (list.get("ligne").equals("1")) {
+                        valueSelect = list.get("ligne");
+                        if (valueSelect != null && valueSelect.equals("1")) {
                             System.out.println("--Sauvegarde ligne--");
                             DocLigne.getDataElement(sqlCon, path, database, simpleDateFormat.format(new Date()), (JSONObject) list.get("typedocument"));
 
                         }
-                        if (list.get("reglement").equals("1")) {
+                        valueSelect = list.get("reglement");
+                        if (valueSelect != null && valueSelect.equals("1")) {
                             System.out.println("--Sauvegarde ReglEch--");
                             ReglEch.getDataElement(sqlCon, path, database, simpleDateFormat.format(new Date()), (JSONObject) list.get("typedocument"));
                             System.out.println("--Sauvegarde Reglement--");
                             Reglement.getDataElement(sqlCon, path, database, simpleDateFormat.format(new Date()));
                         }
-                        if ((list.get("artstock")).equals("1")) {
+                        valueSelect = list.get("artstock");
+                        if (valueSelect != null && valueSelect.equals("1")) {
                             System.out.println("--Sauvegarde ArtStock--");
                             ArtStock.getDataElement(sqlCon, path, database, simpleDateFormat.format(new Date()));
                         }
-                        if ((list.get("ecriturec")).equals("1")) {
+                        valueSelect = list.get("ecriturec");
+                        if (valueSelect != null && valueSelect.equals("1")) {
                             System.out.println("--Sauvegarde JMouv--");
                             JMouv.getDataElement(sqlCon, path, database, simpleDateFormat.format(new Date()));
                             System.out.println("--Sauvegarde EcritureC--");
                             EcritureC.getDataElement(sqlCon, path, database, simpleDateFormat.format(new Date()));
                         }
-                        if ((list.get("ecriturea")).equals("1")) {
+                        valueSelect = list.get("ecriturea");
+                        if (valueSelect != null && valueSelect.equals("1")) {
                             System.out.println("--Sauvegarde EcritureA--");
                             EcritureA.getDataElement(sqlCon, path, database, simpleDateFormat.format(new Date()));
                         }
-                        if ((list.get("compteg")).equals("1")) {
+                        valueSelect = list.get("compteg");
+                        if (valueSelect != null && valueSelect.equals("1")) {
                             System.out.println("--Sauvegarde CompteG--");
                             Compteg.getDataElement(sqlCon, path, database, simpleDateFormat.format(new Date()));
                         }
-                        if ((list.get("journaux")).equals("1")) {
+                        valueSelect = list.get("journaux");
+                        if (valueSelect != null && valueSelect.equals("1")) {
                             System.out.println("--Sauvegarde Journaux--");
                             FJournaux.getDataElement(sqlCon, path, database, simpleDateFormat.format(new Date()));
                         }
-                        if (list.get("collaborateur").equals("1")) {
+                        valueSelect = list.get("collaborateur");
+                        if (valueSelect != null && valueSelect.equals("1")) {
                             System.out.println("--Sauvegarde Collaborateur--");
                             Collaborateur.getDataElement(sqlCon, path, database, simpleDateFormat.format(new Date()));
                         }
-                        /*if (((String) list.get("caisse")).equals("1")) {
-                        }*/
+
+                        valueSelect = list.get("fenumcond");
+                        if (valueSelect != null && valueSelect.equals("1")) {
+                            System.out.println("--Sauvegarde Enumere Condition--");
+                            FEnumCond.getDataElement(sqlCon, path, database, simpleDateFormat.format(new Date()));
+                        }
+                        valueSelect = list.get("ftarifcond");
+                        if (valueSelect != null && valueSelect.equals("1")) {
+                            System.out.println("--Sauvegarde Tarif Condition--");
+                            FTarifCond.getDataElement(sqlCon, path, database, simpleDateFormat.format(new Date()));
+                        }
+                        valueSelect = list.get("pconditionnement");
+                        if (valueSelect != null && valueSelect.equals("1")) {
+                            System.out.println("--Sauvegarde PConditionnement--");
+                            PConditionnement.getDataElement(sqlCon, path, database, simpleDateFormat.format(new Date()));
+                        }
+                        valueSelect = list.get("punite");
+                        if (valueSelect != null && valueSelect.equals("1")) {
+                            System.out.println("--Sauvegarde PUnite--");
+                            PUnite.getDataElement(sqlCon, path, database, simpleDateFormat.format(new Date()));
+                        }
 
                         zip(new File((String) list.get("path")),simpleDateFormat.format(new Date()));
                     } catch (SQLException throwables) {

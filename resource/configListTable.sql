@@ -241,10 +241,40 @@ CREATE TABLE [config].[SelectTable](
     ,DateCreation DATETIME DEFAULT GETDATE()
 )
 
-IF OBJECT_ID('config.ListCompteg', 'U') IS NULL
+IF OBJECT_ID('config.listFEnumCond', 'U') IS NULL
+CREATE TABLE config.listFEnumCond (
+                                      EC_Enumere NVARCHAR(50)
+    ,EC_Champ INT
+    ,cbMarq INT
+    ,DateCreation DATETIME DEFAULT GETDATE()
+)
+
+    IF OBJECT_ID('config.ListCompteg', 'U') IS NULL
 CREATE TABLE config.ListCompteg (
-	CG_Num NVARCHAR(50)
-	,cbMarq INT
+                                    CG_Num NVARCHAR(50)
+    ,cbMarq INT
+    ,DateCreation DATETIME DEFAULT GETDATE()
+)
+
+    IF OBJECT_ID('config.listFTarifCond', 'U') IS NULL
+CREATE TABLE config.listFTarifCond (
+                                         AR_Ref NVARCHAR(50)
+    ,CO_No INT
+    ,cbMarq INT
+    ,DateCreation DATETIME DEFAULT GETDATE()
+)
+
+    IF OBJECT_ID('config.listPConditionnement', 'U') IS NULL
+CREATE TABLE config.listPConditionnement (
+                                             cbIndice INT
+    ,cbMarq INT
+    ,DateCreation DATETIME DEFAULT GETDATE()
+)
+
+    IF OBJECT_ID('config.listPUnite', 'U') IS NULL
+CREATE TABLE config.listPUnite (
+                                             cbIndice INT
+    ,cbMarq INT
     ,DateCreation DATETIME DEFAULT GETDATE()
 )
 

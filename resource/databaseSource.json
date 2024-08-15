@@ -35,6 +35,10 @@
     "active": "1",
     "taxe": "1",
     "article": "1",
+    "fenumcond" : "1",
+    "ftarifcond" : "1",
+    "pconditionnement" : "1",
+    "punite" : "1",
     "servername": "localhost",
     "username": "reports"
   }
@@ -75,6 +79,10 @@
     "active": "1",
     "taxe": "1",
     "article": "1",
+    "fenumcond" : "1",
+    "ftarifcond" : "1",
+    "pconditionnement" : "1",
+    "punite" : "1",
     "servername": "localhost",
     "username": "reports"
   }

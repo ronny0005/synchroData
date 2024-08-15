@@ -28,6 +28,10 @@ public class ConfigFile {
     private JCheckBox SrcArtStockCheckBox;
     private JCheckBox SrcEcritureCCheckBox;
     private JCheckBox SrcEcritureACheckBox;
+    private JCheckBox SrcTarifCondCheckBox;
+    private JCheckBox SrcEnumCondCheckBox;
+    private JCheckBox SrcPConditionnementCheckBox;
+    private JCheckBox SrcPUniteCheckBox;
     private JCheckBox SrcCompteGeneralCheckBox;
     private JTextField dossierFTPSource;
     private JTextField codeAgence;
@@ -188,6 +192,10 @@ public class ConfigFile {
             checkBox(Integer.parseInt((String)object.get("taxe")), SrcTaxeCheckBox);
             checkBox(Integer.parseInt((String)object.get("journaux")), SrcJournauxCheckBox);
             checkBox(Integer.parseInt((String)object.get("collaborateur")), SrcCollaborateurCheckBox);
+            checkBox(Integer.parseInt((String)object.get("ftarifcond")), SrcTarifCondCheckBox);
+            checkBox(Integer.parseInt((String)object.get("fenumcond")), SrcEnumCondCheckBox);
+            checkBox(Integer.parseInt((String)object.get("pconditionnement")), SrcPConditionnementCheckBox);
+            checkBox(Integer.parseInt((String)object.get("punite")), SrcPUniteCheckBox);
             checkBox(Integer.parseInt((String)((JSONObject)object.get("typedocument")).get("facturedevente")), factureDeVenteCheckBox);
             checkBox(Integer.parseInt((String)((JSONObject)object.get("typedocument")).get("devis")), devisCheckBox);
             checkBox(Integer.parseInt((String)((JSONObject)object.get("typedocument")).get("bondelivraison")), bonDeLivraisonCheckBox);
@@ -228,6 +236,10 @@ public class ConfigFile {
         jsonObject.put("envoi","0");
         jsonObject.put("active","1");
         jsonObject.put("reception","0");
+        jsonObject.put("ftarifcond","0");
+        jsonObject.put("fenumcond","0");
+        jsonObject.put("pconditionnement","1");
+        jsonObject.put("punite","0");
         JSONObject typeDocument = new JSONObject();
         typeDocument.put("facturedevente","0");
         typeDocument.put("devis","0");
@@ -265,6 +277,10 @@ public class ConfigFile {
             object.put("artstock",setCheckBox(SrcArtStockCheckBox));
             object.put("ecriturec",setCheckBox(SrcEcritureCCheckBox));
             object.put("ecriturea",setCheckBox(SrcEcritureACheckBox));
+            object.put("ftarifcond",setCheckBox(SrcTarifCondCheckBox));
+            object.put("fenumcond",setCheckBox(SrcEnumCondCheckBox));
+            object.put("pconditionnement",setCheckBox(SrcPConditionnementCheckBox));
+            object.put("punite",setCheckBox(SrcPUniteCheckBox));
             object.put("compteg",setCheckBox(SrcCompteGeneralCheckBox));
             object.put("taxe",setCheckBox(SrcTaxeCheckBox));
             object.put("journaux",setCheckBox(SrcJournauxCheckBox));

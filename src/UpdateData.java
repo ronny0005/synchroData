@@ -5,6 +5,7 @@ import java.io.*;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.util.Date;
 import java.util.Properties;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
@@ -73,6 +74,7 @@ public class UpdateData {
                         String database = (String) list.get("database");
     //            DocLigne.sendDataElement(sqlCon, path,list.get(1));
 
+                        Object valueSelect = list.get("compteg");
                         if ((list.get("compteg")).equals("1")) {
                             System.out.println("--Chargement Compte Général--");
                             Compteg.sendDataElement(sqlCon, path,unibase);
@@ -145,6 +147,30 @@ public class UpdateData {
                         if (list.get("ecriturea").equals("1")) {
                             System.out.println("--Chargement Ecriture Analytique--");
                             EcritureA.sendDataElement(sqlCon, path, database,unibase);
+                        }
+
+                        valueSelect = list.get("fenumcond");
+                        if (valueSelect != null && valueSelect.equals("1")) {
+                            System.out.println("--Chargement Enumere Cond--");
+                            FEnumCond.sendDataElement(sqlCon, path, unibase);
+                        }
+
+                        valueSelect = list.get("ftarifcond");
+                        if (valueSelect != null && valueSelect.equals("1")) {
+                            System.out.println("--Chargement Tarif Conditionne --");
+                            FTarifCond.sendDataElement(sqlCon, path, unibase);
+                        }
+
+                        valueSelect = list.get("pconditionnement");
+                        if (valueSelect != null && valueSelect.equals("1")) {
+                            System.out.println("--Chargement PConditionnement--");
+                            PConditionnement.sendDataElement(sqlCon, path,unibase);
+                        }
+
+                        valueSelect = list.get("punite");
+                        if (valueSelect != null && valueSelect.equals("1")) {
+                            System.out.println("--Chargement PUnite--");
+                            PUnite.sendDataElement(sqlCon, path,unibase);
                         }
 
                     } catch (SQLException throwables) {

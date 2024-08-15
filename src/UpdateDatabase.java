@@ -34,7 +34,7 @@ public class UpdateDatabase {
             e.printStackTrace();
         }
 
-        String dateSynchro = "";
+        String dateSynchro = "1900-01-01";
         JSONArray listObject = DataBase.getInfoConnexion(databaseSourceFile);
         if (listObject != null) {
             for (Object o : listObject) {
@@ -46,7 +46,11 @@ public class UpdateDatabase {
                         properties.put("user", list.get("username"));
                         properties.put("password", list.get("password"));
                         Connection sqlCon = DriverManager.getConnection(dbURL, properties);
-                        dateSynchro = (String) list.get("datemaj");
+
+                        Object valueSelect = list.get("datemaj");
+                        if (valueSelect != null && valueSelect.equals("1"))
+                            dateSynchro = (String) list.get("datemaj");
+
                         executeSQL(new File("resource/configListTable.sql"), sqlCon);
                         PreparedStatement pstmt = null;
                         String sql = "UPDATE config.selectTable SET lastSynchro = ?";

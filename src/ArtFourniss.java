@@ -74,7 +74,7 @@ public class ArtFourniss extends Table {
     {
         String filename =  file+time+".csv";
         initTableParam(sqlCon,tableName,configList,"AR_Ref,CT_Num");//initTable(sqlCon);
-        getData(sqlCon, selectSourceTable(tableName,database)/*list()*/, tableName, path, filename);
+        getData(sqlCon, selectSourceTable(tableName,database,true)/*list()*/, tableName, path, filename);
         listDeleteAllInfo(sqlCon, path, "deleteList" + filename,tableName,configList,database);
     }
 
