@@ -45,8 +45,8 @@ public class EcritureC extends Table {
                 "      ,[cbFlag],dest.DatabaseSource,[EC_No]\n" +
                 " FROM\t[F_ECRITUREC_DEST] dest\n" +
                 " LEFT JOIN (SELECT cbMarqSource,DataBaseSource FROM F_ECRITUREC) src\n" +
-                " \tON\tdest.cbMarqSource = src.cbMarqSource \n" +
-                " \tAND\tdest.DataBaseSource = src.DataBaseSource\n" +
+                " \tON\tISNULL(dest.cbMarqSource,0) = ISNULL(src.cbMarqSource,0) \n" +
+                " \tAND\tISNULL(dest.DataBaseSource,'') = ISNULL(src.DataBaseSource,'')\n" +
                 " WHERE src.cbMarqSource IS NULL" +
                 " AND dest.EC_NoLink = 0;\n" +
                 " INSERT INTO F_ECRITUREC ([JO_Num],[EC_No],[EC_NoLink],[JM_Date],[EC_Jour]\n" +
@@ -80,8 +80,8 @@ public class EcritureC extends Table {
                 "      ,[cbFlag],dest.DatabaseSource,[EC_No]\n" +
                 " FROM\t[F_ECRITUREC_DEST] dest\n" +
                 " LEFT JOIN (SELECT cbMarqSource,DataBaseSource FROM F_ECRITUREC) src\n" +
-                " \tON\tdest.cbMarqSource = src.cbMarqSource \n" +
-                " \tAND\tdest.DataBaseSource = src.DataBaseSource\n" +
+                " \tON\tISNULL(dest.cbMarqSource,0) = ISNULL(src.cbMarqSource,0) \n" +
+                " \tAND\tISNULL(dest.DataBaseSource,'') = ISNULL(src.DataBaseSource,'')\n" +
                 " WHERE src.cbMarqSource IS NULL" +
                 " AND dest.EC_NoLink <> 0;\n" +
                         " END TRY\n" +
@@ -137,7 +137,7 @@ public class EcritureC extends Table {
     {
         String query =
                 " DELETE FROM F_ECRITUREC \n" +
-                " WHERE EXISTS (SELECT 1 FROM F_ECRITUREC_SUPPR WHERE F_ECRITUREC_SUPPR.EC_No = F_ECRITUREC.EC_NoSource AND F_ECRITUREC_SUPPR.DatabaseSource = F_ECRITUREC.DatabaseSource)  \n" +
+                " WHERE EXISTS (SELECT 1 FROM F_ECRITUREC_SUPPR WHERE ISNULL(F_ECRITUREC_SUPPR.EC_No,0) = ISNULL(F_ECRITUREC.EC_NoSource,0) AND ISNULL(F_ECRITUREC_SUPPR.DatabaseSource,'') = ISNULL(F_ECRITUREC.DatabaseSource,''))  \n" +
                 "  \n" +
                 " IF OBJECT_ID('F_ECRITUREC_SUPPR') IS NOT NULL  \n" +
                 " DROP TABLE F_ECRITUREC_SUPPR ;";

@@ -35,11 +35,11 @@ public class EcritureA extends Table {
                 "\t\t,dest.[DataBaseSource],dest.cbMarqSource\n" +
                 "FROM\t[F_ECRITUREA_DEST] dest\n" +
                 "LEFT JOIN (SELECT cbMarqSource,DataBaseSource FROM F_ECRITUREA) src\n" +
-                "\tON\tsrc.cbMarqSource = dest.cbMarqSource\n" +
-                "\tAND\t\tsrc.DatabaseSource = dest.DatabaseSource\n" +
+                "\tON\tISNULL(src.cbMarqSource,0) = ISNULL(dest.cbMarqSource,0)\n" +
+                "\tAND\t\tISNULL(src.DatabaseSource,'') = ISNULL(dest.DatabaseSource,'')\n" +
                 "LEFT JOIN (SELECT EC_No,EC_NoSource,DatabaseSource FROM F_ECRITUREC) ecr\n" +
-                "\tON\tecr.EC_NoSource = dest.EC_No\n" +
-                "\tAND ecr.DataBaseSource = dest.DataBaseSource" +
+                "\tON\tISNULL(ecr.EC_NoSource,0) = ISNULL(dest.EC_No,0)\n" +
+                "\tAND ISNULL(ecr.DataBaseSource,'') = ISNULL(dest.DataBaseSource,'')" +
                 "\nWHERE ecr.EC_No IS NOT NULL\n" +
                         " END TRY\n" +
                 " BEGIN CATCH \n" +

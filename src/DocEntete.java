@@ -45,10 +45,10 @@ public class DocEntete extends Table {
                 "                 ON dest.DO_Piece = src.DO_Piece   \n" +
                 "                 AND dest.DO_Domaine = src.DO_Domaine   \n" +
                 "                 AND dest.DO_Type = src.DO_Type   \n" +
-                "                 LEFT JOIN F_DEPOT dep ON dep.DE_NoSource = dest.DE_No AND dep.dataBaseSource = dest.dataBaseSource   \n" +
-                "                 LEFT JOIN F_CAISSE cai ON cai.CA_NoSource = dest.CA_No AND cai.dataBaseSource = dest.dataBaseSource   \n" +
-                "                 LEFT JOIN F_LIVRAISON liv ON liv.LI_NoSource = dest.LI_No AND liv.dataBaseSource = dest.dataBaseSource   \n" +
-                "                   \n" +
+                "                 LEFT JOIN F_DEPOT dep ON ISNULL(dep.DE_NoSource,0) = ISNULL(dest.DE_No,0) AND ISNULL(dep.dataBaseSource,'') = ISNULL(dest.dataBaseSource,'')   \n" +
+                "                 LEFT JOIN F_CAISSE cai ON ISNULL(cai.CA_NoSource,0) = ISNULL(dest.CA_No,0) AND ISNULL(cai.dataBaseSource,'') = ISNULL(dest.dataBaseSource,'')   \n" +
+                "                 LEFT JOIN F_LIVRAISON liv ON ISNULL(liv.LI_NoSource,0) = ISNULL(dest.LI_No,0) AND ISNULL(liv.dataBaseSource,'') = ISNULL(dest.dataBaseSource,'')   \n" +
+                "                 WHERE src.DO_Domaine IS NULL  \n" +
                 "                 UPDATE dwh  \n" +
                 "                    SET [DO_Domaine] = tmp.DO_Domaine  \n" +
                 "                       ,[DO_Type] = tmp.DO_Type  \n" +
@@ -131,8 +131,8 @@ public class DocEntete extends Table {
                 "                       ,[cbFlag] = tmp.cbFlag  \n" +
                 "                      \n" +
                 "                 FROM [dbo].[F_DOCENTETE] dwh  \n" +
-                "                 INNER JOIN #DocEntete tmp ON dwh.[DataBaseSource] = tmp.[DataBaseSource]  \n" +
-                "                 AND dwh.cbMarqSource = tmp.cbMarqSource  \n" +
+                "                 INNER JOIN #DocEntete tmp ON ISNULL(dwh.[DataBaseSource],'') = ISNULL(tmp.[DataBaseSource],'')  \n" +
+                "                 AND ISNULL(dwh.cbMarqSource,0) = ISNULL(tmp.cbMarqSource,0)  \n" +
                 "                   \n" +
                 "                  INSERT INTO F_DOCENTETE (  \n" +
                 "                 [DO_Domaine], [DO_Type], [DO_Date], [DO_Ref]  \n" +
@@ -278,12 +278,18 @@ public class DocEntete extends Table {
                 "       AND F_REGLECH.DO_Type = suppr.DO_Type \n" +
                 "       AND F_REGLECH.DO_Piece = suppr.DO_Piece ); \n" +*/
                 "\n" +
-                "DISABLE TRIGGER dbo.[TG_CBDEL_F_DOCENTETE] ON [dbo].[F_DOCENTETE] ;\n" +
-                "DISABLE TRIGGER dbo.[TG_DEL_F_DOCENTETE] ON [dbo].[F_DOCENTETE] ;\n" +
+                "IF EXISTS (SELECT * FROM sys.triggers WHERE name = 'TG_CBDEL_F_DOCENTETE' AND parent_id = OBJECT_ID('dbo.F_DOCENTETE'))\n" +
+                "BEGIN\n" +
+                "    DISABLE TRIGGER dbo.TG_CBDEL_F_DOCENTETE ON [dbo].[F_DOCENTETE];\n" +
+                "END\n" +
+                "IF EXISTS (SELECT * FROM sys.triggers WHERE name = 'TG_DEL_F_DOCENTETE' AND parent_id = OBJECT_ID('dbo.F_DOCENTETE'))\n" +
+                "BEGIN\n" +
+                "    DISABLE TRIGGER dbo.TG_DEL_F_DOCENTETE ON [dbo].[F_DOCENTETE];\n" +
+                "END\n" +
                 " DELETE FROM F_DOCENTETE \n" +
                 " WHERE EXISTS (SELECT 1 \n" +
                 "       FROM F_DOCENTETE_SUPPR \n" +
-                "       WHERE F_DOCENTETE.DataBaseSource = F_DOCENTETE_SUPPR.DataBaseSource \n" +
+                "       WHERE ISNULL(F_DOCENTETE.DataBaseSource,'') = ISNULL(F_DOCENTETE_SUPPR.DataBaseSource,'') \n" +
                 "       AND F_DOCENTETE.DO_Domaine = F_DOCENTETE_SUPPR.DO_Domaine \n" +
                 "       AND F_DOCENTETE.DO_Type = F_DOCENTETE_SUPPR.DO_Type \n" +
                 "       AND F_DOCENTETE.DO_Piece = F_DOCENTETE_SUPPR.DO_Piece ) ;\n" +
@@ -305,8 +311,14 @@ public class DocEntete extends Table {
                 "       AND F_DOCENTETE.DO_Domaine = docL.DO_Domaine \n" +
                 "       AND F_DOCENTETE.DO_Type = docL.DO_Type \n" +
                 "       AND F_DOCENTETE.DO_Piece = docL.DO_Piece ) \n" +*/
-                "ENABLE TRIGGER dbo.[TG_CBDEL_F_DOCENTETE] ON [dbo].[F_DOCENTETE] ;\n" +
-                "ENABLE TRIGGER dbo.[TG_DEL_F_DOCENTETE] ON [dbo].[F_DOCENTETE] ;"+
+                "IF EXISTS (SELECT * FROM sys.triggers WHERE name = 'TG_CBDEL_F_DOCENTETE' AND parent_id = OBJECT_ID('dbo.F_DOCENTETE'))\n" +
+                "BEGIN\n" +
+                "    ENABLE TRIGGER dbo.TG_CBDEL_F_DOCENTETE ON [dbo].[F_DOCENTETE];\n" +
+                "END\n" +
+                "IF EXISTS (SELECT * FROM sys.triggers WHERE name = 'TG_DEL_F_DOCENTETE' AND parent_id = OBJECT_ID('dbo.F_DOCENTETE'))\n" +
+                "BEGIN\n" +
+                "    ENABLE TRIGGER dbo.TG_DEL_F_DOCENTETE ON [dbo].[F_DOCENTETE];\n" +
+                "END\n" +
                 " \n" +
                 " \n" +
                 "INSERT INTO config.DB_Errors(\n" +
@@ -334,25 +346,25 @@ public class DocEntete extends Table {
                 " FROM F_DOCENTETE docE\n" +
                 " WHERE EXISTS (SELECT 1 \n" +
                 "       FROM F_DOCENTETE_SUPPR docL \n" +
-                "       WHERE docE.DataBaseSource = docL.DataBaseSource \n" +
+                "       WHERE ISNULL(docE.DataBaseSource,'') = ISNULL(docL.DataBaseSource,'') \n" +
                 "       AND docE.DO_Domaine = docL.DO_Domaine \n" +
                 "       AND docE.DO_Type = docL.DO_Type \n" +
                 "       AND docE.DO_Piece = docL.DO_Piece ) \n" +
                 " AND NOT EXISTS (SELECT 1 \n" +
                 "       FROM F_DOCLIGNE docL \n" +
-                "       WHERE docE.DataBaseSource = docL.DataBaseSource \n" +
+                "       WHERE ISNULL(docE.DataBaseSource,'') = ISNULL(docL.DataBaseSource,'') \n" +
                 "       AND docE.DO_Domaine = docL.DO_Domaine \n" +
                 "       AND docE.DO_Type = docL.DO_Type \n" +
                 "       AND docE.DO_Piece = docL.DO_Piece ) \n" +
                 " AND NOT EXISTS (SELECT 1 \n" +
                 "       FROM F_DOCREGL docL \n" +
-                "       WHERE docE.DataBaseSource = docL.DataBaseSource \n" +
+                "       WHERE ISNULL(docE.DataBaseSource,'') = ISNULL(docL.DataBaseSource,'') \n" +
                 "       AND docE.DO_Domaine = docL.DO_Domaine \n" +
                 "       AND docE.DO_Type = docL.DO_Type \n" +
                 "       AND docE.DO_Piece = docL.DO_Piece ) \n" +
                 " AND NOT EXISTS (SELECT 1 \n" +
                 "       FROM F_REGLECH docL \n" +
-                "       WHERE docE.DataBaseSource = docL.DataBaseSource \n" +
+                "       WHERE ISNULL(docE.DataBaseSource,'') = ISNULL(docL.DataBaseSource,'') \n" +
                 "       AND docE.DO_Domaine = docL.DO_Domaine \n" +
                 "       AND docE.DO_Type = docL.DO_Type \n" +
                 "       AND docE.DO_Piece = docL.DO_Piece ) \n" +

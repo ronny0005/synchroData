@@ -25,14 +25,14 @@ public class ReglEch extends Table {
                 "\t\t,dest.[cbModification],dest.[cbReplication],dest.[cbFlag],dest.cbMarqSource,dest.DataBaseSource,dest.DR_No,dest.RG_No\n" +
                 "FROM F_REGLECH_DEST dest\n" +
                 "LEFT JOIN (SELECT DataBaseSource,cbMarqSource FROM F_REGLECH) src\n" +
-                "\tON\tdest.DataBaseSource = src.DataBaseSource\n" +
-                "\tAND dest.cbMarqSource = src.cbMarqSource\n" +
+                "\tON\tISNULL(dest.DataBaseSource,'') = ISNULL(src.DataBaseSource,'')\n" +
+                "\tAND ISNULL(dest.cbMarqSource,0) = ISNULL(src.cbMarqSource,0)\n" +
                 "LEFT JOIN F_DOCREGL fdr\n" +
-                "\tON\tfdr.DataBaseSource = dest.DataBaseSource\n" +
-                "\tAND fdr.DR_NoSource = dest.DR_No\n" +
+                "\tON\tISNULL(fdr.DataBaseSource,'') = ISNULL(dest.DataBaseSource,'')\n" +
+                "\tAND ISNULL(fdr.DR_NoSource,0) = ISNULL(dest.DR_No,0)\n" +
                 "LEFT JOIN F_CREGLEMENT cre\n" +
-                "\tON\tcre.DataBaseSource = dest.DataBaseSource\n" +
-                "\tAND cre.RG_NoSource = dest.RG_No\n" +
+                "\tON\tISNULL(cre.DataBaseSource,'') = ISNULL(dest.DataBaseSource,'')\n" +
+                "\tAND ISNULL(cre.RG_NoSource,0) = ISNULL(dest.RG_No,0)\n" +
                 "WHERE src.cbMarqSource IS NULL\n" +
                 "AND cre.RG_No IS NOT NULL AND fdr.DR_No IS NOT NULL\n" +
                 "            \n" +
@@ -62,14 +62,14 @@ public class ReglEch extends Table {
                 "           ,GETDATE()\n" +
                 "FROM F_REGLECH_DEST dest\n" +
                 "LEFT JOIN (SELECT DataBaseSource,cbMarqSource FROM F_REGLECH) src\n" +
-                "\tON\tdest.DataBaseSource = src.DataBaseSource\n" +
-                "\tAND dest.cbMarqSource = src.cbMarqSource\n" +
+                "\tON\tISNULL(dest.DataBaseSource,'') = ISNULL(src.DataBaseSource,'')\n" +
+                "\tAND ISNULL(dest.cbMarqSource,0) = ISNULL(src.cbMarqSource,0)\n" +
                 "LEFT JOIN F_DOCREGL fdr\n" +
-                "\tON\tfdr.DataBaseSource = dest.DataBaseSource\n" +
-                "\tAND fdr.DR_NoSource = dest.DR_No\n" +
+                "\tON\tISNULL(fdr.DataBaseSource,'') = ISNULL(dest.DataBaseSource,'')\n" +
+                "\tAND ISNULL(fdr.DR_NoSource,0) = ISNULL(dest.DR_No,0)\n" +
                 "LEFT JOIN F_CREGLEMENT cre\n" +
-                "\tON\tcre.DataBaseSource = dest.DataBaseSource\n" +
-                "\tAND cre.RG_NoSource = dest.RG_No\n" +
+                "\tON\tISNULL(cre.DataBaseSource,'') = ISNULL(dest.DataBaseSource,'')\n" +
+                "\tAND ISNULL(cre.RG_NoSource,0) = ISNULL(dest.RG_No,0)\n" +
                 "WHERE src.cbMarqSource IS NULL\n" +
                 "AND (cre.RG_No IS NULL OR fdr.DR_No IS NULL)\n" +
                 "\n" +
@@ -158,7 +158,7 @@ public class ReglEch extends Table {
     {
         return
                 " DELETE FROM F_REGLECH \n" +
-                " WHERE EXISTS (SELECT 1 FROM F_REGLECH_SUPPR WHERE F_REGLECH.DataBaseSource = F_REGLECH_SUPPR.DataBaseSource AND F_REGLECH.cbMarqSource = F_REGLECH_SUPPR.cbMarq ) \n" +
+                " WHERE EXISTS (SELECT 1 FROM F_REGLECH_SUPPR WHERE ISNULL(F_REGLECH.DataBaseSource,'') = ISNULL(F_REGLECH_SUPPR.DataBaseSource,'') AND ISNULL(F_REGLECH.cbMarqSource,0) = ISNULL(F_REGLECH_SUPPR.cbMarq,0) ) \n" +
                 " \n" +
                 " IF OBJECT_ID('F_REGLECH_SUPPR') IS NOT NULL \n" +
                 " DROP TABLE F_REGLECH_SUPPR \n";

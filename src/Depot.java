@@ -112,7 +112,7 @@ public class Depot extends Table{
     {
         String query =
                 " DELETE FROM F_DEPOT  \n" +
-                " WHERE EXISTS (SELECT 1 FROM F_DEPOT_SUPPR WHERE F_DEPOT_SUPPR.DE_No = F_DEPOT.DE_NoSource AND F_DEPOT.DataBaseSource = F_DEPOT_SUPPR.DataBaseSource" +
+                " WHERE EXISTS (SELECT 1 FROM F_DEPOT_SUPPR WHERE ISNULL(F_DEPOT_SUPPR.DE_No,0) = ISNULL(F_DEPOT.DE_NoSource,0) AND ISNULL(F_DEPOT.DataBaseSource,'') = ISNULL(F_DEPOT_SUPPR.DataBaseSource,'')" +
                 "   )  \n" +
                 "  \n" +
                 " IF OBJECT_ID('F_DEPOT_SUPPR') IS NOT NULL  \n" +

@@ -25,9 +25,9 @@ public class Livraison extends Table {
                 ",[cbModification],[cbReplication],[cbFlag],dest.[cbMarqSource],dest.[dataBaseSource],dest.LI_No\n" +
                 "FROM F_LIVRAISON_DEST dest \n" +
                 "LEFT JOIN (SELECT [LI_NoSource],[CT_Num],[DatabaseSource] FROM F_LIVRAISON) src \n" +
-                "ON dest.[LI_No] = src.[LI_NoSource] \n" +
+                "ON ISNULL(dest.[LI_No],0) = ISNULL(src.[LI_NoSource],0) \n" +
                 "AND dest.[CT_Num] = src.[CT_Num] \n" +
-                "AND dest.[DatabaseSource] = src.[DatabaseSource] \n" +
+                "AND ISNULL(dest.[DatabaseSource],'') = ISNULL(src.[DatabaseSource],'') \n" +
                 "WHERE src.[LI_NoSource] IS NULL ;" +
                 " END TRY\n" +
                 " BEGIN CATCH \n" +

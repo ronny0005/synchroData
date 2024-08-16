@@ -25,8 +25,8 @@ public class DepotEmpl extends Table {
                         "      ,[cbReplication] = F_DEPOTEMPL_DEST.cbReplication\n" +
                         "      ,[cbFlag] = F_DEPOTEMPL_DEST.cbFlag\n" +
                         "FROM F_DEPOTEMPL_DEST       \n" +
-                        "  WHERE F_DEPOTEMPL.DP_NoSource = F_DEPOTEMPL_DEST.DP_No \n" +
-                        "  AND\tF_DEPOTEMPL.DataBaseSource = F_DEPOTEMPL_DEST.DataBaseSource \n" +
+                        "  WHERE ISNULL(F_DEPOTEMPL.DP_NoSource,0) = ISNULL(F_DEPOTEMPL_DEST.DP_No,0) \n" +
+                        "  AND\tISNULL(F_DEPOTEMPL.DataBaseSource,'') = ISNULL(F_DEPOTEMPL_DEST.DataBaseSource,'') \n" +
                         "  \n" +
                         "  INSERT INTO [dbo].[F_DEPOTEMPL]     \n" +
                         "  ([DP_No],[DE_No],[DP_Code],[DP_Intitule],[DP_Zone],[DP_Type],[cbProt]\n" +
@@ -36,11 +36,11 @@ public class DepotEmpl extends Table {
                         "      ,[cbCreateur],[cbModification],[cbReplication],[cbFlag],dest.DP_No,dest.cbMarqSource,dest.DataBaseSource \n" +
                         "  FROM F_DEPOTEMPL_DEST dest       \n" +
                         "  LEFT JOIN (SELECT DP_NoSource,DataBaseSource FROM F_DEPOTEMPL) src       \n" +
-                        "  ON dest.DP_No = src.DP_NoSource\n" +
-                        "  AND dest.DataBaseSource = src.DataBaseSource\n" +
+                        "  ON ISNULL(dest.DP_No,0) = ISNULL(src.DP_NoSource,0)\n" +
+                        "  AND ISNULL(dest.DataBaseSource,'') = ISNULL(src.DataBaseSource,'')\n" +
                         "  LEFT JOIN (SELECT DatabaseSource,DE_NoSource,DE_No FROM F_DEPOT) srcDep       \n" +
-                        "  ON\tdest.DE_No = srcDep.DE_NoSource\n" +
-                        "  AND\tdest.DataBaseSource = srcDep.DataBaseSource\n" +
+                        "  ON\tISNULL(dest.DE_No,0) = ISNULL(srcDep.DE_NoSource,0)\n" +
+                        "  AND\tISNULL(dest.DataBaseSource,'') = ISNULL(srcDep.DataBaseSource,'')\n" +
                         "  WHERE src.DP_NoSource IS NULL \n" +
                         "  AND\tsrcDep.DE_No IS NOT NULL;   " +
                         "  IF OBJECT_ID('F_DEPOTEMPL_DEST') IS NOT NULL     \n" +
@@ -94,8 +94,8 @@ public class DepotEmpl extends Table {
                 " DELETE FROM F_DEPOTEMPL  \n" +
                 " WHERE EXISTS (SELECT 1 " +
                 "               FROM F_DEPOTEMPL_SUPPR emplSuppr" +
-                "               WHERE emplSuppr.DP_No = F_DEPOTEMPL.DP_NoSource " +
-                "               AND emplSuppr.DataBaseSource = F_DEPOTEMPL.DataBaseSource" +
+                "               WHERE ISNULL(emplSuppr.DP_No,0) = ISNULL(F_DEPOTEMPL.DP_NoSource,0) " +
+                "               AND ISNULL(emplSuppr.DataBaseSource,'') = ISNULL(F_DEPOTEMPL.DataBaseSource,'')" +
                 "   )  \n" +
                 "  \n" +
                 " IF OBJECT_ID('F_DEPOTEMPL_SUPPR') IS NOT NULL  \n" +

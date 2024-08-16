@@ -41,7 +41,7 @@ public class DocRegl extends Table {
                 "      ,[DR_NoSource] = dest.DR_No\n" +
                 "FROM [dbo].[F_DOCREGL] src\n" +
                 "INNER JOIN F_DOCREGL_DEST dest ON src.cbMarqSource = dest.cbMarqSource \n" +
-                "\tAND\tsrc.DataBaseSource = dest.DataBaseSource\n" +
+                "\tAND\tISNULL(src.DataBaseSource,'') = ISNULL(dest.DataBaseSource,'')\n" +
                 "            \n" +
 
                 " IF OBJECT_ID('F_DOCREGL_DEST') IS NOT NULL\n"+
@@ -56,8 +56,8 @@ public class DocRegl extends Table {
                 "\t\t,[N_Reglement],[cbProt],[cbCreateur],[cbModification],[cbReplication],[cbFlag],dest.cbMarqSource,dest.[dataBaseSource],dest.DR_No\n" +
                 "FROM F_DOCREGL_DEST dest\n" +
                 "LEFT JOIN (SELECT cbMarqSource,DataBaseSource FROM F_DOCREGL) src\n" +
-                "\tON\tdest.cbMarqSource = src.cbMarqSource\n" +
-                "\tAND\tdest.DataBaseSource = src.DataBaseSource\n" +
+                "\tON\tISNULL(dest.cbMarqSource,0) = ISNULL(src.cbMarqSource,0)\n" +
+                "\tAND\tISNULL(dest.DataBaseSource,'') = ISNULL(src.DataBaseSource,'')\n" +
                 "LEFT JOIN (SELECT DO_Piece,DO_Type,DO_Domaine FROM F_DOCENTETE) docE\n" +
                 "ON docE.DO_Domaine = dest.DO_Domaine\n"+
                 "AND docE.DO_Type = dest.DO_Type\n"+
@@ -91,8 +91,8 @@ public class DocRegl extends Table {
                 "           ,GETDATE()\n" +
                 "FROM F_DOCREGL_DEST dest\n" +
                 "LEFT JOIN (SELECT cbMarqSource,DataBaseSource FROM F_DOCREGL) src\n" +
-                "\tON\tdest.cbMarqSource = src.cbMarqSource\n" +
-                "\tAND\tdest.DataBaseSource = src.DataBaseSource\n" +
+                "\tON\tISNULL(dest.cbMarqSource,0) = ISNULL(src.cbMarqSource,0)\n" +
+                "\tAND\tISNULL(dest.DataBaseSource,'') = ISNULL(src.DataBaseSource,'')\n" +
                 "LEFT JOIN (SELECT DO_Piece,DO_Type,DO_Domaine FROM F_DOCENTETE) docE\n" +
                 "ON docE.DO_Domaine = dest.DO_Domaine\n"+
                 "AND docE.DO_Type = dest.DO_Type\n"+
@@ -176,7 +176,7 @@ public class DocRegl extends Table {
     {
         return
                 " DELETE FROM F_DOCREGL \n" +
-                " WHERE EXISTS (SELECT 1 FROM F_DOCREGL_SUPPR WHERE F_DOCREGL.DataBaseSource = F_DOCREGL_SUPPR.DataBaseSource AND F_DOCREGL.DR_NoSource = F_DOCREGL_SUPPR.DR_No ) \n" +
+                " WHERE EXISTS (SELECT 1 FROM F_DOCREGL_SUPPR WHERE ISNULL(F_DOCREGL.DataBaseSource,'') = ISNULL(F_DOCREGL_SUPPR.DataBaseSource,'') AND ISNULL(F_DOCREGL.DR_NoSource,0) = ISNULL(F_DOCREGL_SUPPR.DR_No,0) ) \n" +
                 " \n" +
                 " IF OBJECT_ID('F_DOCENTETE_SUPPR') IS NOT NULL \n" +
                 " DROP TABLE F_DOCENTETE_SUPPR \n";

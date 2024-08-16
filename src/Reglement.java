@@ -41,9 +41,9 @@ public class Reglement extends Table {
                 ",RG_NoSrc = src.RG_No into #reglement\n" +
                 "FROM F_CREGLEMENT_DEST dest \n" +
                 "LEFT JOIN (SELECT RG_No,RG_NoSource,dataBaseSource FROM F_CREGLEMENT) src \n" +
-                "ON dest.RG_No = src.RG_NoSource \n" +
-                "AND dest.dataBaseSource = src.dataBaseSource \n" +
-                "LEFT JOIN F_CAISSE cai ON cai.CA_NoSource = dest.CA_No AND cai.dataBaseSource = dest.dataBaseSource  \n" +
+                "ON ISNULL(dest.RG_No,0) = ISNULL(src.RG_NoSource,0) \n" +
+                "AND ISNULL(dest.dataBaseSource,'') = ISNULL(src.dataBaseSource,'') \n" +
+                "LEFT JOIN F_CAISSE cai ON ISNULL(cai.CA_NoSource,0) = ISNULL(dest.CA_No,0) AND ISNULL(cai.dataBaseSource,'') = ISNULL(dest.dataBaseSource,'')  \n" +
                 ""+
                 " IF OBJECT_ID('F_CREGLEMENT_DEST') IS NOT NULL\n"+
                 "UPDATE cre\n" +
@@ -86,8 +86,8 @@ public class Reglement extends Table {
                 "      ,[cbReplication] = cre.cbReplication\n" +
                 "      ,[cbFlag] = cre.cbFlag\n" +
                 "\t  FROM F_CREGLEMENT cre \n" +
-                "\t  INNER JOIN #reglement tmp ON cre.[DataBaseSource] = tmp.[DataBaseSource]\n" +
-                "\t  AND cre.RG_NoSource = tmp.RG_NoSource" +
+                "\t  INNER JOIN #reglement tmp ON ISNULL(cre.[DataBaseSource],'') = ISNULL(tmp.[DataBaseSource],'')\n" +
+                "\t  AND ISNULL(cre.RG_NoSource,0) = ISNULL(tmp.RG_NoSource,0)" +
                 "            \n" +
 
                 " IF OBJECT_ID('F_CREGLEMENT_DEST') IS NOT NULL\n"+
@@ -183,7 +183,7 @@ public class Reglement extends Table {
     {
         return
                 " DELETE FROM F_CREGLEMENT \n" +
-                " WHERE EXISTS (SELECT 1 FROM F_CREGLEMENT_SUPPR WHERE F_CREGLEMENT.RG_NoSource = F_CREGLEMENT_SUPPR.RG_No AND F_CREGLEMENT.DataBaseSource = F_CREGLEMENT_SUPPR.DataBaseSource) \n" +
+                " WHERE EXISTS (SELECT 1 FROM F_CREGLEMENT_SUPPR WHERE ISNULL(F_CREGLEMENT.RG_NoSource,0) = ISNULL(F_CREGLEMENT_SUPPR.RG_No,0) AND ISNULL(F_CREGLEMENT.DataBaseSource,'') = ISNULL(F_CREGLEMENT_SUPPR.DataBaseSource,'')) \n" +
                 " \n" +
                 " IF OBJECT_ID('F_CREGLEMENT_SUPPR') IS NOT NULL \n" +
                 " DROP TABLE F_CREGLEMENT_SUPPR \n";

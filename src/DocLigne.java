@@ -46,11 +46,11 @@ public class DocLigne extends Table {
                 "\t   INTO #DocLigne\n" +
                 " FROM F_DOCLIGNE_DEST dest  \n" +
                 " LEFT JOIN (SELECT cbMarqSource,dataBaseSource,DO_Piece,DO_Type,DO_Domaine FROM F_DOCLIGNE) src  \n" +
-                "  ON dest.cbMarqSource = src.cbMarqSource  \n" +
-                "  AND dest.dataBaseSource = src.dataBaseSource  \n" +
+                "  ON ISNULL(dest.cbMarqSource,0) = ISNULL(src.cbMarqSource,0)  \n" +
+                "  AND ISNULL(dest.dataBaseSource,'') = ISNULL(src.dataBaseSource,'')  \n" +
                 " LEFT JOIN (SELECT DE_NoSource,dataBaseSource,DE_No FROM F_DEPOT) dsrc  \n" +
-                "  ON dsrc.DE_NoSource = dest.DE_No  \n" +
-                "  AND dsrc.dataBaseSource = dest.dataBaseSource  \n"+
+                "  ON ISNULL(dsrc.DE_NoSource,0) = ISNULL(dest.DE_No,0)  \n" +
+                "  AND ISNULL(dsrc.dataBaseSource,'') = ISNULL(dest.dataBaseSource,'')  \n"+
                 "\n"+
                 "INSERT INTO F_DOCLIGNE (\n" +
                 "[DO_Domaine],[DO_Type],[CT_Num],[DO_Piece],[DL_PieceBC],[DL_PieceBL],[DO_Date],[DL_DateBC],[DL_DateBL],[DL_Ligne],[DO_Ref],[DL_TNomencl]\n" +
@@ -107,13 +107,18 @@ public class DocLigne extends Table {
                 "           NULL," +
                 "           NULL," +
                 "           NULL," +
-                "           NULL,'Domaine : '+CAST([DO_Domaine] AS VARCHAR(150))+' Type : ' + CAST([DO_Type] AS VARCHAR(150)) + ' Piece : ' + CAST([DO_Piece] AS VARCHAR(150))" +
-                "           +' cbMarq : ' + CAST([cbMarqSource] AS VARCHAR(150)) + ' database : ' + CAST([DataBaseSource] AS VARCHAR(150))" +
+                "           NULL,'Domaine : '+CAST(docL.[DO_Domaine] AS VARCHAR(150))+' Type : ' + CAST(docL.[DO_Type] AS VARCHAR(150)) + ' Piece : ' + CAST(docL.[DO_Piece] AS VARCHAR(150))" +
+                "           +' cbMarq : ' + CAST(docL.[cbMarqSource] AS VARCHAR(150)) + ' database : ' + CAST(docL.[DataBaseSource] AS VARCHAR(150))" +
                 "           + 'fileName : "+filename+" '" +
                 "           ,'Insert F_DOCLIGNE'\n" +
                 "           ,GETDATE()\n" +
-                "FROM #DocLigne\n" +
+                "FROM #DocLigne docL\n" +
+                "LEFT JOIN (SELECT DO_Piece,DO_Type,DO_Domaine FROM F_DOCENTETE) docE\n" +
+                "ON docE.DO_Domaine = docL.DO_Domaine\n" +
+                "AND docE.DO_Type = docL.DO_Type\n" +
+                "AND docE.DO_Piece = docL.DO_Piece\n" +
                 "WHERE cbMarqSourceSrc IS NULL\n" +
+                "AND docE.DO_Piece IS NULL\n" +
                 " END TRY\n" +
                 " BEGIN CATCH \n" +
                 "INSERT INTO config.DB_Errors\n" +
@@ -190,11 +195,11 @@ public class DocLigne extends Table {
                 "\t   INTO #DocLigne\n" +
                 " FROM F_DOCLIGNE_DEST dest  \n" +
                 " LEFT JOIN (SELECT cbMarqSource,dataBaseSource,DO_Piece,DO_Type,DO_Domaine FROM F_DOCLIGNE) src  \n" +
-                "  ON dest.cbMarqSource = src.cbMarqSource  \n" +
-                "  AND dest.dataBaseSource = src.dataBaseSource  \n" +
+                "  ON ISNULL(dest.cbMarqSource,0) = ISNULL(src.cbMarqSource,0)  \n" +
+                "  AND ISNULL(dest.dataBaseSource,'') = ISNULL(src.dataBaseSource,'')  \n" +
                 " LEFT JOIN (SELECT DE_NoSource,dataBaseSource,DE_No FROM F_DEPOT) dsrc  \n" +
-                "  ON dsrc.DE_NoSource = dest.DE_No  \n" +
-                "  AND dsrc.dataBaseSource = dest.dataBaseSource  \n"+
+                "  ON ISNULL(dsrc.DE_NoSource,0) = ISNULL(dest.DE_No,0)  \n" +
+                "  AND ISNULL(dsrc.dataBaseSource,'') = ISNULL(dest.dataBaseSource,'')  \n"+
                 "\n"+
                 "\t\tUPDATE doc\n" +
                 "\t\tSET DO_Domaine = docL.DO_Domaine\n" +
@@ -287,8 +292,8 @@ public class DocLigne extends Table {
                 "\t\t\t,USERGESCOM = docL.USERGESCOM\n" +
                 "\t\t\t,MACHINEPC = docL.MACHINEPC\n" +
                 "FROM F_DOCLIGNE doc\n"+
-                "\t\tINNER JOIN #DocLigne docL ON doc.cbMarqSource = docL.cbMarqSource\n" +
-                "AND doc.[DataBaseSource] = docL.[DataBaseSource]\n"+
+                "\t\tINNER JOIN #DocLigne docL ON ISNULL(doc.cbMarqSource,0) = ISNULL(docL.cbMarqSource,0)\n" +
+                "AND ISNULL(doc.[DataBaseSource],'') = ISNULL(docL.[DataBaseSource],'')\n"+
                 "\n" +
                 "\t\tINSERT INTO config.DB_Errors (\n" +
                 "\t\t\tUserName\n" +
@@ -313,18 +318,15 @@ public class DocLigne extends Table {
                 "\t\t\t,'Update F_DOCLIGNE'\n" +
                 "\t\t\t,GETDATE()\n" +
                 "\t\tFROM F_DOCLIGNE_DEST dest\n" +
-                "\t\tINNER JOIN F_DOCLIGNE docL ON docL.cbMarqSource = dest.cbMarqSource\n" +
-                "\t\t\tAND docL.DataBaseSource = dest.DataBaseSource\n" +
+                "\t\tINNER JOIN F_DOCLIGNE docL ON ISNULL(docL.cbMarqSource,0) = ISNULL(dest.cbMarqSource,0)\n" +
+                "\t\t\tAND ISNULL(docL.DataBaseSource,'') = ISNULL(dest.DataBaseSource,'')\n" +
                 "LEFT JOIN (SELECT DE_NoSource,dataBaseSource,DE_No FROM F_DEPOT) dsrc\n" +
-                "ON\tdsrc.DE_NoSource = dest.DE_No\n" +
-                "AND\tdsrc.dataBaseSource = dest.dataBaseSource\n"+
-                "\t\t\tAND NOT EXISTS (\n" +
-                "\t\t\t\tSELECT 1\n" +
-                "\t\t\t\tFROM F_DOCENTETE docE\n" +
-                "\t\t\t\tWHERE docE.DO_Type = docL.DO_Type\n" +
-                "\t\t\t\t\tAND docE.DO_Piece = docL.DO_Piece\n" +
-                "\t\t\t\t\tAND docE.DO_Domaine = docL.DO_Domaine\n" +
-                "\t\t\t\t)\n" +
+                "ON\tISNULL(dsrc.DE_NoSource,0) = ISNULL(dest.DE_No,0)\n" +
+                "AND\tISNULL(dsrc.dataBaseSource,'') = ISNULL(dest.dataBaseSource,'')\n"+
+                "LEFT JOIN F_DOCENTETE docE ON docE.DO_Type = dest.DO_Type\n" +
+                "AND docE.DO_Piece = dest.DO_Piece\n" +
+                "AND docE.DO_Domaine = dest.DO_Domaine\n" +
+                "WHERE docE.DO_Type IS NULL\n" +
                 "\tEND\n" +
                 "END TRY\n" +
                 "\n" +
@@ -382,8 +384,8 @@ public class DocLigne extends Table {
                 " DELETE FROM F_DOCLIGNE \n" +
                 " WHERE EXISTS (SELECT 1 " +
                 "               FROM F_DOCLIGNE_SUPPR " +
-                "               WHERE F_DOCLIGNE.cbMarqSource = F_DOCLIGNE_SUPPR.cbMarq " +
-                "               AND F_DOCLIGNE.DataBaseSource = F_DOCLIGNE_SUPPR.DataBaseSource) \n"
+                "               WHERE ISNULL(F_DOCLIGNE.cbMarqSource,0) = ISNULL(F_DOCLIGNE_SUPPR.cbMarq,0) " +
+                "               AND ISNULL(F_DOCLIGNE.DataBaseSource,'') = ISNULL(F_DOCLIGNE_SUPPR.DataBaseSource,'')) \n"
                 ;
 
     }

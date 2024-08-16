@@ -25,11 +25,11 @@ public class Caisse extends Table {
                         "   INTO #TmpCaisse \n" +
                         "FROM F_CAISSE_DEST dest \n" +
                         "LEFT JOIN (SELECT CA_NoSource,DatabaseSource FROM F_CAISSE) src \n" +
-                        "ON src.CA_NoSource = dest.CA_No \n" +
-                        "AND src.DatabaseSource = dest.DatabaseSource \n" +
+                        "ON ISNULL(src.CA_NoSource,0) = ISNULL(dest.CA_No,0) \n" +
+                        "AND ISNULL(src.DatabaseSource,'') = ISNULL(dest.DatabaseSource,'') \n" +
                         "LEFT JOIN (SELECT DE_NoSource,DatabaseSource,DE_No FROM F_DEPOT) dep \n" +
-                        "ON dep.DE_NoSource = dest.DE_No \n" +
-                        "AND dep.DataBaseSource = dest.DataBaseSource " +
+                        "ON ISNULL(dep.DE_NoSource,0) = ISNULL(dest.DE_No,0) \n" +
+                        "AND ISNULL(dep.DataBaseSource,'') = ISNULL(dest.DataBaseSource,'') " +
                         "\n" +
                         "UPDATE dwh SET\n" +
                         "      [CA_Intitule] = tmp.CA_Intitule\n" +
@@ -54,7 +54,7 @@ public class Caisse extends Table {
                         "      ,[cbFlag] = tmp.cbFlag\n" +
                         "FROM F_CAISSE dwh\n" +
                         "INNER JOIN #TmpCaisse tmp ON dwh.CA_NoSource = tmp.CA_NoSource\n" +
-                        "AND dwh.DatabaseSource = tmp.DatabaseSource\n" +
+                        "AND ISNULL(dwh.DatabaseSource,'') = ISNULL(tmp.DatabaseSource,'')\n" +
                         "\n" +
                         "INSERT INTO [dbo].[F_CAISSE]\n" +
                         "           ([CA_No],[CA_Intitule],[DE_No],[CO_No]\n" +
@@ -141,8 +141,8 @@ public class Caisse extends Table {
                 " DELETE src\n" +
                 " FROM F_CAISSE src\n" +
                 " INNER JOIN F_CAISSE_SUPPR del\n" +
-                " ON src.CA_No = del.CA_No \n" +
-                " AND src.DatabaseSource = del.DatabaseSource ;\n" +
+                " ON ISNULL(src.CA_No,0) = ISNULL(del.CA_No,0) \n" +
+                " AND ISNULL(src.DatabaseSource,'') = ISNULL(del.DatabaseSource,'') ;\n" +
                 " IF OBJECT_ID('F_CAISSE_SUPPR') IS NOT NULL\n" +
                 " DROP TABLE F_CAISSE_SUPPR ;";
     }

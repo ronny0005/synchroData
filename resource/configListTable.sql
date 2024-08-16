@@ -1,3 +1,20 @@
+-- Variable pour stocker les commandes de suppression
+DECLARE @dropCommands NVARCHAR(MAX);
+
+-- Initialiser la variable
+SET @dropCommands = '';
+
+-- Générer les commandes DROP TABLE
+SELECT @dropCommands += 'DROP TABLE [' + SCHEMA_NAME(schema_id) + '].[' + name + ']; '
+FROM sys.tables
+WHERE schema_id = SCHEMA_ID('config');
+
+-- Vérifier les commandes générées
+PRINT @dropCommands;
+
+-- Exécuter les commandes
+EXEC sp_executesql @dropCommands;
+
 
 IF SCHEMA_ID('config') IS NULL
 	EXECUTE('CREATE SCHEMA config')
@@ -292,11 +309,43 @@ CREATE TABLE [config].[DB_Errors]
           Query			 VARCHAR(MAX),
           ErrorDateTime  DATETIME)
 
-IF COL_LENGTH('dbo.F_DOCREGL', 'cbMarqSource') IS NULL
+    IF COL_LENGTH('dbo.F_DOCREGL', 'cbMarqSource') IS NULL
 ALTER TABLE F_DOCREGL ADD cbMarqSource INT
 
-IF COL_LENGTH('dbo.F_DOCENTETE', 'cbMarqSource') IS NULL
-ALTER TABLE F_DOCENTETE ADD cbMarqSource INT
+    IF COL_LENGTH('config.ListCollaborateur', 'DateCreation') IS NULL
+ALTER TABLE config.ListCollaborateur ADD DateCreation DATETIME DEFAULT GETDATE()
+    IF COL_LENGTH('config.listComptet', 'DateCreation') IS NULL
+ALTER TABLE config.listComptet ADD DateCreation DATETIME DEFAULT GETDATE()
+    IF COL_LENGTH('config.listLivraison', 'DateCreation') IS NULL
+ALTER TABLE config.listLivraison ADD DateCreation DATETIME DEFAULT GETDATE()
+    IF COL_LENGTH('config.listFamille', 'DateCreation') IS NULL
+ALTER TABLE config.listFamille ADD DateCreation DATETIME DEFAULT GETDATE()
+    IF COL_LENGTH('config.listFamCompta', 'DateCreation') IS NULL
+ALTER TABLE config.listFamCompta ADD DateCreation DATETIME DEFAULT GETDATE()
+    IF COL_LENGTH('config.listArticle', 'DateCreation') IS NULL
+ALTER TABLE config.listArticle ADD DateCreation DATETIME DEFAULT GETDATE()
+    IF COL_LENGTH('config.listCondition', 'DateCreation') IS NULL
+ALTER TABLE config.listCondition ADD DateCreation DATETIME DEFAULT GETDATE()
+    IF COL_LENGTH('config.ListArticleRessource', 'DateCreation') IS NULL
+ALTER TABLE config.ListArticleRessource ADD DateCreation DATETIME DEFAULT GETDATE()
+    IF COL_LENGTH('config.listRessourceProd', 'DateCreation') IS NULL
+ALTER TABLE config.listRessourceProd ADD DateCreation DATETIME DEFAULT GETDATE()
+    IF COL_LENGTH('config.listArtCompta', 'DateCreation') IS NULL
+ALTER TABLE config.listArtCompta ADD DateCreation DATETIME DEFAULT GETDATE()
+    IF COL_LENGTH('config.listArtClient', 'DateCreation') IS NULL
+ALTER TABLE config.listArtClient ADD DateCreation DATETIME DEFAULT GETDATE()
+    IF COL_LENGTH('config.listArtFourniss', 'DateCreation') IS NULL
+ALTER TABLE config.listArtFourniss ADD DateCreation DATETIME DEFAULT GETDATE()
+    IF COL_LENGTH('config.listDocEntete', 'DateCreation') IS NULL
+ALTER TABLE config.listDocEntete ADD DateCreation DATETIME DEFAULT GETDATE()
+    IF COL_LENGTH('config.listDocRegl', 'DateCreation') IS NULL
+ALTER TABLE config.listDocRegl ADD DateCreation DATETIME DEFAULT GETDATE()
+    IF COL_LENGTH('config.listDocLigne', 'DateCreation') IS NULL
+ALTER TABLE config.listDocLigne ADD DateCreation DATETIME DEFAULT GETDATE()
+    IF COL_LENGTH('config.listCompteg', 'DateCreation') IS NULL
+ALTER TABLE config.listCompteg ADD DateCreation DATETIME DEFAULT GETDATE()
+    IF COL_LENGTH('config.listCollaborateur', 'DateCreation') IS NULL
+ALTER TABLE config.listCollaborateur ADD DateCreation DATETIME DEFAULT GETDATE()
 
 IF COL_LENGTH('dbo.F_DOCREGL', 'DataBaseSource') IS NULL
 ALTER TABLE F_DOCREGL ADD DataBaseSource NVARCHAR(50)
@@ -334,7 +383,10 @@ ALTER TABLE F_DOCLIGNE ADD DataBaseSource NVARCHAR(50)
 IF COL_LENGTH('dbo.F_DOCENTETE', 'DataBaseSource') IS NULL
 ALTER TABLE F_DOCENTETE ADD DataBaseSource NVARCHAR(50) 
 
-IF COL_LENGTH('dbo.F_ECRITUREC', 'DataBaseSource') IS NULL
+IF COL_LENGTH('dbo.F_DOCENTETE', 'cbMarqSource') IS NULL
+ALTER TABLE F_DOCENTETE ADD cbMarqSource INT
+
+    IF COL_LENGTH('dbo.F_ECRITUREC', 'DataBaseSource') IS NULL
 ALTER TABLE F_ECRITUREC ADD DataBaseSource NVARCHAR(50)
 
 IF COL_LENGTH('dbo.F_ECRITUREC', 'cbMarqSource') IS NULL
@@ -364,8 +416,14 @@ ALTER TABLE F_CAISSE ADD DataBaseSource NVARCHAR(50)
 IF COL_LENGTH('dbo.F_CAISSE', 'CA_NoSource') IS NULL
 ALTER TABLE F_CAISSE ADD CA_NoSource INT
 
-IF COL_LENGTH('dbo.F_CAISSE', 'cbMarqSource') IS NULL
+    IF COL_LENGTH('dbo.F_CAISSE', 'cbMarqSource') IS NULL
 ALTER TABLE F_CAISSE ADD cbMarqSource INT
+
+    IF COL_LENGTH('config.ListDepot', 'DataBaseSource') IS NULL
+ALTER TABLE config.ListDepot ADD DataBaseSource NVARCHAR(50)
+
+IF COL_LENGTH('config.ListDepotEmpl', 'DataBaseSource') IS NULL
+ALTER TABLE config.ListDepotEmpl ADD DataBaseSource NVARCHAR(50)
 
 IF COL_LENGTH('dbo.F_DEPOTEMPL', 'DataBaseSource') IS NULL
 ALTER TABLE F_DEPOTEMPL ADD DataBaseSource NVARCHAR(50)
