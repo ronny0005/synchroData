@@ -49,7 +49,7 @@ public class FTarifCond extends Table{
             for (String filename : children) {
                 readOnFile(path, filename, tableName + "_DEST", sqlCon);
                 readOnFile(path, "deleteList" + filename, tableName + "_SUPPR", sqlCon);
-                executeQuery(sqlCon, updateTableDest("AR_Ref,CO_No", "'AR_Ref','CO_No'", tableName, tableName + "_DEST", filename,unibase));
+                executeQuery(sqlCon, updateTableDest("AR_Ref,CO_No", "'AR_Ref','CO_No','TC_RefCF'", tableName, tableName + "_DEST", filename,unibase));
                 sendData(sqlCon, path, filename, insert(filename));
 
                 deleteCondition(sqlCon, path, filename);

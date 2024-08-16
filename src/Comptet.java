@@ -96,11 +96,14 @@ public class Comptet extends Table {
             for (String filename : children) {
                 readOnFile(path, filename, tableName + "_DEST", sqlCon);
                 readOnFile(path, "deleteList" + filename, tableName + "_SUPPR", sqlCon);
+
+                disableTrigger(sqlCon,tableName);
                 executeQuery(sqlCon, updateTableDest("CT_Num,CT_Type", "'CT_Num','CT_Type','DE_No'", tableName, tableName + "_DEST", filename,unibase));
                 sendData(sqlCon, path, filename, insert(filename));
 
                 deleteTempTable(sqlCon, tableName + "_DEST");
                 deleteComptet(sqlCon, path, filename);
+                enableTrigger(sqlCon,tableName);
             }
         }
     }
