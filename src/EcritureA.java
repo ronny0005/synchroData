@@ -41,7 +41,8 @@ public class EcritureA extends Table {
                 "\tON\tISNULL(ecr.EC_NoSource,0) = ISNULL(dest.EC_No,0)\n" +
                 "\tAND ISNULL(ecr.DataBaseSource,'') = ISNULL(dest.DataBaseSource,'')" +
                 "\nWHERE ecr.EC_No IS NOT NULL\n" +
-                        " END TRY\n" +
+                "\nAND src.cbMarqSource IS NULL\n" +
+                " END TRY\n" +
                 " BEGIN CATCH \n" +
                 "INSERT INTO config.DB_Errors\n" +
                 "    VALUES\n" +

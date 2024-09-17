@@ -52,6 +52,7 @@ public class UpdateDatabase {
                             dateSynchro = (String) list.get("datemaj");
 
                         executeSQL(new File("resource/configListTable.sql"), sqlCon);
+                        executeSQL(new File("resource/updateBdd.sql"), sqlCon);
                         PreparedStatement pstmt = null;
                         String sql = "UPDATE config.selectTable SET lastSynchro = ?";
                         try {
