@@ -45,6 +45,11 @@ public class ConfigFile {
         initCheckBoxMap();
         initValue();
 
+        // Créer un panneau avec le défilement
+        panel1.setLayout(new BoxLayout(panel1, BoxLayout.Y_AXIS)); // Ajuster la disposition si nécessaire
+
+        JScrollPane scrollPane = new JScrollPane(panel1, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+
         validerButton.addActionListener(e -> saveConfiguration());
         SrcAjoutConfig.addActionListener(e -> addNewConfig());
 
@@ -344,7 +349,12 @@ public class ConfigFile {
 
     public static void main(String[] args) {
         JFrame frame = new JFrame("ConfigFile");
-        frame.setContentPane(new ConfigFile().panel1);
+        ConfigFile configFile = new ConfigFile();
+
+        // Ajouter le panneau défilant
+        JScrollPane scrollPane = new JScrollPane(configFile.panel1);
+        frame.setContentPane(scrollPane);
+
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.pack();
         frame.setVisible(true);
