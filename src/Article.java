@@ -91,7 +91,8 @@ public class Article extends Table {
             for (String filename : children) {
                 readOnFile(path, filename, tableName + "_DEST", sqlCon);
                 executeQuery(sqlCon, updateTableDest("AR_Ref", "'AR_Ref','AR_SuiviStock'", tableName, tableName + "_DEST", filename,unibase));
-                sendData(sqlCon, path, filename, insert(filename));
+                executeQuery(sqlCon,insertTable (tableName,tableName+"_DEST","AR_Ref",filename,0,0,"","",""));
+                //sendData(sqlCon, path, filename, insert(filename));
                 Condition.sendDataElement(sqlCon, path,unibase);
                 RessourceProd.sendDataElement(sqlCon, path,unibase);
                 ArticleRessource.sendDataElement(sqlCon, path,unibase);

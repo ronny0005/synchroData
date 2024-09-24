@@ -89,23 +89,6 @@ public class Reglement extends Table {
                 "\t  INNER JOIN #reglement tmp ON ISNULL(cre.[DataBaseSource],'') = ISNULL(tmp.[DataBaseSource],'')\n" +
                 "\t  AND ISNULL(cre.RG_NoSource,0) = ISNULL(tmp.RG_NoSource,0)" +
                 "            \n" +
-
-                " IF OBJECT_ID('F_CREGLEMENT_DEST') IS NOT NULL\n"+
-                "INSERT INTO F_CREGLEMENT (\n" +
-                "[RG_No],[CT_NumPayeur],[RG_Date],[RG_Reference],[RG_Libelle],[RG_Montant],[RG_MontantDev],[N_Reglement],[RG_Impute]\n" +
-                "\t\t,[RG_Compta],[EC_No],[RG_Type],[RG_Cours],[N_Devise],[JO_Num],[CG_NumCont],[RG_Impaye]\n" +
-                "\t\t,[CG_Num],[RG_TypeReg],[RG_Heure],[RG_Piece],[CA_No],[CO_NoCaissier],[RG_Banque],[RG_Transfere]\n" +
-                "\t\t,[RG_Cloture],[RG_Ticket],[RG_Souche],[CT_NumPayeurOrig],[RG_DateEchCont],[CG_NumEcart],[JO_NumEcart],[RG_MontantEcart]\n" +
-                "\t\t,[RG_NoBonAchat],[cbProt],[cbCreateur],[cbModification],[cbReplication],[cbFlag],cbMarqSource,DataBaseSource,RG_NoSource)\n" +
-                "            \n" +
-                "SELECT\tRG_No\n" +
-                "\t\t,[CT_NumPayeur],[RG_Date],[RG_Reference],[RG_Libelle],[RG_Montant],[RG_MontantDev],[N_Reglement],[RG_Impute]\n" +
-                "\t\t,[RG_Compta],[EC_No],[RG_Type],[RG_Cours],[N_Devise],[JO_Num],[CG_NumCont],[RG_Impaye]\n" +
-                "\t\t,[CG_Num],[RG_TypeReg],[RG_Heure],[RG_Piece],[CA_No],[CO_NoCaissier],[RG_Banque],[RG_Transfere]\n" +
-                "\t\t,[RG_Cloture],[RG_Ticket],[RG_Souche],[CT_NumPayeurOrig],[RG_DateEchCont],[CG_NumEcart],[JO_NumEcart],[RG_MontantEcart]\n" +
-                "\t\t,[RG_NoBonAchat],[cbProt],[cbCreateur],[cbModification],[cbReplication],[cbFlag],[cbMarqSource],[dataBaseSource],[RG_NoSource]\n" +
-                "FROM #reglement\n" +
-                "WHERE RG_NoSrc IS NULL\n" +
                 "            \n" +
                 " END TRY\n" +
                 " BEGIN CATCH \n" +
@@ -122,6 +105,14 @@ public class Reglement extends Table {
                 "   'F_REGLEMENT',\n" +
                 "   GETDATE());\n" +
                 "END CATCH";
+    }
+
+
+    public static String updateCaisse(){
+        return  " UPDATE dest SET CA_No = ISNULL(cai.[CA_No],dest.[CA_No]) \n"+
+                " FROM F_CREGLEMENT_TMP dest \n" +
+                " LEFT JOIN F_CAISSE cai ON ISNULL(cai.CA_NoSource,0) = ISNULL(dest.CA_No,0)\n" +
+                " AND ISNULL(cai.dataBaseSource,'') = ISNULL(dest.dataBaseSource,'')  \n";
     }
 
     public static void sendDataElement(Connection sqlCon, String path,String database,int unibase)
@@ -155,7 +146,10 @@ public class Reglement extends Table {
                 disableTrigger(sqlCon,tableName);
                 readOnFile(path, filename, tableName + "_DEST", sqlCon);
                 sendData(sqlCon, path, filename, insert(filename));
-                //deleteTempTable(sqlCon, tableName+"_DEST");
+                executeQuery(sqlCon,insertTmpTable (tableName,tableName+"_DEST","RG_No,dataBaseSource",filename,1,1,"RG_No","RG_No","CA_No"));
+                executeQuery(sqlCon,updateCaisse());
+                executeQuery(sqlCon,insertTable (tableName,tableName+"_TMP","RG_No,dataBaseSource",filename,0,1,"","RG_No",""));
+//              //deleteTempTable(sqlCon, tableName+"_DEST");
                 enableTrigger(sqlCon,tableName);
             }
         }

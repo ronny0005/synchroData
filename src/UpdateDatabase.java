@@ -156,7 +156,7 @@ public class UpdateDatabase {
         if (listObject != null) {
             for (Object o : listObject) {
                 JSONObject list = (JSONObject) o;
-                if (list.get("reception").equals("1") && list.get("active").equals("1")) {
+                if (list.get("envoi").equals("1") && list.get("active").equals("1")) {
                     try {
                         String dbURL = "jdbc:sqlserver://" + list.get("servername") + ";databaseName=" + list.get("database");
                         Properties properties = new Properties();

@@ -70,7 +70,8 @@ public class Famille extends Table {
                 readOnFile(path, filename, tableName + "_DEST", sqlCon);
                 readOnFile(path, "deleteList" + filename, tableName + "_SUPPR", sqlCon);
                 executeQuery(sqlCon, updateTableDest("FA_CodeFamille", "'FA_CodeFamille','FA_Type'", tableName, tableName + "_DEST", filename,unibase));
-                sendData(sqlCon, path, filename, insert(filename));
+                executeQuery(sqlCon,insertTable (tableName,tableName+"_DEST","FA_CodeFamille",filename,0,0,"","",""));
+                //sendData(sqlCon, path, filename, insert(filename));
 
                 FamCompta.sendDataElement(sqlCon, path,unibase);
                 deleteTempTable(sqlCon, tableName + "_DEST");

@@ -62,8 +62,8 @@ public class Compteg extends Table {
                 readOnFile(path, filename, tableName + "_DEST", sqlCon);
                 readOnFile(path, "deleteList" + filename, tableName + "_SUPPR", sqlCon);
                 executeQuery(sqlCon, updateTableDest("CG_Num,CG_Type", "'CG_Num','CG_Type'", tableName, tableName + "_DEST", filename,unibase));
-                sendData(sqlCon, path, filename, insert(filename));
-
+                executeQuery(sqlCon,insertTable (tableName,tableName+"_DEST","CG_Num",filename,0,0,"","",""));
+                //sendData(sqlCon, path, filename, insert(filename));
                 deleteTempTable(sqlCon, tableName + "_DEST");
                 deleteCompteg(sqlCon, path, filename);
             }

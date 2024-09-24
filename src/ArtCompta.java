@@ -59,7 +59,8 @@ public class ArtCompta extends Table {
 
                 readOnFile(path, "deleteList" + filename, tableName + "_SUPPR", sqlCon);
                 executeQuery(sqlCon, updateTableDest("AR_Ref,ACP_Type,ACP_Champ", "'AR_Ref','ACP_Type','ACP_Champ'", tableName, tableName + "_DEST", filename,unibase));
-                sendData(sqlCon, path, filename, insert(filename));
+                executeQuery(sqlCon,insertTable (tableName,tableName+"_DEST","AR_Ref,ACP_Type,ACP_Champ",filename,0,0,"","",""));
+                //sendData(sqlCon, path, filename, insert(filename));
 
                 deleteTempTable(sqlCon, tableName + "_DEST");
                 deleteArtCompta(sqlCon, path, filename);

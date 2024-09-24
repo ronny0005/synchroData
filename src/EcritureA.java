@@ -59,6 +59,15 @@ public class EcritureA extends Table {
                 "END CATCH";
     }
 
+    public static String updateECNo (){
+        return  "UPDATE dest SET EC_No = ecr.[EC_No]" +
+                "FROM\t[F_ECRITUREA_TMP] dest\n" +
+                "LEFT JOIN F_ECRITUREC ecr\n" +
+                "\tON\tISNULL(ecr.EC_NoSource,0) = ISNULL(dest.EC_No,0)\n" +
+                "\tAND ISNULL(ecr.DataBaseSource,'') = ISNULL(dest.DataBaseSource,'');" +
+                "\nDELETE FROM [F_ECRITUREA_TMP]\n" +
+                "\nWHERE EC_No IS NOT NULL;\n";
+    }
     public static void sendDataElement(Connection  sqlCon, String path,String database,int unibase)
     {
         File dir = new File(path);
@@ -72,7 +81,11 @@ public class EcritureA extends Table {
                 readOnFile(path, filename, tableName + "_DEST", sqlCon);
                 readOnFile(path, "deleteList" + filename, tableName + "_SUPPR", sqlCon);
                 executeQuery(sqlCon, updateTableDest("", "'EC_No','N_Analytique'", tableName, tableName + "_DEST", filename,unibase));
-                sendData(sqlCon, path, filename, insert(filename));
+
+                executeQuery(sqlCon,insertTmpTable (tableName,tableName+"_DEST","cbMarqSource,dataBaseSource",filename,0,0,"","","EC_No"));
+                executeQuery(sqlCon,updateECNo());
+                executeQuery(sqlCon,insertTable (tableName,tableName+"_TMP","cbMarqSource,dataBaseSource",filename,0,0,"","",""));
+                //sendData(sqlCon, path, filename, insert(filename));
                 deleteTempTable(sqlCon, tableName + "_DEST");
                 deleteEcritureA(sqlCon, path, filename);
             }

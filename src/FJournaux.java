@@ -62,7 +62,8 @@ public class FJournaux extends Table {
                 readOnFile(path, filename, tableName + "_DEST", sqlCon);
                 readOnFile(path, "deleteList" + filename, tableName + "_SUPPR", sqlCon);
                 executeQuery(sqlCon, updateTableDest("JO_Num,JO_Type", "'JO_Num','JO_Type','CG_Num','JO_IFRS'", tableName, tableName + "_DEST", filename,unibase));
-                sendData(sqlCon, path, filename, insert(filename));
+                executeQuery(sqlCon,insertTable (tableName,tableName+"_DEST","JO_Num",filename,0,0,"","",""));
+                //sendData(sqlCon, path, filename, insert(filename));
 
                 deleteTempTable(sqlCon, tableName + "_DEST");
                 deleteJournaux(sqlCon, path, filename);

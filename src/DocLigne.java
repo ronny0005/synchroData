@@ -52,41 +52,6 @@ public class DocLigne extends Table {
                 "  ON ISNULL(dsrc.DE_NoSource,0) = ISNULL(dest.DE_No,0)  \n" +
                 "  AND ISNULL(dsrc.dataBaseSource,'') = ISNULL(dest.dataBaseSource,'')  \n"+
                 "\n"+
-                "INSERT INTO F_DOCLIGNE (\n" +
-                "[DO_Domaine],[DO_Type],[CT_Num],[DO_Piece],[DL_PieceBC],[DL_PieceBL],[DO_Date],[DL_DateBC],[DL_DateBL],[DL_Ligne],[DO_Ref],[DL_TNomencl]\n" +
-                "      ,[DL_TRemPied],[DL_TRemExep],[AR_Ref],[DL_Design],[DL_Qte],[DL_QteBC],[DL_QteBL],[DL_PoidsNet] ,[DL_PoidsBrut] \n" +
-                "\t  ,[DL_Remise01REM_Valeur] ,[DL_Remise01REM_Type],[DL_Remise02REM_Valeur],[DL_Remise02REM_Type],[DL_Remise03REM_Valeur] ,[DL_Remise03REM_Type]\n" +
-                "      ,[DL_PrixUnitaire] ,[DL_PUBC] ,[DL_Taxe1] ,[DL_TypeTaux1],[DL_TypeTaxe1],[DL_Taxe2] ,[DL_TypeTaux2],[DL_TypeTaxe2],[CO_No]/*,[AG_No1],[AG_No2]*/\n" +
-                "\t  ,[DL_PrixRU] ,[DL_CMUP] ,[DL_MvtStock],[DT_No],[AF_RefFourniss],[EU_Enumere],[EU_Qte] ,[DL_TTC]\n" +
-                "      ,[DE_No],[DL_NoRef],[DL_TypePL],[DL_PUDevise] ,[DL_PUTTC] ,[DL_No],[DO_DateLivr],[CA_Num],[DL_Taxe3] ,[DL_TypeTaux3],[DL_TypeTaxe3],[DL_Frais] \n" +
-                "      ,[DL_Valorise],[AR_RefCompose],[DL_NonLivre],[AC_RefClient],[DL_MontantHT] ,[DL_MontantTTC] ,[DL_FactPoids],[DL_Escompte],[DL_PiecePL],[DL_DatePL],[DL_QtePL] ,[DL_NoColis],[DL_NoLink]\n" +
-                "      ,[RP_Code],[DL_QteRessource],[DL_DateAvancement],[cbProt],[cbCreateur],[cbModification],[cbReplication],[cbFlag]" +
-                "      ,[DATEMODIF]" +
-                //",[CONTROLE],[NBJ],[NOM_CLIENT],[PMIN],[PMAX],[CONTROLEDATE],[PGROS]" +
-                ",[DL_QTE_SUPER_PRIX]" +
-                "      ,[DL_SUPER_PRIX],[USERGESCOM],[NOMCLIENT],[ORDONATEUR_REMISE],[GROUPEUSER],[Qte_LivreeBL],[Qte_RestantBL],[DL_COMM],[cbMarqSource],[DataBaseSource]" +
-                "      )\n" +
-                "            \n" +
-                "SELECT\t[DO_Domaine],[DO_Type],[CT_Num],[DO_Piece],[DL_PieceBC],[DL_PieceBL],[DO_Date],[DL_DateBC]" +
-                "       ,[DL_DateBL],[DL_Ligne],[DO_Ref],[DL_TNomencl]\n" +
-                "       ,[DL_TRemPied],[DL_TRemExep],[AR_Ref],[DL_Design],[DL_Qte],[DL_QteBC],[DL_QteBL]" +
-                "       ,[DL_PoidsNet] ,[DL_PoidsBrut] \n" +
-                "\t     ,[DL_Remise01REM_Valeur] ,[DL_Remise01REM_Type],[DL_Remise02REM_Valeur],[DL_Remise02REM_Type],[DL_Remise03REM_Valeur] " +
-                "       ,[DL_Remise03REM_Type]\n" +
-                "       ,[DL_PrixUnitaire] ,[DL_PUBC] ,[DL_Taxe1] ,[DL_TypeTaux1],[DL_TypeTaxe1],[DL_Taxe2] ,[DL_TypeTaux2]" +
-                "       ,[DL_TypeTaxe2],[CO_No]/*,[AG_No1],[AG_No2]*/\n" +
-                "\t     ,[DL_PrixRU] ,[DL_CMUP] ,[DL_MvtStock],[DT_No],[AF_RefFourniss],[EU_Enumere],[EU_Qte] ,[DL_TTC]\n" +
-                "       ,DE_No,[DL_NoRef],[DL_TypePL],[DL_PUDevise] ,[DL_PUTTC] " +
-                "       ,DL_No,[DO_DateLivr],[CA_Num]" +
-                "       ,[DL_Taxe3] ,[DL_TypeTaux3],[DL_TypeTaxe3],[DL_Frais] \n" +
-                "      ,[DL_Valorise],[AR_RefCompose],[DL_NonLivre],[AC_RefClient],[DL_MontantHT] ,[DL_MontantTTC] ,[DL_FactPoids],[DL_Escompte],[DL_PiecePL],[DL_DatePL],[DL_QtePL] ,[DL_NoColis],[DL_NoLink]\n" +
-                "      ,[RP_Code],[DL_QteRessource],[DL_DateAvancement],[cbProt],[cbCreateur],[cbModification],[cbReplication],[cbFlag]" +
-                "      ,[DATEMODIF]" +
-                // "       ,[CONTROLE],[NBJ],[NOM_CLIENT],[PMIN],[PMAX],[CONTROLEDATE],[PGROS]" +
-                "       ,[DL_QTE_SUPER_PRIX]"+
-                "      ,[DL_SUPER_PRIX],[USERGESCOM],[NOMCLIENT],[ORDONATEUR_REMISE],[GROUPEUSER],[Qte_LivreeBL],[Qte_RestantBL],[DL_COMM],[cbMarqSource],[DataBaseSource]\n" +
-                "FROM #DocLigne \n" +
-                "WHERE cbMarqSourceSrc IS NULL\n" +
                 "END\n" +
                 "\n" +
                 "INSERT INTO config.DB_Errors(\n" +
@@ -130,7 +95,7 @@ public class DocLigne extends Table {
                 "   ERROR_LINE(),\n" +
                 "   ERROR_PROCEDURE(),\n" +
                 "   ERROR_MESSAGE(),\n" +
-                "   'Insert '+ ' "+filename+"',\n" +
+                "   'Update '+ ' "+filename+"',\n" +
                 "   'F_DOCLIGNE',\n" +
                 "   GETDATE());\n" +
                 "END CATCH";
@@ -142,6 +107,14 @@ public class DocLigne extends Table {
         loadDeleteFile(path,sqlCon);
     }
 
+    public static String updateDepot(){
+        return  "UPDATE dest SET DE_No = ISNULL(dsrc.[DE_No],dest.DE_No) \n"+
+                " FROM F_DOCLIGNE_TMP dest  \n" +
+                " LEFT JOIN F_DEPOT dsrc  \n" +
+                "  ON ISNULL(dsrc.DE_NoSource,0) = ISNULL(dest.DE_No,0)  \n" +
+                "  AND ISNULL(dsrc.dataBaseSource,'') = ISNULL(dest.dataBaseSource,'')  \n";
+    }
+
     public static void loadFile(String path,Connection sqlCon){
         String [] children = getFile(path,file);
         if (children == null) {
@@ -151,7 +124,12 @@ public class DocLigne extends Table {
                 disableTrigger(sqlCon,tableName);
                 readOnFile(path, filename, tableName + "_DEST", sqlCon);
                 executeQuery(sqlCon, updateDocLigne(filename));
+
                 sendData(sqlCon, path, filename, insert(filename));
+                executeQuery(sqlCon,insertTmpTable (tableName,tableName+"_DEST","cbMarqSource,databaseSource",filename,0,0,"","","DE_No"));
+                executeQuery(sqlCon,updateDepot());
+                executeQuery(sqlCon,insertTable (tableName,tableName+"_TMP","cbMarqSource,databaseSource",filename,0,0,"","",""));
+//                sendData(sqlCon, path, filename, insert(filename));
                 enableTrigger(sqlCon,tableName);
                 //deleteTempTable(sqlCon, tableName+"_DEST");
             }

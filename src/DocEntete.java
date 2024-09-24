@@ -134,52 +134,6 @@ public class DocEntete extends Table {
                 "                 INNER JOIN #DocEntete tmp ON ISNULL(dwh.[DataBaseSource],'') = ISNULL(tmp.[DataBaseSource],'')  \n" +
                 "                 AND ISNULL(dwh.cbMarqSource,0) = ISNULL(tmp.cbMarqSource,0)  \n" +
                 "                   \n" +
-                "                  INSERT INTO F_DOCENTETE (  \n" +
-                "                 [DO_Domaine], [DO_Type], [DO_Date], [DO_Ref]  \n" +
-                "                  , [DO_Tiers], [CO_No], [DO_Period], [DO_Devise]  \n" +
-                "                  , [DO_Cours], [DE_No], [LI_No]  \n" +
-                "                  , [CT_NumPayeur], [DO_Expedit], [DO_NbFacture], [DO_BLFact]  \n" +
-                "                  , [DO_TxEscompte], [DO_Reliquat], [DO_Imprim], [CA_Num]  \n" +
-                "                  , [DO_Coord01], [DO_Coord02], [DO_Coord03], [DO_Coord04]  \n" +
-                "                  , [DO_Souche], [DO_DateLivr], [DO_Condition], [DO_Tarif]  \n" +
-                "                  , [DO_Colisage], [DO_TypeColis], [DO_Transaction], [DO_Langue]  \n" +
-                "                  , [DO_Ecart], [DO_Regime], [N_CatCompta], [DO_Ventile]  \n" +
-                "                  , [AB_No], [DO_DebutAbo], [DO_FinAbo], [DO_DebutPeriod]  \n" +
-                "                  , [DO_FinPeriod], [CG_Num], [DO_Statut], [DO_Heure]  \n" +
-                "                  , [CA_No], [CO_NoCaissier]  \n" +
-                "                  , [DO_Transfere], [DO_Cloture], [DO_NoWeb], [DO_Attente]  \n" +
-                "                  , [DO_Provenance], [CA_NumIFRS], [MR_No], [DO_TypeFrais]  \n" +
-                "                  , [DO_ValFrais], [DO_TypeLigneFrais], [DO_TypeFranco], [DO_ValFranco]  \n" +
-                "                   , [DO_TypeLigneFranco], [DO_Taxe1], [DO_TypeTaux1], [DO_TypeTaxe1]  \n" +
-                "                   , [DO_Taxe2], [DO_TypeTaux2], [DO_TypeTaxe2], [DO_Taxe3]  \n" +
-                "                   , [DO_TypeTaux3], [DO_TypeTaxe3], [DO_MajCpta], [DO_Motif]  \n" +
-                "                    , [CT_NumCentrale], [DO_Contact], [DO_FactureElec], [DO_TypeTransac]  \n" +
-                "                    , [cbProt], [cbCreateur], [cbModification], [cbReplication]  \n" +
-                "                    , [cbFlag],[DO_Piece],[DataBaseSource],[cbMarqSource])  \n" +
-                "                               \n" +
-                "                 SELECT docE.[DO_Domaine], docE.[DO_Type], docE.[DO_Date], docE.[DO_Ref]  \n" +
-                "                  , docE.[DO_Tiers], docE.[CO_No], docE.[DO_Period], docE.[DO_Devise]  \n" +
-                "                  , docE.[DO_Cours], docE.DE_No, docE.[LI_No]  \n" +
-                "                  , [CT_NumPayeur], [DO_Expedit], [DO_NbFacture], [DO_BLFact]  \n" +
-                "                  , [DO_TxEscompte], [DO_Reliquat], [DO_Imprim], [CA_Num]  \n" +
-                "                  , [DO_Coord01], [DO_Coord02], [DO_Coord03], [DO_Coord04]  \n" +
-                "                  , [DO_Souche], [DO_DateLivr], [DO_Condition], [DO_Tarif]  \n" +
-                "                  , [DO_Colisage], [DO_TypeColis], [DO_Transaction], [DO_Langue]  \n" +
-                "                  , [DO_Ecart], [DO_Regime], [N_CatCompta], [DO_Ventile]  \n" +
-                "                  , [AB_No], [DO_DebutAbo], [DO_FinAbo], [DO_DebutPeriod]  \n" +
-                "                  , [DO_FinPeriod], [CG_Num], [DO_Statut], [DO_Heure]  \n" +
-                "                  , docE.CA_No, [CO_NoCaissier]  \n" +
-                "                  , [DO_Transfere], [DO_Cloture], [DO_NoWeb], [DO_Attente]  \n" +
-                "                  , [DO_Provenance], [CA_NumIFRS], [MR_No], [DO_TypeFrais]  \n" +
-                "                  , [DO_ValFrais], [DO_TypeLigneFrais], [DO_TypeFranco], [DO_ValFranco]  \n" +
-                "                   , [DO_TypeLigneFranco], [DO_Taxe1], [DO_TypeTaux1], [DO_TypeTaxe1]  \n" +
-                "                   , [DO_Taxe2], [DO_TypeTaux2], [DO_TypeTaxe2], [DO_Taxe3]  \n" +
-                "                   , [DO_TypeTaux3], [DO_TypeTaxe3], [DO_MajCpta], [DO_Motif]  \n" +
-                "                    , [CT_NumCentrale], [DO_Contact], [DO_FactureElec], [DO_TypeTransac]  \n" +
-                "                    , [cbProt], [cbCreateur], [cbModification], [cbReplication]  \n" +
-                "                    , [cbFlag],[DO_Piece],[dataBaseSource],[cbMarqSource]  \n" +
-                "                 FROM #DocEntete docE \n" +
-                "                 WHERE DO_DomaineSrc IS NULL;  \n" +
                 "                 END  \n" +
                 "                  END TRY  \n" +
                 " BEGIN CATCH \n" +
@@ -192,7 +146,7 @@ public class DocEntete extends Table {
                 "   ERROR_LINE(),\n" +
                 "   ERROR_PROCEDURE(),\n" +
                 "   ERROR_MESSAGE(),\n" +
-                "   'Insert '+ ' "+filename+"',\n" +
+                "   'Update '+ ' "+filename+"',\n" +
                 "   'F_DOCENTETE',\n" +
                 "   GETDATE());\n" +
                 "END CATCH";
@@ -204,6 +158,18 @@ public class DocEntete extends Table {
         loadDeleteFile(path,sqlCon);
     }
 
+    public static String updateDepotInsert() {
+
+        return "UPDATE dest SET DE_No = ISNULL(dep.DE_No,dest.[DE_No])\n" +
+                "               ,LI_No = ISNULL(liv.[LI_No],dest.[LI_No])\n" +
+                "               ,CA_No = ISNULL(cai.CA_No,dest.[CA_No])\n" +
+                "FROM F_DOCENTETE_TMP dest\n" +
+                "LEFT JOIN F_DEPOT dep ON ISNULL(dep.DE_NoSource,0) = ISNULL(dest.DE_No,0) AND ISNULL(dep.dataBaseSource,'') = ISNULL(dest.dataBaseSource,'')   \n" +
+                "LEFT JOIN F_CAISSE cai ON ISNULL(cai.CA_NoSource,0) = ISNULL(dest.CA_No,0) AND ISNULL(cai.dataBaseSource,'') = ISNULL(dest.dataBaseSource,'')   \n" +
+                "LEFT JOIN F_LIVRAISON liv ON ISNULL(liv.LI_NoSource,0) = ISNULL(dest.LI_No,0) AND ISNULL(liv.dataBaseSource,'') = ISNULL(dest.dataBaseSource,'')   \n" +
+                "\n";
+    }
+
     public static void loadFile(String path,Connection sqlCon){
         String [] children = getFile(path,file);
         if (children == null) {
@@ -213,7 +179,13 @@ public class DocEntete extends Table {
                 readOnFile(path, filename, tableName + "_DEST", sqlCon);
                 disableTrigger(sqlCon,tableName);
 //                executeQuery(sqlCon, updateTableDest("", "'DO_Domaine','DO_Type','DO_Piece','DataBaseSource','cbMarqSource'", tableName, tableName + "_DEST",filename));
+
                 sendData(sqlCon, path, filename, insert(filename));
+                executeQuery(sqlCon,insertTmpTable (tableName,tableName+"_DEST","DO_Piece,DO_Domaine,DO_Type",filename,0,0,"","","DE_No,CA_No,LI_No"));
+                executeQuery(sqlCon,updateDepotInsert());
+                executeQuery(sqlCon,insertTable (tableName,tableName+"_TMP","DO_Piece,DO_Domaine,DO_Type",filename,0,0,"","",""));
+
+//                sendData(sqlCon, path, filename, insert(filename));
                 //deleteTempTable(sqlCon, tableName+"_DEST");
                 enableTrigger(sqlCon,tableName);
             }

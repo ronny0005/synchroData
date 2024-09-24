@@ -28,23 +28,6 @@ public class DepotEmpl extends Table {
                         "  WHERE ISNULL(F_DEPOTEMPL.DP_NoSource,0) = ISNULL(F_DEPOTEMPL_DEST.DP_No,0) \n" +
                         "  AND\tISNULL(F_DEPOTEMPL.DataBaseSource,'') = ISNULL(F_DEPOTEMPL_DEST.DataBaseSource,'') \n" +
                         "  \n" +
-                        "  INSERT INTO [dbo].[F_DEPOTEMPL]     \n" +
-                        "  ([DP_No],[DE_No],[DP_Code],[DP_Intitule],[DP_Zone],[DP_Type],[cbProt]\n" +
-                        "      ,[cbCreateur],[cbModification],[cbReplication],[cbFlag],DP_NoSource,cbMarqSource,DataBaseSource)     \n" +
-                        "     \n" +
-                        "  SELECT ISNULL((SELECT Max(DP_No) FROM F_DEPOTEMPL),0)  + ROW_NUMBER() OVER(ORDER BY dest.DP_No),srcDep.[DE_No],[DP_Code],[DP_Intitule],[DP_Zone],[DP_Type],[cbProt]\n" +
-                        "      ,[cbCreateur],[cbModification],[cbReplication],[cbFlag],dest.DP_No,dest.cbMarqSource,dest.DataBaseSource \n" +
-                        "  FROM F_DEPOTEMPL_DEST dest       \n" +
-                        "  LEFT JOIN (SELECT DP_NoSource,DataBaseSource FROM F_DEPOTEMPL) src       \n" +
-                        "  ON ISNULL(dest.DP_No,0) = ISNULL(src.DP_NoSource,0)\n" +
-                        "  AND ISNULL(dest.DataBaseSource,'') = ISNULL(src.DataBaseSource,'')\n" +
-                        "  LEFT JOIN (SELECT DatabaseSource,DE_NoSource,DE_No FROM F_DEPOT) srcDep       \n" +
-                        "  ON\tISNULL(dest.DE_No,0) = ISNULL(srcDep.DE_NoSource,0)\n" +
-                        "  AND\tISNULL(dest.DataBaseSource,'') = ISNULL(srcDep.DataBaseSource,'')\n" +
-                        "  WHERE src.DP_NoSource IS NULL \n" +
-                        "  AND\tsrcDep.DE_No IS NOT NULL;   " +
-                        "  IF OBJECT_ID('F_DEPOTEMPL_DEST') IS NOT NULL     \n" +
-                        "  DROP TABLE F_DEPOTEMPL_DEST;" +
                         " END TRY\n" +
                         " BEGIN CATCH \n" +
                         "INSERT INTO config.DB_Errors\n" +
@@ -62,6 +45,18 @@ public class DepotEmpl extends Table {
                         "END CATCH";
     }
 
+    public static String updateDepotInsert(){
+        return "UPDATE dest SET DE_No = ISNULL(srcDep.DE_No,dest.[DE_No])\n" +
+                "FROM F_DEPOTEMPL_TMP dest\n" +
+                "LEFT JOIN (SELECT DatabaseSource,DE_NoSource,DE_No FROM F_DEPOT) srcDep\n" +
+                "ON ISNULL(dest.DE_No,0) = ISNULL(srcDep.DE_NoSource,0)\n" +
+                "AND ISNULL(dest.DataBaseSource,'') = ISNULL(srcDep.DataBaseSource,'')\n" +
+                "\n" +
+                "DELETE \n" +
+                "FROM F_DEPOTEMPL_TMP\n" +
+                "WHERE DE_No IS NOT NULL";
+    }
+
     public static void sendDataElement(Connection sqlCon, String path,int unibase)
     {
         File dir = new File(path);
@@ -74,8 +69,10 @@ public class DepotEmpl extends Table {
                 readOnFile(path, filename, tableName + "_DEST", sqlCon);
                 readOnFile(path, "deleteList" + filename, tableName + "_SUPPR", sqlCon);
                 executeQuery(sqlCon, updateTableDest("", "'DP_No','DE_No','DP_NoSource'", tableName, tableName + "_DEST", filename,unibase));
+                executeQuery(sqlCon,insertTmpTable (tableName,tableName+"_DEST","DP_No,DatabaseSource",filename,1,1,"DP_No","DP_No","DE_No"));
+                executeQuery(sqlCon,updateDepotInsert());
+                executeQuery(sqlCon,insertTable (tableName,tableName+"_TMP","DP_No",filename,0,0,"","",""));
                 sendData(sqlCon, path, filename, insert(filename));
-
                 deleteTempTable(sqlCon, tableName + "_DEST");
                 deleteDepot(sqlCon, path, filename);
             }

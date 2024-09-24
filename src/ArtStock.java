@@ -171,14 +171,14 @@ public class ArtStock extends Table {
         String query =
                 " DELETE FROM F_ARTSTOCK \n" +
                 " WHERE EXISTS (SELECT 1 FROM F_ARTSTOCK_SUPPR artSuppr \n" +
-                        "       INNER JOIN F_DEPOT dep \n" +
-                        "       ON  artSuppr.DE_No = dep.DE_NoSource \n" +
-                        "       AND dep.dataBaseSource = '" + database +"' \n" +
-                        "       WHERE artSuppr.AR_Ref = F_ARTSTOCK.AR_Ref" +
-                        "       AND dep.DE_No = F_ARTSTOCK.DE_No)  \n" +
-                        "  \n" +
-                        " IF OBJECT_ID('F_ARTSTOCK_SUPPR') IS NOT NULL  \n" +
-                        " DROP TABLE F_ARTSTOCK_SUPPR ;";
+                "       INNER JOIN F_DEPOT dep \n" +
+                "       ON  artSuppr.DE_No = dep.DE_NoSource \n" +
+                "       AND dep.dataBaseSource = '" + database +"' \n" +
+                "       WHERE artSuppr.AR_Ref = F_ARTSTOCK.AR_Ref" +
+                "       AND dep.DE_No = F_ARTSTOCK.DE_No)  \n" +
+                "  \n" +
+                " IF OBJECT_ID('F_ARTSTOCK_SUPPR') IS NOT NULL  \n" +
+                " DROP TABLE F_ARTSTOCK_SUPPR ;";
         if ((new File(path + "\\deleteList" + filename)).exists())
         {
             executeQuery(sqlCon, query);

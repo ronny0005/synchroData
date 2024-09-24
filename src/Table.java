@@ -52,9 +52,11 @@ public class Table {
                 "FROM sys.tables tab\n" +
                 "INNER JOIN sys.columns col\n" +
                 "\tON tab.object_id = col.object_id\n" +
+                "INNER JOIN sys.types t\n" +
+                "    ON col.user_type_id = t.user_type_id\n" +
                 "WHERE tab.name = @TableName\n" +
-                "AND (col.name NOT LIKE 'cb%' OR col.Name = 'cbIndice')" +
-                "AND col.name NOT IN ('DataBaseSource','cbMarqSource')\n" +
+                "AND col.name NOT IN ('DataBaseSource','cbMarqSource','cbMarq')\n" +
+                "AND t.name NOT IN ('varbinary')\n" +
                 "\n" +
                 "OPEN @getid\n" +
                 "FETCH NEXT\n" +
@@ -71,7 +73,7 @@ public class Table {
                 "SELECT @MonSQL = SUBSTRING(@MonSQL,2,LEN(@MonSQL)) \n" +
                 "\n" +
                 "SELECT @MonSQL = 'DECLARE @databaseSource AS VARCHAR (150) = '''+@databaseSource+'''; SELECT ' + @MonSQL \n" +
-                "+ CASE WHEN @cbModification IS NOT NULL THEN ',[cbProt],[cbCreateur],[cbModification],[cbReplication],[cbFlag]' ELSE '' END +',cbMarqSource = [cbMarq],[DataBaseSource] = @databaseSource  FROM '\n" +
+                "+',cbMarqSource = [cbMarq],[DataBaseSource] = @databaseSource  FROM '\n" +
                 "+ @TableName +  CASE WHEN @cbModification IS NOT NULL THEN ' WHERE cbModification > CONVERT(DATETIME,''' + @lastSynchro +''',20)' ELSE '' END\n" +
                 "IF EXISTS (\tSELECT\tcol.name  \n" +
                 "\t\t\tFROM\tsys.tables tab  \n" +
@@ -545,6 +547,218 @@ public class Table {
         sql.append("\n").append("EXEC (@MonSQL) \n").append("\n").append("END TRY\n").append("BEGIN CATCH \n").append("\tINSERT INTO config.DB_Errors\n").append("\tVALUES\n").append("\t(\n").append("\t\tSUSER_SNAME(),\n").append("\t\tERROR_NUMBER(),\n").append("\t\tERROR_STATE(),\n").append("\t\tERROR_SEVERITY(),\n").append("\t\tERROR_LINE(),\n").append("\t\tERROR_PROCEDURE(),\n").append("\t\tERROR_MESSAGE(),\n").append("\t\t@TableName + ' ").append(filename).append("',\n").append("\t\t@MonSQL,\n").append("\t\tGETDATE()\n").append("\t);\n").append("END CATCH");
         return sql.toString();
     }
+
+    public static String insertTmpTable (String tableName,String tableNameDest,String keyJoin,String fileName,int increment,int isSource,String incrementValue,String keySource,String setToNull){
+        StringBuilder sql = new StringBuilder("\n" +
+                "\n" +
+                "DECLARE @tableName VARCHAR(150) = '"+ tableName +"'\n" +
+                "DECLARE @tableNameDest VARCHAR(150) = '"+ tableNameDest +"'\n" +
+                "DECLARE @keyJoin VARCHAR(150) = '"+ keyJoin +"'\n" +
+                "DECLARE @filename VARCHAR(150) = '"+ fileName + "'\n" +
+                "DECLARE @increment INT = "+ increment +"\n" +
+                "DECLARE @isSource INT  = "+ isSource +"\n" +
+                "DECLARE @incrementValue VARCHAR(50) = '"+ incrementValue +"'\n" +
+                "DECLARE @keySource VARCHAR(50) = '"+ keySource +"'\n" +
+                "DECLARE @setToNull VARCHAR(50) = '"+ setToNull +"'\n" +
+                "DECLARE @keyValue VARCHAR(MAX) = ''\n" +
+                "DECLARE @columnsSource NVARCHAR(MAX);\n" +
+                "DECLARE @columnsDest NVARCHAR(MAX);\n" +
+                "DECLARE @sql NVARCHAR(MAX);\n" +
+                "DECLARE @columns NVARCHAR(MAX);\n" +
+                "DROP TABLE IF EXISTS #keyJoin;\n" +
+                "DROP TABLE IF EXISTS #setToNull;\n" +
+                "-- Obtenir la liste des colonnes non-IDENTITY\n" +
+                "SELECT *\n" +
+                "\tINTO #keyJoin\n" +
+                "FROM STRING_SPLIT(@keyJoin,',')\n" +
+                "SELECT *\n" +
+                "\tINTO #setToNull\n" +
+                "FROM STRING_SPLIT(@setToNull,',')\n" +
+                "\n" +
+                "    SELECT @columnsSource = STRING_AGG(col.name,',')\n" +
+                "    FROM sys.tables tab\n" +
+                "\tINNER JOIN sys.columns col\n" +
+                "\t\tON tab.object_id = col.object_id\n" +
+                "\tINNER JOIN sys.types t\n" +
+                "\t\tON col.user_type_id = t.user_type_id\n" +
+                "\tWHERE tab.name = @tableName\n" +
+                "\tAND t.name NOT IN ('varbinary')\n" +
+                "\tAND col.is_identity <> 1\n" +
+                "\n" +
+                ";\n" +
+                "WITH _Source_ AS (\n" +
+                "SELECT  \n" +
+                "    CASE \n" +
+                "        -- Vérifier si la colonne existe dans F_COMPTETG_DEST\n" +
+                "        WHEN EXISTS (\n" +
+                "            SELECT 1 \n" +
+                "            FROM sys.columns c\n" +
+                "            INNER JOIN sys.tables t ON t.object_id = c.object_id\n" +
+                "            WHERE t.name = @tableNameDest\n" +
+                "            AND c.name = col.name\n" +
+                "        ) \n" +
+                "        THEN CASE WHEN @increment  = 1 AND col.name = @incrementValue THEN '(SELECT ISNULL((SELECT MAX('+@incrementValue+') FROM '+@tableName+'),0)) + ROW_NUMBER() OVER(ORDER BY dest.' + @incrementValue + ' ) AS ' + col.name\n" +
+                "\t\t\t\t\tWHEN @isSource = 1 AND col.name = @keySource+'Source' THEN  'dest.'+@keySource +' AS ' + col.name\n" +
+                "\t\t\t\t\tWHEN col.name IN (SELECT [value] FROM #setToNull) THEN  'NULL AS ' + col.name \n" +
+                "\t\t\t\t\tELSE  'dest.' + col.name  END-- Si la colonne existe, on l'inclut\n" +
+                "        ELSE 'NULL AS ' + col.name  -- Si elle n'existe pas, on met NULL\n" +
+                "    END AS Col\n" +
+                "FROM sys.tables tab\n" +
+                "INNER JOIN sys.columns col\n" +
+                "    ON tab.object_id = col.object_id\n" +
+                "INNER JOIN sys.types t\n" +
+                "    ON col.user_type_id = t.user_type_id\n" +
+                "WHERE tab.name = @tableName\n" +
+                "AND t.name NOT IN ('varbinary')\n" +
+                "AND col.is_identity <> 1\n" +
+                ")\n" +
+                "SELECT @columnsDest = STRING_AGG(col,',')\n" +
+                "    FROM _Source_;\n" +
+                "\t\n" +
+                "\t\n" +
+                "SELECT @keyValue = STRING_AGG( CASE WHEN @isSource = 1 AND col.name = @keySource THEN 'ISNULL(dest.'+ @keySource + ','''') = ISNULL(src.' + @keySource + 'Source,'')' ELSE 'ISNULL(src.'+col.name + ','''') = ISNULL(dest.' + col.name +','''')' END, ' AND ')\n" +
+                "FROM sys.tables tab\n" +
+                "INNER JOIN sys.columns col\n" +
+                "    ON tab.object_id = col.object_id\n" +
+                "INNER JOIN sys.types t\n" +
+                "    ON col.user_type_id = t.user_type_id\n" +
+                "WHERE tab.name = @tableName\n" +
+                "AND col.name IN (SELECT [value] FROM #keyJoin)\n" +
+                "\n" +
+                "\n" +
+                "SELECT @sql =\n" +
+                "'SET DATEFORMAT ymd; '+\n" +
+                "\n" +
+                "\n" +
+                "' DROP TABLE IF EXISTS ' + @tableName + '_TMP\n" +
+                "' + ' SELECT ' + @columnsDest + ' INTO ' + @tableName + '_TMP' \n" +
+                "+ ' FROM ' + @tableNameDest + ' dest '\n" +
+                "+ ' LEFT JOIN ' + @tableName + ' src '\n" +
+                "+ ' ON ' + @keyValue\n" +
+                "+ ' WHERE src.' + (SELECT TOP 1 value FROM #keyJoin) + ' IS NULL;'\n" +
+                "\n" +
+                "exec sp_executesql @sql");
+        return sql.toString();
+    }
+
+    /**
+     *
+     * @param tableName Nom de la table source
+     * @param tableNameDest Nom de la table temporaire crée lors de l'import
+     * @param keyJoin Clé de jointure entre la table source et temporaire
+     * @param fileName nom du fichier traité
+     * @param increment détermine si une clé doit être incrémenté
+     * @param isSource
+     * @param incrementValue colonne à incrémenter
+     * @param keySource
+     * @param setToNull colonne à mettre a null
+     * @return
+     */
+    public static String insertTable (String tableName,String tableNameDest,String keyJoin,String fileName,int increment,int isSource,String incrementValue,String keySource,String setToNull){
+        StringBuilder sql = new StringBuilder("\n" +
+                "\n" +
+                "DECLARE @tableName VARCHAR(150) = '"+ tableName +"'\n" +
+                "DECLARE @tableNameDest VARCHAR(150) = '"+ tableNameDest +"'\n" +
+                "DECLARE @keyJoin VARCHAR(150) = '"+ keyJoin +"'\n" +
+                "DECLARE @filename VARCHAR(150) = '"+ fileName + "'\n" +
+                "DECLARE @increment INT = "+ increment +"\n" +
+                "DECLARE @isSource INT  = "+ isSource +"\n" +
+                "DECLARE @incrementValue VARCHAR(50) = '"+ incrementValue +"'\n" +
+                "DECLARE @keySource VARCHAR(50) = '"+ keySource +"'\n" +
+                "DECLARE @setToNull VARCHAR(50) = '"+ setToNull +"'\n" +
+                "DECLARE @keyValue VARCHAR(MAX) = ''\n" +
+                "DECLARE @columnsSource NVARCHAR(MAX);\n" +
+                "DECLARE @columnsDest NVARCHAR(MAX);\n" +
+                "DECLARE @sql NVARCHAR(MAX);\n" +
+                "DECLARE @columns NVARCHAR(MAX);\n" +
+                "DROP TABLE IF EXISTS #keyJoin;\n" +
+                "DROP TABLE IF EXISTS #setToNull;\n" +
+                "-- Obtenir la liste des colonnes non-IDENTITY\n" +
+                "SELECT *\n" +
+                "\tINTO #keyJoin\n" +
+                "FROM STRING_SPLIT(@keyJoin,',')\n" +
+                "SELECT *\n" +
+                "\tINTO #setToNull\n" +
+                "FROM STRING_SPLIT(@setToNull,',')\n" +
+                "\n" +
+                "    SELECT @columnsSource = STRING_AGG(col.name,',')\n" +
+                "    FROM sys.tables tab\n" +
+                "\tINNER JOIN sys.columns col\n" +
+                "\t\tON tab.object_id = col.object_id\n" +
+                "\tINNER JOIN sys.types t\n" +
+                "\t\tON col.user_type_id = t.user_type_id\n" +
+                "\tWHERE tab.name = @tableName\n" +
+                "\tAND t.name NOT IN ('varbinary')\n" +
+                "\tAND col.is_identity <> 1\n" +
+                "\n" +
+                ";\n" +
+                "WITH _Source_ AS (\n" +
+                "SELECT  \n" +
+                "    CASE \n" +
+                "        -- Vérifier si la colonne existe dans F_COMPTETG_DEST\n" +
+                "        WHEN EXISTS (\n" +
+                "            SELECT 1 \n" +
+                "            FROM sys.columns c\n" +
+                "            INNER JOIN sys.tables t ON t.object_id = c.object_id\n" +
+                "            WHERE t.name = @tableNameDest\n" +
+                "            AND c.name = col.name\n" +
+                "        ) \n" +
+                "        THEN CASE WHEN @increment  = 1 AND col.name = @incrementValue THEN '(SELECT ISNULL((SELECT MAX('+@incrementValue+') FROM '+@tableName+'),0)) + ROW_NUMBER() OVER(ORDER BY dest.' + @incrementValue + ' ) AS ' + col.name\n" +
+                "\t\t\t\t\tWHEN @isSource = 1 AND col.name = @keySource+'Source' THEN  'dest.'+@keySource +' AS ' + col.name\n" +
+                "\t\t\t\t\tWHEN col.name IN (SELECT [value] FROM #setToNull) THEN  'NULL AS ' + col.name \n" +
+                "\t\t\t\t\tELSE  'dest.' + col.name  END-- Si la colonne existe, on l'inclut\n" +
+                "        ELSE 'NULL AS ' + col.name  -- Si elle n'existe pas, on met NULL\n" +
+                "    END AS Col \n" +
+                " FROM sys.tables tab\n" +
+                "INNER JOIN sys.columns col\n" +
+                "    ON tab.object_id = col.object_id\n" +
+                "INNER JOIN sys.types t\n" +
+                "    ON col.user_type_id = t.user_type_id\n" +
+                "WHERE tab.name = @tableName\n" +
+                "AND t.name NOT IN ('varbinary')\n" +
+                "AND col.is_identity <> 1\n" +
+                ")\n" +
+                "SELECT @columnsDest = STRING_AGG(col,',')\n" +
+                "    FROM _Source_;\n" +
+                "\t\n" +
+                "\t\n" +
+                "SELECT @keyValue = STRING_AGG( CASE WHEN @isSource = 1 AND col.name = @keySource THEN 'dest.'+ @keySource + ' = src.' + @keySource + 'Source' ELSE 'src.'+col.name + ' = dest.' + col.name END, ' AND ')\n" +
+                "FROM sys.tables tab\n" +
+                "INNER JOIN sys.columns col\n" +
+                "    ON tab.object_id = col.object_id\n" +
+                "INNER JOIN sys.types t\n" +
+                "    ON col.user_type_id = t.user_type_id\n" +
+                "WHERE tab.name = @tableName\n" +
+                "AND col.name IN (SELECT [value] FROM #keyJoin)\n" +
+                "\n" +
+                "SELECT @sql =\n" +
+                "'BEGIN TRY '+\n" +
+                "'SET DATEFORMAT ymd; '+\n" +
+                "'IF OBJECT_ID('''+ @tableNameDest+''') IS NOT NULL '+\n" +
+                "'INSERT INTO ' + @tableName + ' (' + @columnsSource + ')'\n" +
+                "+ ' SELECT ' + @columnsDest\n" +
+                "+ ' FROM ' + @tableNameDest + ' dest '\n" +
+                "+ ' LEFT JOIN ' + @tableName + ' src '\n" +
+                "+ ' ON ' + @keyValue\n" +
+                "+ ' WHERE src.' + (SELECT TOP 1 value FROM #keyJoin) + ' IS NULL;'\n" +
+                "+ ' END TRY '\n" +
+                "+ ' BEGIN CATCH '\n" +
+                "+ ' INSERT INTO config.DB_Errors VALUES '\n" +
+                "+ ' (SUSER_SNAME(),'\n" +
+                "+ ' ERROR_NUMBER(),'\n" +
+                "+ ' ERROR_STATE(),' \n" +
+                "+ ' ERROR_SEVERITY(),' \n" +
+                "+ ' ERROR_LINE(), '\n" +
+                "+ ' ERROR_PROCEDURE(), ' \n" +
+                "+ ' ERROR_MESSAGE(), ' \n" +
+                "+ ' ''Insert '+ @filename + ''', ' \n" +
+                "+ ' '''+ @tableName +''',' \n" +
+                "+ ' GETDATE()); '\n" +
+                "+ 'END CATCH';\n" +
+                "\n" +
+                "exec sp_executesql @sql");
+        return sql.toString();
+    }
     public static void archiveDocument(String archive, String source,String file)
     {
         String[] folder = file.split("_");
@@ -950,62 +1164,6 @@ public class Table {
     {
 
         insertAvroDataToSqlServer(path.concat("\\").concat(fileInfo),table,sqlCon);
-        /*
-        String sql;
-        StringBuilder sqlCreateTable;
-        String header = "";
-        String lineHeader;
-        String fileName = path+"\\"+fileInfo;
-        try {
-            File file = new File(fileName);
-            if(file.exists()) {
-                BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(fileName), StandardCharsets.ISO_8859_1));
-                int i = 0;
-                while ((line = br.readLine()) != null) {
-                    if (i == 0) {
-                        header = "INSERT INTO " + table + "(";
-                        lineHeader = line;
-                        line = line.replace(";", ",").replace("\"", "");
-
-                        sqlCreateTable = new StringBuilder("IF OBJECT_ID('" + table + "') IS NOT NULL \n" +
-                                "\tDROP TABLE " + table + "\n" +
-                                "\n" +
-                                "SELECT ");
-                        String[] value = lineHeader.split(";");
-                        for (String data : value)
-                            sqlCreateTable.append(" ").append(data).append(" = CAST('' AS NVARCHAR(150)),");
-
-                        sqlCreateTable = new StringBuilder(sqlCreateTable.substring(0, sqlCreateTable.length() - 1));
-
-                        sqlCreateTable.append(" INTO ").append(table).append(   /*" FROM " + table.replace("_DEST", "") +*/ /*";").append(" TRUNCATE TABLE ").append(table);
-                        executeQuery(sqlCon, sqlCreateTable.toString());
-                        header = header + line + ")";
-                    } else {
-                        sql = header + "VALUES (";
-                        String[] value = line.split(";");
-                        for (String data : value) {
-                            if (data.contains("\"")) {
-                                data = data.replace("'", "''");
-                                sql = sql.concat(data).replace("\"", "'").concat(",");
-                            } else if (data.equals("")) {
-                                sql = sql.concat("NULL").concat(",");
-                            }else
-                                sql = sql.concat(data).concat(",");
-                        }
-                        sql = " IF OBJECTPROPERTY(OBJECT_ID('" + table + "'), 'TableHasIdentity') = 1 SET IDENTITY_INSERT " + table + " ON ; "
-                                + sql.substring(0, sql.length() - 1) + "); "
-                                + " IF OBJECTPROPERTY(OBJECT_ID('" + table + "'), 'TableHasIdentity') = 1  SET IDENTITY_INSERT " + table + " OFF ; ";
-                       executeQuery(sqlCon,sql);
-                    }
-                    i++;
-                }
-                br.close();
-            }
-        }
-        catch (IOException e) {
-            e.printStackTrace();
-        }
-        */
     }
 
     private static String escapeDoubleQuotes(String value) {

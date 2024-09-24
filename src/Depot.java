@@ -78,8 +78,11 @@ public class Depot extends Table{
                 readOnFile(path, filename, tableName + "_DEST", sqlCon);
                 readOnFile(path, "deleteList" + filename, tableName + "_SUPPR", sqlCon);
                 executeQuery(sqlCon, updateTableDest("", "'DE_No','DP_NoDefaut','DE_Code','DE_NoSource','DatabaseSource','DE_Intitule'", tableName, tableName + "_DEST", filename,unibase));
-                sendData(sqlCon, path, filename, insert(filename));
-
+                //executeQuery(sqlCon,insertTable (tableName,tableName+"_DEST","JO_Num",filename));
+                disableTrigger(sqlCon,tableName);
+                executeQuery(sqlCon,insertTable (tableName,tableName+"_DEST","DE_No,DatabaseSource",filename,1,1,"DE_No","DE_No","DP_NoDefaut,DE_Code"));
+                //sendData(sqlCon, path, filename, insert(filename));
+                enableTrigger(sqlCon,tableName);
                 DepotEmpl.sendDataElement(sqlCon, path,unibase);
                 linkDepot(sqlCon);
 

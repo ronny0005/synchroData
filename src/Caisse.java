@@ -56,26 +56,6 @@ public class Caisse extends Table {
                         "INNER JOIN #TmpCaisse tmp ON dwh.CA_NoSource = tmp.CA_NoSource\n" +
                         "AND ISNULL(dwh.DatabaseSource,'') = ISNULL(tmp.DatabaseSource,'')\n" +
                         "\n" +
-                        "INSERT INTO [dbo].[F_CAISSE]\n" +
-                        "           ([CA_No],[CA_Intitule],[DE_No],[CO_No]\n" +
-                        "           ,[CO_NoCaissier],[CT_Num],[JO_Num],[CA_IdentifCaissier]\n" +
-                        "           ,[CA_DateCreation],[N_Comptoir],[N_Clavier]\n" +
-                        "\t\t   ,[CA_LignesAfficheur],[CA_ColonnesAfficheur],[CA_ImpTicket]\n" +
-                        "           ,[CA_SaisieVendeur],[CA_Souche],[cbProt],[cbCreateur]\n" +
-                        "           ,[cbModification],[cbReplication],[cbFlag]\n" +
-                        "\t\t   ,CA_NoSource,cbMarqSource,DatabaseSource)\n" +
-                        "\n" +
-                        "SELECT [CA_No] \n" +
-                        ", [CA_Intitule],[DE_No],[CO_No] \n" +
-                        "           ,[CO_NoCaissier],[CT_Num],[JO_Num],[CA_IdentifCaissier] \n" +
-                        "           ,[CA_DateCreation],[N_Comptoir],[N_Clavier] \n" +
-                        "   ,[CA_LignesAfficheur],[CA_ColonnesAfficheur],[CA_ImpTicket] \n" +
-                        "           ,[CA_SaisieVendeur],[CA_Souche],[cbProt],[cbCreateur] \n" +
-                        "           ,[cbModification],[cbReplication],[cbFlag] \n" +
-                        "   ,CA_NoSource, cbMarqSource,DatabaseSource \n" +
-                        "FROM #TmpCaisse \n" +
-                        "WHERE [CA_NoSourceCai]  IS NULL " +
-                        "\n" +
                         "END TRY" +
                         " BEGIN CATCH  \n" +
                         "INSERT INTO config.DB_Errors \n" +
@@ -87,7 +67,7 @@ public class Caisse extends Table {
                         "   ERROR_LINE(), \n" +
                         "   ERROR_PROCEDURE(), \n" +
                         "   ERROR_MESSAGE(), \n" +
-                        "   'Insert '+ ' "+filename+"', \n" +
+                        "   'Update '+ ' "+filename+"', \n" +
                         "   'F_CAISSE', \n" +
                         "   GETDATE()); \n" +
                         "END CATCH\n" +
@@ -114,6 +94,17 @@ public class Caisse extends Table {
         }
     }
 
+    public static String updateDepotInsert(){
+
+        return "UPDATE dest SET DE_No = ISNULL(srcDep.DE_No,dest.[DE_No])\n" +
+                "FROM F_CAISSE_TMP dest\n" +
+                "LEFT JOIN (SELECT DE_NoSource,DatabaseSource,DE_No FROM F_DEPOT) dep \n" +
+                "ON ISNULL(dep.DE_NoSource,0) = ISNULL(dest.DE_No,0) \n" +
+                "AND ISNULL(dep.DataBaseSource,'') = ISNULL(dest.DataBaseSource,'') " +
+                "\n";
+    }
+
+
     public static void loadFile(String path,Connection sqlCon){
         String [] children = getFile(path,file);
         if (children == null) {
@@ -121,7 +112,13 @@ public class Caisse extends Table {
         } else {
             for (String filename : children){
                 readOnFile(path, filename, tableName + "_DEST", sqlCon);
+
                 sendData(sqlCon, path, filename, insert(filename));
+                executeQuery(sqlCon,insertTmpTable (tableName,tableName+"_DEST","CA_No,DatabaseSource",filename,1,1,"CA_No","CA_No","DE_No"));
+                executeQuery(sqlCon,updateDepotInsert());
+                executeQuery(sqlCon,insertTable (tableName,tableName+"_TMP","CA_No",filename,0,0,"","",""));
+
+                //sendData(sqlCon, path, filename, insert(filename));
                 //deleteTempTable(sqlCon, tableName+"_DEST");
             }
         }

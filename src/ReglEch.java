@@ -14,27 +14,6 @@ public class ReglEch extends Table {
         return "BEGIN TRY " +
                 " SET DATEFORMAT ymd;\n" +
 
-                " IF OBJECT_ID('F_REGLECH_DEST') IS NOT NULL\n"+
-                "INSERT INTO F_REGLECH (\n" +
-                "[RG_No],[DR_No],[DO_Domaine],[DO_Type]\n" +
-                "\t\t,[DO_Piece],[RC_Montant],[RG_TypeReg],[cbProt],[cbCreateur]\n" +
-                "\t\t,[cbModification],[cbReplication],[cbFlag],cbMarqSource,DataBaseSource,DR_NoSource,RG_NoSource)\n" +
-                "            \n" +
-                "SELECT \tcre.[RG_No],fdr.[DR_No],dest.[DO_Domaine],dest.[DO_Type]\n" +
-                "\t\t,dest.[DO_Piece],dest.[RC_Montant],dest.[RG_TypeReg],dest.[cbProt],dest.[cbCreateur]\n" +
-                "\t\t,dest.[cbModification],dest.[cbReplication],dest.[cbFlag],dest.cbMarqSource,dest.DataBaseSource,dest.DR_No,dest.RG_No\n" +
-                "FROM F_REGLECH_DEST dest\n" +
-                "LEFT JOIN (SELECT DataBaseSource,cbMarqSource FROM F_REGLECH) src\n" +
-                "\tON\tISNULL(dest.DataBaseSource,'') = ISNULL(src.DataBaseSource,'')\n" +
-                "\tAND ISNULL(dest.cbMarqSource,0) = ISNULL(src.cbMarqSource,0)\n" +
-                "LEFT JOIN F_DOCREGL fdr\n" +
-                "\tON\tISNULL(fdr.DataBaseSource,'') = ISNULL(dest.DataBaseSource,'')\n" +
-                "\tAND ISNULL(fdr.DR_NoSource,0) = ISNULL(dest.DR_No,0)\n" +
-                "LEFT JOIN F_CREGLEMENT cre\n" +
-                "\tON\tISNULL(cre.DataBaseSource,'') = ISNULL(dest.DataBaseSource,'')\n" +
-                "\tAND ISNULL(cre.RG_NoSource,0) = ISNULL(dest.RG_No,0)\n" +
-                "WHERE src.cbMarqSource IS NULL\n" +
-                "AND cre.RG_No IS NOT NULL AND fdr.DR_No IS NOT NULL\n" +
                 "            \n" +
 
                 "INSERT INTO config.DB_Errors(\n" +
@@ -90,6 +69,21 @@ public class ReglEch extends Table {
                 "END CATCH";
     }
 
+    public static String linkDrRGNo (){
+        return "UPDATE dest SET RG_No = cre.[RG_No]\n" +
+                "\t\t\t\t,DR_No = fdr.[DR_No]\n" +
+                "FROM F_REGLECH_DEST dest\n" +
+                "LEFT JOIN F_DOCREGL fdr\n" +
+                "ON ISNULL(fdr.DataBaseSource,'') = ISNULL(dest.DataBaseSource,'')\n" +
+                "AND ISNULL(fdr.DR_NoSource,0) = ISNULL(dest.DR_No,0)\n" +
+                "LEFT JOIN F_CREGLEMENT cre\n" +
+                "ON ISNULL(cre.DataBaseSource,'') = ISNULL(dest.DataBaseSource,'')\n" +
+                "AND ISNULL(cre.RG_NoSource,0) = ISNULL(dest.RG_No,0)\n" +
+                "WHERE cre.RG_No IS NOT NULL AND fdr.DR_No IS NOT NULL;\n" +
+                "\n" +
+                "DELETE FROM F_REGLECH_DEST \n" +
+                "WHERE RG_No IS NULL OR DR_No IS NULL;";
+    }
     public static void sendDataElement(Connection sqlCon, String path,String database,int unibase)
     {
         dbSource = database;
@@ -108,6 +102,8 @@ public class ReglEch extends Table {
                 readOnFile(path, filename, tableName + "_DEST", sqlCon);
                 executeQuery(sqlCon, updateTableDest("", "'RG_No','DR_No'", tableName, tableName + "_DEST",filename,unibase));
                 sendData(sqlCon, path, filename, insert(filename));
+                executeQuery(sqlCon,linkDrRGNo());
+                executeQuery(sqlCon,insertTable (tableName,tableName+"_DEST","cbMarqSource,dataBaseSource",filename,0,1,"","cbMarqSource,DR_NoSource",""));
             //    deleteTempTable(sqlCon, tableName+"_DEST");
                 enableTrigger(sqlCon,tableName);
             }

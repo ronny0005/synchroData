@@ -43,29 +43,6 @@ public class DocRegl extends Table {
                 "INNER JOIN F_DOCREGL_DEST dest ON src.cbMarqSource = dest.cbMarqSource \n" +
                 "\tAND\tISNULL(src.DataBaseSource,'') = ISNULL(dest.DataBaseSource,'')\n" +
                 "            \n" +
-
-                " IF OBJECT_ID('F_DOCREGL_DEST') IS NOT NULL\n"+
-                "INSERT INTO F_DOCREGL (\n" +
-                "[DR_No],[DO_Domaine],[DO_Type],[DO_Piece],[DR_TypeRegl],[DR_Date]\n" +
-                "\t\t,[DR_Libelle],[DR_Pourcent],[DR_Montant],[DR_MontantDev],[DR_Equil],[EC_No],[DR_Regle]\n" +
-                "\t\t,[N_Reglement],[cbProt],[cbCreateur],[cbModification],[cbReplication],[cbFlag],cbMarqSource,DataBaseSource,DR_NoSource)\n" +
-                "            \n" +
-                "SELECT \tISNULL((SELECT Max(DR_No) FROM F_DOCREGL),0) + ROW_NUMBER() OVER(ORDER BY dest.DR_No)\n" +
-                "\t\t,dest.[DO_Domaine],dest.[DO_Type],dest.[DO_Piece],[DR_TypeRegl],[DR_Date]\n" +
-                "\t\t,[DR_Libelle],[DR_Pourcent],[DR_Montant],[DR_MontantDev],[DR_Equil],[EC_No],[DR_Regle]\n" +
-                "\t\t,[N_Reglement],[cbProt],[cbCreateur],[cbModification],[cbReplication],[cbFlag],dest.cbMarqSource,dest.[dataBaseSource],dest.DR_No\n" +
-                "FROM F_DOCREGL_DEST dest\n" +
-                "LEFT JOIN (SELECT cbMarqSource,DataBaseSource FROM F_DOCREGL) src\n" +
-                "\tON\tISNULL(dest.cbMarqSource,0) = ISNULL(src.cbMarqSource,0)\n" +
-                "\tAND\tISNULL(dest.DataBaseSource,'') = ISNULL(src.DataBaseSource,'')\n" +
-                "LEFT JOIN (SELECT DO_Piece,DO_Type,DO_Domaine FROM F_DOCENTETE) docE\n" +
-                "ON docE.DO_Domaine = dest.DO_Domaine\n"+
-                "AND docE.DO_Type = dest.DO_Type\n"+
-                "AND docE.DO_Piece = dest.DO_Piece\n"+
-                "WHERE src.cbMarqSource IS NULL\n" +
-                "AND docE.DO_Piece IS NOT NULL\n" +
-                "            \n" +
-                "" +
                 "INSERT INTO config.DB_Errors(\n" +
                 "          UserName,\n" +
                 "          ErrorNumber,\n" +
@@ -123,6 +100,15 @@ public class DocRegl extends Table {
 //        DocEntete.loadDeleteFile(path,sqlCon);
     }
 
+    public static String deleteEmptyDocEntete(){
+        return "DELETE dest\n" +
+                "FROM F_DOCREGL_DEST dest\n" +
+                "LEFT JOIN F_DOCENTETE docE\n" +
+                "ON docE.DO_Domaine = dest.DO_Domaine\n"+
+                "AND docE.DO_Type = dest.DO_Type\n"+
+                "AND docE.DO_Piece = dest.DO_Piece\n"+
+                "WHERE docE.DO_Piece IS NULL";
+    }
     public static void loadFile(String path,Connection sqlCon,int unibase){
         String [] children = getFile(path,file);
         if (children == null) {
@@ -132,7 +118,11 @@ public class DocRegl extends Table {
                 disableTrigger(sqlCon,tableName);
                 readOnFile(path, filename, tableName + "_DEST", sqlCon);
                 executeQuery(sqlCon, updateTableDest("", "'DR_No'", tableName, tableName + "_DEST",filename,unibase));
+
                 sendData(sqlCon, path, filename, insert(filename));
+                executeQuery(sqlCon,insertTmpTable (tableName,tableName+"_DEST","cbMarqSource,DatabaseSource",filename,0,0,"","",""));
+                executeQuery(sqlCon,deleteEmptyDocEntete());
+                executeQuery(sqlCon,insertTable (tableName,tableName+"_TMP","cbMarqSource,DatabaseSource",filename,0,0,"","",""));
                // deleteTempTable(sqlCon, tableName+"_DEST");
                 enableTrigger(sqlCon,tableName);
             }

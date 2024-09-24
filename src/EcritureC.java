@@ -49,6 +49,7 @@ public class EcritureC extends Table {
                 " \tAND\tISNULL(dest.DataBaseSource,'') = ISNULL(src.DataBaseSource,'')\n" +
                 " WHERE src.cbMarqSource IS NULL" +
                 " AND dest.EC_NoLink = 0;\n" +
+
                 " INSERT INTO F_ECRITUREC ([JO_Num],[EC_No],[EC_NoLink],[JM_Date],[EC_Jour]\n" +
                 "      ,[EC_Date],[EC_Piece],[EC_RefPiece],[EC_TresoPiece]\n" +
                 "      ,[CG_Num],[CG_NumCont],[CT_Num],[EC_Intitule]\n" +
@@ -101,7 +102,6 @@ public class EcritureC extends Table {
                 " END CATCH";
     }
 
-
     public static void sendDataElement(Connection  sqlCon, String path,String database,int unibase)
     {
         File dir = new File(path);
@@ -117,6 +117,9 @@ public class EcritureC extends Table {
                 readOnFile(path, "deleteList" + filename, tableName + "_SUPPR", sqlCon);
                 executeQuery(sqlCon, updateTableDest("", "'EC_No','JM_Date','JO_Num','EC_CType'", tableName, tableName + "_DEST", filename,unibase));
                 sendData(sqlCon, path, filename, insert(filename));
+
+                executeQuery(sqlCon,insertTable (tableName,tableName+"_DEST","cbMarqSource,dataBaseSource",filename,1,1,"RG_No","RG_No",""));
+
                 deleteTempTable(sqlCon, tableName + "_DEST");
 
                 deleteEcritureC(sqlCon, path, filename);
