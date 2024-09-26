@@ -9,97 +9,6 @@ public class DocLigne extends Table {
     public static String tableName = "F_DOCLIGNE";
     public static String configList = "listDocLigne";
 
-    public static String insert(String filename)
-    {
-        return  "BEGIN TRY " +
-                " SET DATEFORMAT ymd;\n" +
-                " IF OBJECT_ID('F_DOCLIGNE_DEST') IS NOT NULL\n"+
-                "BEGIN \n"+
-                "IF OBJECT_ID('tempdb..#DocLigne') IS NOT NULL\n" +
-                "    DROP TABLE #DocLigne\n" +
-                "\n" +
-                " SELECT dest.[DO_Domaine],dest.[DO_Type],dest.[CT_Num],dest.[DO_Piece],dest.[DL_PieceBC],dest.[DL_PieceBL],dest.[DO_Date],dest.[DL_DateBC] \n" +
-                "        ,dest.[DL_DateBL],dest.[DL_Ligne]\n" +
-                "\t\t,[DO_Ref] = LEFT(CAST(dest.[DO_Ref] AS VARCHAR(150)),17),dest.[DL_TNomencl]  \n" +
-                "        ,dest.[DL_TRemPied],dest.[DL_TRemExep],dest.[AR_Ref]\n" +
-                "\t\t,[DL_Design] = LEFT(dest.[DL_Design],69),dest.[DL_Qte],dest.[DL_QteBC],dest.[DL_QteBL] \n" +
-                "        ,dest.[DL_PoidsNet] ,dest.[DL_PoidsBrut]   \n" +
-                "       ,dest.[DL_Remise01REM_Valeur] ,dest.[DL_Remise01REM_Type],dest.[DL_Remise02REM_Valeur],dest.[DL_Remise02REM_Type],dest.[DL_Remise03REM_Valeur]  \n" +
-                "        ,dest.[DL_Remise03REM_Type]  \n" +
-                "        ,dest.[DL_PrixUnitaire] ,dest.[DL_PUBC] ,dest.[DL_Taxe1] ,dest.[DL_TypeTaux1],dest.[DL_TypeTaxe1],dest.[DL_Taxe2] ,dest.[DL_TypeTaux2] \n" +
-                "        ,dest.[DL_TypeTaxe2],dest.[CO_No]/*,[AG_No1],[AG_No2]*/  \n" +
-                "       ,dest.[DL_PrixRU] ,dest.[DL_CMUP] ,dest.[DL_MvtStock],dest.[DT_No],dest.[AF_RefFourniss],dest.[EU_Enumere],dest.[EU_Qte] ,dest.[DL_TTC]  \n" +
-                "        ,DE_No = ISNULL(dsrc.[DE_No],dest.DE_No)\n" +
-                "\t\t,dest.[DL_NoRef],dest.[DL_TypePL],dest.[DL_PUDevise] ,dest.[DL_PUTTC]  \n" +
-                "        ,[DL_No] = ISNULL((SELECT MAX(DL_No) FROM F_DOCLIGNE),0)+ ROW_NUMBER() OVER (ORDER BY dest.[cbMarqSource])\n" +
-                "\t\t,dest.[DO_DateLivr],dest.[CA_Num] \n" +
-                "        ,dest.[DL_Taxe3] ,dest.[DL_TypeTaux3],dest.[DL_TypeTaxe3],dest.[DL_Frais]   \n" +
-                "       ,[DL_Valorise],[AR_RefCompose],[DL_NonLivre],[AC_RefClient],[DL_MontantHT] \n" +
-                "\t   ,[DL_MontantTTC] ,[DL_FactPoids],[DL_Escompte],[DL_PiecePL],[DL_DatePL],[DL_QtePL] ,[DL_NoColis],[DL_NoLink]  \n" +
-                "       ,[RP_Code],[DL_QteRessource],[DL_DateAvancement],[cbProt],[cbCreateur],[cbModification],[cbReplication],[cbFlag] \n" +
-                "       ,[DATEMODIF] \n" +
-                "        /*,[CONTROLE],[NBJ],[NOM_CLIENT],[PMIN],[PMAX],[CONTROLEDATE],[PGROS] */\n" +
-                "        ,[DL_QTE_SUPER_PRIX] \n" +
-                "       ,[DL_SUPER_PRIX],[USERGESCOM],[NOMCLIENT],[ORDONATEUR_REMISE],[GROUPEUSER],[MACHINEPC]\n" +
-                "\t   ,[Qte_LivreeBL],[Qte_RestantBL],[DL_COMM],dest.[cbMarqSource],dest.[DataBaseSource]  \n" +
-                "\t   ,[cbMarqSourceSrc] = src.cbMarqSource\n" +
-                "\t   INTO #DocLigne\n" +
-                " FROM F_DOCLIGNE_DEST dest  \n" +
-                " LEFT JOIN (SELECT cbMarqSource,dataBaseSource,DO_Piece,DO_Type,DO_Domaine FROM F_DOCLIGNE) src  \n" +
-                "  ON ISNULL(dest.cbMarqSource,0) = ISNULL(src.cbMarqSource,0)  \n" +
-                "  AND ISNULL(dest.dataBaseSource,'') = ISNULL(src.dataBaseSource,'')  \n" +
-                " LEFT JOIN (SELECT DE_NoSource,dataBaseSource,DE_No FROM F_DEPOT) dsrc  \n" +
-                "  ON ISNULL(dsrc.DE_NoSource,0) = ISNULL(dest.DE_No,0)  \n" +
-                "  AND ISNULL(dsrc.dataBaseSource,'') = ISNULL(dest.dataBaseSource,'')  \n"+
-                "\n"+
-                "END\n" +
-                "\n" +
-                "INSERT INTO config.DB_Errors(\n" +
-                "          UserName,\n" +
-                "          ErrorNumber,\n" +
-                "          ErrorState,\n" +
-                "          ErrorSeverity,\n" +
-                "          ErrorLine,\n" +
-                "          ErrorProcedure,\n" +
-                "          ErrorMessage,\n" +
-                "          TableLoad,\n" +
-                "          Query,\n" +
-                "          ErrorDateTime)\n" +
-
-                "SELECT\t   SUSER_SNAME()," +
-                "           NULL," +
-                "           NULL," +
-                "           NULL," +
-                "           NULL," +
-                "           NULL," +
-                "           NULL,'Domaine : '+CAST(docL.[DO_Domaine] AS VARCHAR(150))+' Type : ' + CAST(docL.[DO_Type] AS VARCHAR(150)) + ' Piece : ' + CAST(docL.[DO_Piece] AS VARCHAR(150))" +
-                "           +' cbMarq : ' + CAST(docL.[cbMarqSource] AS VARCHAR(150)) + ' database : ' + CAST(docL.[DataBaseSource] AS VARCHAR(150))" +
-                "           + 'fileName : "+filename+" '" +
-                "           ,'Insert F_DOCLIGNE'\n" +
-                "           ,GETDATE()\n" +
-                "FROM #DocLigne docL\n" +
-                "LEFT JOIN (SELECT DO_Piece,DO_Type,DO_Domaine FROM F_DOCENTETE) docE\n" +
-                "ON docE.DO_Domaine = docL.DO_Domaine\n" +
-                "AND docE.DO_Type = docL.DO_Type\n" +
-                "AND docE.DO_Piece = docL.DO_Piece\n" +
-                "WHERE cbMarqSourceSrc IS NULL\n" +
-                "AND docE.DO_Piece IS NULL\n" +
-                " END TRY\n" +
-                " BEGIN CATCH \n" +
-                "INSERT INTO config.DB_Errors\n" +
-                "    VALUES\n" +
-                "  (SUSER_SNAME(),\n" +
-                "   ERROR_NUMBER(),\n" +
-                "   ERROR_STATE(),\n" +
-                "   ERROR_SEVERITY(),\n" +
-                "   ERROR_LINE(),\n" +
-                "   ERROR_PROCEDURE(),\n" +
-                "   ERROR_MESSAGE(),\n" +
-                "   'Update '+ ' "+filename+"',\n" +
-                "   'F_DOCLIGNE',\n" +
-                "   GETDATE());\n" +
-                "END CATCH";
-    }
     public static void sendDataElement(Connection sqlCon, String path,String database,int unibase)
     {
         dbSource = database;
@@ -125,7 +34,6 @@ public class DocLigne extends Table {
                 readOnFile(path, filename, tableName + "_DEST", sqlCon);
                 executeQuery(sqlCon, updateDocLigne(filename));
 
-                sendData(sqlCon, path, filename, insert(filename));
                 executeQuery(sqlCon,insertTmpTable (tableName,tableName+"_DEST","cbMarqSource,databaseSource",filename,0,0,"","","DE_No"));
                 executeQuery(sqlCon,updateDepot());
                 executeQuery(sqlCon,insertTable (tableName,tableName+"_TMP","cbMarqSource,databaseSource",filename,0,0,"","",""));
@@ -325,16 +233,8 @@ public class DocLigne extends Table {
                 "END CATCH\n";
     }
     public static void loadDeleteFile(String path,Connection sqlCon) {
-        String [] children = getFile(path,"deleteList"+file);
         disableTrigger(sqlCon,tableName);
-        if (children == null) {
-            System.out.println("Either dir does not exist or is not a directory");
-        } else {
-            for (String filename : children){
-                String deleteDocLigne = deleteDocLigne();
-                loadDeleteInfo(path,tableName,filename,sqlCon,deleteDocLigne);
-            }
-        }
+        loadDeleteFile(path,sqlCon,file,tableName,"cbMarq","DataBaseSource");
         enableTrigger(sqlCon,tableName);
     }
 
@@ -354,17 +254,5 @@ public class DocLigne extends Table {
         initTableParam(sqlCon,tableName,configList,"DO_Domaine,DO_Type,DO_Piece,DatabaseSource");
         getData(sqlCon, selectSourceTableFilterAgencyEnteteLink(tableName,database,agency), tableName, path, filename);
         listDeleteAllInfo(sqlCon, path, "deleteList" + filename,tableName,configList,database);
-    }
-
-    public static String deleteDocLigne()
-    {
-        return
-                " DELETE FROM F_DOCLIGNE \n" +
-                " WHERE EXISTS (SELECT 1 " +
-                "               FROM F_DOCLIGNE_SUPPR " +
-                "               WHERE ISNULL(F_DOCLIGNE.cbMarqSource,0) = ISNULL(F_DOCLIGNE_SUPPR.cbMarq,0) " +
-                "               AND ISNULL(F_DOCLIGNE.DataBaseSource,'') = ISNULL(F_DOCLIGNE_SUPPR.DataBaseSource,'')) \n"
-                ;
-
     }
 }

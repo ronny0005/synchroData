@@ -8,46 +8,6 @@ public class Depot extends Table{
     public static String configList = "listDepot";
     public static String file ="depot_";
 
-    public static String insert(String filename)
-    {
-        return  "BEGIN TRY " +
-                " SET DATEFORMAT ymd;\n" +
-                "  DISABLE TRIGGER [TG_INS_F_DEPOT] ON dbo.F_DEPOT; \n" +
-                " IF OBJECT_ID('F_DEPOT_DEST') IS NOT NULL\n"+
-                "  INSERT INTO [dbo].[F_DEPOT]    \n" +
-                "  ([DE_No],[DE_Intitule],[DE_Adresse],[DE_Complement],[DE_CodePostal],[DE_Ville]\n" +
-                "\t\t,[DE_Contact],[DE_Principal],[DE_CatCompta],[DE_Region],[DE_Pays],[DE_EMail]\n" +
-                "\t\t,[DE_Code],[DE_Telephone],[DE_Telecopie],[DE_Replication],[DP_NoDefaut],[cbProt]\n" +
-                "\t\t,[cbCreateur],[cbModification],[cbReplication],[cbFlag],DE_NoSource,cbMarqSource,DatabaseSource)    \n" +
-                "    \n" +
-                "  SELECT ISNULL((SELECT Max(DE_No) FROM F_DEPOT),0)  + ROW_NUMBER() OVER(ORDER BY dest.DE_No),dest.[DE_Intitule],[DE_Adresse],[DE_Complement],[DE_CodePostal],[DE_Ville]\n" +
-                "\t\t,[DE_Contact],[DE_Principal],[DE_CatCompta],[DE_Region],[DE_Pays],[DE_EMail]\n" +
-                "\t\t,NULL,[DE_Telephone],[DE_Telecopie],[DE_Replication],null/*[DP_NoDefaut]*/,[cbProt]\n" +
-                "\t\t,[cbCreateur],[cbModification],[cbReplication],[cbFlag],dest.DE_No, dest.cbMarqSource,dest.DatabaseSource \n" +
-                "  FROM F_DEPOT_DEST dest      \n" +
-                "  LEFT JOIN (SELECT [DE_NoSource],DataBaseSource,DE_Intitule FROM F_DEPOT) src      \n" +
-                "  ON (dest.DE_No = src.DE_NoSource\n" +
-                "  AND dest.DataBaseSource = src.DataBaseSource) OR dest.DE_Intitule = src.DE_Intitule\n" +
-                "  WHERE src.DE_Intitule IS NULL ;  \n" +
-                "  \n" +
-                "ENABLE  TRIGGER [TG_INS_F_DEPOT] ON dbo.F_DEPOT; " +
-                " END TRY\n" +
-                " BEGIN CATCH \n" +
-                "INSERT INTO config.DB_Errors\n" +
-                "    VALUES\n" +
-                "  (SUSER_SNAME(),\n" +
-                "   ERROR_NUMBER(),\n" +
-                "   ERROR_STATE(),\n" +
-                "   ERROR_SEVERITY(),\n" +
-                "   ERROR_LINE(),\n" +
-                "   ERROR_PROCEDURE(),\n" +
-                "   ERROR_MESSAGE(),\n" +
-                "   'Insert '+ ' "+filename+"',\n" +
-                "   'F_DEPOT',\n" +
-                "   GETDATE());\n" +
-                "END CATCH";
-    }
-
     public static void linkDepot(Connection sqlCon)
     {
         String query = "\n" +
@@ -59,14 +19,11 @@ public class Depot extends Table{
                 "INNER JOIN F_DEPOTEMPL depE\n" +
                 "ON depE.DP_NoSource = depD.DP_NoDefaut\n" +
                 "AND depE.DataBaseSource = depD.DataBaseSource";
-        //                           " UPDATE F_DEPOTEMPL \n" +
-        //                           "     SET DE_No = F_DEPOTEMPL_DEST.DE_No \n" +
-        //" FROM F_DEPOTEMPL_DEST \n" +
-        //" WHERE F_DEPOTEMPL_DEST.DP_No = F_DEPOTEMPL.DP_No";
         executeQuery(sqlCon, query);
     }
     public static void sendDataElement(Connection sqlCon, String path,int unibase)
     {
+
 
         File dir = new File(path);
         FilenameFilter filter = (dir1, name) -> name.startsWith(file);
@@ -76,21 +33,15 @@ public class Depot extends Table{
         } else {
             for (String filename : children) {
                 readOnFile(path, filename, tableName + "_DEST", sqlCon);
-                readOnFile(path, "deleteList" + filename, tableName + "_SUPPR", sqlCon);
                 executeQuery(sqlCon, updateTableDest("", "'DE_No','DP_NoDefaut','DE_Code','DE_NoSource','DatabaseSource','DE_Intitule'", tableName, tableName + "_DEST", filename,unibase));
-                //executeQuery(sqlCon,insertTable (tableName,tableName+"_DEST","JO_Num",filename));
                 disableTrigger(sqlCon,tableName);
                 executeQuery(sqlCon,insertTable (tableName,tableName+"_DEST","DE_No,DatabaseSource",filename,1,1,"DE_No","DE_No","DP_NoDefaut,DE_Code"));
-                //sendData(sqlCon, path, filename, insert(filename));
                 enableTrigger(sqlCon,tableName);
                 DepotEmpl.sendDataElement(sqlCon, path,unibase);
                 linkDepot(sqlCon);
-
-                deleteTempTable(sqlCon, tableName + "_DEST");
-
-                deleteDepot(sqlCon, path, filename);
             }
         }
+        loadDeleteFile(path,sqlCon,file,tableName,"DE_No","DataBaseSource");
 
     }
     public static void getDataElement(Connection sqlCon, String path,String database,String time)
@@ -110,20 +61,5 @@ public class Depot extends Table{
         listDeleteAllInfo(sqlCon, path, "deleteList" + filename,tableName,configList,database);
 
         DepotEmpl.getDataElement(sqlCon, path,database, time);
-    }
-    public static void deleteDepot(Connection sqlCon, String path,String filename)
-    {
-        String query =
-                " DELETE FROM F_DEPOT  \n" +
-                " WHERE EXISTS (SELECT 1 FROM F_DEPOT_SUPPR WHERE ISNULL(F_DEPOT_SUPPR.DE_No,0) = ISNULL(F_DEPOT.DE_NoSource,0) AND ISNULL(F_DEPOT.DataBaseSource,'') = ISNULL(F_DEPOT_SUPPR.DataBaseSource,'')" +
-                "   )  \n" +
-                "  \n" +
-                " IF OBJECT_ID('F_DEPOT_SUPPR') IS NOT NULL  \n" +
-                " DROP TABLE F_DEPOT_SUPPR ;";
-        if ((new File(path + "\\deleteList" + filename)).exists())
-        {
-            executeQuery(sqlCon, query);
-            archiveDocument(path + "\\archive", path, "deleteList" + filename);
-        }
     }
 }

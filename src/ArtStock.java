@@ -98,12 +98,23 @@ public class ArtStock extends Table {
         } else {
             for (String filename : children) {
                 readOnFile(path, filename, tableName + "_DEST", sqlCon);
-                readOnFile(path, "deleteList" + filename, tableName + "_SUPPR", sqlCon);
                 //executeQuery(sqlCon, updateTableDest("AR_Ref,DE_No", "'AR_Ref','DE_No'", tableName, tableName + "_DEST"));
-                sendData(sqlCon, path, filename, insert(filename));
 
                 deleteTempTable(sqlCon, tableName + "_DEST");
-                deleteArtStock(sqlCon, path, filename, database);
+                deleteArtStock(sqlCon, database);
+
+            }
+        }
+
+        filter = (dir1, name) -> name.startsWith(file);
+        children = dir.list(filter);
+        if (children == null) {
+            System.out.println("Either dir does not exist or is not a directory");
+        } else {
+
+            for (String filename : children) {
+                readOnFile(path, "deleteList" + filename, tableName + "_SUPPR", sqlCon);
+                deleteArtStock(sqlCon, database);
             }
         }
     }
@@ -166,9 +177,11 @@ public class ArtStock extends Table {
         listDeleteAllInfo(sqlCon, path, "deleteList" + filename,tableName,configList,database);
     }
 
-    public static void deleteArtStock(Connection sqlCon, String path,String filename,String database)
+    public static void deleteArtStock(Connection sqlCon,String database)
     {
         String query =
+
+                " IF OBJECT_ID('F_ARTSTOCK_SUPPR') IS NOT NULL  \n" +
                 " DELETE FROM F_ARTSTOCK \n" +
                 " WHERE EXISTS (SELECT 1 FROM F_ARTSTOCK_SUPPR artSuppr \n" +
                 "       INNER JOIN F_DEPOT dep \n" +
@@ -176,13 +189,8 @@ public class ArtStock extends Table {
                 "       AND dep.dataBaseSource = '" + database +"' \n" +
                 "       WHERE artSuppr.AR_Ref = F_ARTSTOCK.AR_Ref" +
                 "       AND dep.DE_No = F_ARTSTOCK.DE_No)  \n" +
-                "  \n" +
-                " IF OBJECT_ID('F_ARTSTOCK_SUPPR') IS NOT NULL  \n" +
-                " DROP TABLE F_ARTSTOCK_SUPPR ;";
-        if ((new File(path + "\\deleteList" + filename)).exists())
-        {
+                "  \n";
             executeQuery(sqlCon, query);
-            archiveDocument(path + "\\archive", path, "deleteList" + filename);
-        }
+
     }
 }

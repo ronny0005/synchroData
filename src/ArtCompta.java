@@ -6,46 +6,7 @@ public class ArtCompta extends Table {
     public static String file ="ArtCompta_";
     public static String tableName = "F_ARTCOMPTA";
     public static String configList = "listArtCompta";
-
-    public static String insert(String filename)
-    {
-        return
-                " BEGIN TRY " +
-                " SET DATEFORMAT ymd;\n" +
-                " \n" +
-                " IF OBJECT_ID('F_ARTCOMPTA_DEST') IS NOT NULL\n"+
-                " INSERT INTO [dbo].[F_ARTCOMPTA] \n" +
-                "\t ([AR_Ref],[ACP_Type],[ACP_Champ],[ACP_ComptaCPT_CompteG]\n" +
-                "      ,[ACP_ComptaCPT_CompteA],[ACP_ComptaCPT_Taxe1],[ACP_ComptaCPT_Taxe2],[ACP_ComptaCPT_Taxe3]\n" +
-                "      ,[ACP_TypeFacture],[cbProt],[cbCreateur],[cbModification],[cbReplication],[cbFlag]) \n" +
-                "\t\n" +
-                " SELECT dest.[AR_Ref],dest.[ACP_Type],dest.[ACP_Champ],[ACP_ComptaCPT_CompteG]\n" +
-                "      ,[ACP_ComptaCPT_CompteA],[ACP_ComptaCPT_Taxe1],[ACP_ComptaCPT_Taxe2],[ACP_ComptaCPT_Taxe3]\n" +
-                "      ,[ACP_TypeFacture],[cbProt],[cbCreateur],[cbModification],[cbReplication],[cbFlag] \n" +
-                " FROM F_ARTCOMPTA_DEST dest   \n" +
-                " LEFT JOIN (SELECT [AR_Ref],[ACP_Type],[ACP_Champ] FROM F_ARTCOMPTA) src   \n" +
-                " ON dest.[AR_Ref] = src.[AR_Ref]   \n" +
-                " AND \tdest.ACP_Type = src.ACP_Type \n" +
-                " AND \tdest.ACP_Champ = src.ACP_Champ \n" +
-                " WHERE src.[AR_Ref] IS NULL ; \n" +
-                " IF OBJECT_ID('F_ARTCOMPTA_DEST') IS NOT NULL \n" +
-                " DROP TABLE F_ARTCOMPTA_DEST;\n" +
-                " END TRY\n" +
-                " BEGIN CATCH \n" +
-                "INSERT INTO config.DB_Errors\n" +
-                "    VALUES\n" +
-                "  (SUSER_SNAME(),\n" +
-                "   ERROR_NUMBER(),\n" +
-                "   ERROR_STATE(),\n" +
-                "   ERROR_SEVERITY(),\n" +
-                "   ERROR_LINE(),\n" +
-                "   ERROR_PROCEDURE(),\n" +
-                "   ERROR_MESSAGE(),\n" +
-                "   'Insert '+ ' "+filename+"',\n" +
-                "   'F_ARTCOMPTA',\n" +
-                "   GETDATE());\n" +
-                "END CATCH";
-    }
+    public static String keyColumns = "AR_Ref,ACP_Type,ACP_Champ";
 
     public static void sendDataElement(Connection sqlCon, String path,int unibase) {
         File dir = new File(path);
@@ -57,39 +18,22 @@ public class ArtCompta extends Table {
             for (String filename : children) {
                 readOnFile(path, filename, tableName + "_DEST", sqlCon);
 
-                readOnFile(path, "deleteList" + filename, tableName + "_SUPPR", sqlCon);
-                executeQuery(sqlCon, updateTableDest("AR_Ref,ACP_Type,ACP_Champ", "'AR_Ref','ACP_Type','ACP_Champ'", tableName, tableName + "_DEST", filename,unibase));
-                executeQuery(sqlCon,insertTable (tableName,tableName+"_DEST","AR_Ref,ACP_Type,ACP_Champ",filename,0,0,"","",""));
-                //sendData(sqlCon, path, filename, insert(filename));
+                executeQuery(sqlCon, updateTableDest(keyColumns, "'AR_Ref','ACP_Type','ACP_Champ'", tableName, tableName + "_DEST", filename,unibase));
+                executeQuery(sqlCon,insertTable (tableName,tableName+"_DEST",keyColumns,filename,0,0,"","",""));
 
                 deleteTempTable(sqlCon, tableName + "_DEST");
-                deleteArtCompta(sqlCon, path, filename);
+
             }
         }
+        loadDeleteFile(path,sqlCon,file,tableName,"",keyColumns);
     }
 
     public static void getDataElement(Connection sqlCon, String path,String database,String time)
     {
         String filename =  file+time+".csv";
-        initTableParam(sqlCon,tableName,configList,"AR_Ref,ACP_Type,ACP_Champ");
+        initTableParam(sqlCon,tableName,configList,keyColumns);
         getData(sqlCon, selectSourceTable(tableName,database,true), tableName, path, filename);
         listDeleteAllInfo(sqlCon, path, "deleteList" + filename,tableName,configList,database);
-    }
-
-    public static void deleteArtCompta(Connection sqlCon, String path,String filename)
-    {
-        String query =
-                " DELETE FROM F_ARTCOMPTA  \n" +
-                " WHERE EXISTS (SELECT 1 FROM F_ARTCOMPTA_SUPPR WHERE F_ARTCOMPTA_SUPPR.AR_Ref = F_ARTCOMPTA.AR_Ref" +
-                "   AND F_ARTCOMPTA_SUPPR.ACP_Type = F_ARTCOMPTA.ACP_Type AND F_ARTCOMPTA_SUPPR.ACP_Champ = F_ARTCOMPTA.ACP_Champ)  \n" +
-                "  \n" +
-                " IF OBJECT_ID('F_ARTCOMPTA_SUPPR') IS NOT NULL  \n" +
-                " DROP TABLE F_ARTCOMPTA_SUPPR ;";
-        if ((new File(path + "\\deleteList" + filename)).exists())
-        {
-            executeQuery(sqlCon, query);
-            archiveDocument(path + "\\archive", path, "deleteList" + filename);
-        }
     }
 
 }

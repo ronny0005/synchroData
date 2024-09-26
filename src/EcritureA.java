@@ -70,6 +70,7 @@ public class EcritureA extends Table {
     }
     public static void sendDataElement(Connection  sqlCon, String path,String database,int unibase)
     {
+
         File dir = new File(path);
         FilenameFilter filter = (dir1, name) -> name.startsWith(file);
         String[] children = dir.list(filter);
@@ -79,17 +80,17 @@ public class EcritureA extends Table {
             for (String filename : children) {
                 dbSource = database;
                 readOnFile(path, filename, tableName + "_DEST", sqlCon);
-                readOnFile(path, "deleteList" + filename, tableName + "_SUPPR", sqlCon);
                 executeQuery(sqlCon, updateTableDest("", "'EC_No','N_Analytique'", tableName, tableName + "_DEST", filename,unibase));
 
                 executeQuery(sqlCon,insertTmpTable (tableName,tableName+"_DEST","cbMarqSource,dataBaseSource",filename,0,0,"","","EC_No"));
                 executeQuery(sqlCon,updateECNo());
                 executeQuery(sqlCon,insertTable (tableName,tableName+"_TMP","cbMarqSource,dataBaseSource",filename,0,0,"","",""));
-                //sendData(sqlCon, path, filename, insert(filename));
+
                 deleteTempTable(sqlCon, tableName + "_DEST");
-                deleteEcritureA(sqlCon, path, filename);
+
             }
         }
+        loadDeleteFile(path,sqlCon,file,tableName,"cbMarq","dataBaseSource");
     }
     public static void getDataElement(Connection  sqlCon, String path,String database,String time)
     {
@@ -98,21 +99,6 @@ public class EcritureA extends Table {
         initTableParam(sqlCon,tableName,configList,"EC_No,DataBaseSource");
         getData(sqlCon, selectSourceTable(tableName,database,true), tableName, path, filename);
         listDeleteAllInfo(sqlCon, path, "deleteList" + filename,tableName,configList,database);
-
-    }
-    public static void deleteEcritureA(Connection sqlCon, String path,String filename)
-    {
-        String query =
-                " DELETE FROM F_ECRITUREA \n" +
-                " WHERE EXISTS (SELECT 1 FROM F_ECRITUREA_SUPPR WHERE F_ECRITUREA_SUPPR.EC_No = F_ECRITUREA.EC_No)  \n" +
-                "  \n" +
-                " IF OBJECT_ID('F_ECRITUREA_SUPPR') IS NOT NULL  \n" +
-                " DROP TABLE F_ECRITUREA_SUPPR ;";
-        if ((new File(path + "\\deleteList" + filename)).exists())
-        {
-            executeQuery(sqlCon, query);
-            archiveDocument(path + "\\archive", path, "deleteList" + filename);
-        }
     }
 
     public static void listDeleteEcritureA(Connection sqlCon, String path)

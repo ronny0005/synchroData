@@ -370,7 +370,7 @@ public class Table {
     }
 
 
-    public static void loadDeleteFile(String path,Connection sqlCon,String file,String tableName,String query) {
+    public static void loadDeleteFile(String path,Connection sqlCon,String file,String tableName,String keySource,String listKeys) {
         File dir = new File(path);
         FilenameFilter filter = (dir1, name) -> name.startsWith("deleteList"+file);
         String [] children = dir.list(filter);
@@ -378,7 +378,8 @@ public class Table {
             System.out.println("Either dir does not exist or is not a directory");
         } else {
             for (String filename : children) {
-                loadDeleteInfo(path, tableName, filename, sqlCon, query);
+                readOnFile(path, filename, tableName + "_SUPPR", sqlCon);
+                deleteItem(sqlCon, tableName,filename,keySource,listKeys);
             }
         }
     }
@@ -389,58 +390,65 @@ public class Table {
         return dir.list(filter);
     }
 
-    public static void loadDeleteInfo(String path,String tableName,String filename,Connection sqlCon,String query){
-        readOnFile(path, filename, tableName + "_SUPPR", sqlCon);
-        File file = new File(path + "\\" + filename);
-        if (file.exists())
-        {
-            executeQuery(sqlCon, query);
-            archiveDocument(path + "\\archive", path, filename);
-        }
-        deleteTempTable(sqlCon, tableName+"_SUPPR");
-    }
+    /***
+    IF OBJECT_ID('{tablename}_SUPPR') IS NOT NULL
+	DELETE src
+	FROM {tablename} src
+	WHERE EXISTS (
+			SELECT 1
+			FROM {tablename}_SUPPR suppr
+			WHERE 1 = 1
+				AND ISNULL(src.{keys}, '') = ISNULL(suppr.{keys}, '')
+				AND ISNULL(src.{keysSource}Source, '') = ISNULL(suppr.{keys}, '')
+			)
 
-    public static void deleteItem(Connection sqlCon, String path,String file)
+     ***/
+    public static void deleteItem(Connection sqlCon, String tablename,String fileName,String keySource,String listKeys)
     {
         String query =
                 "BEGIN TRY\n" +
-                        "DECLARE @MaColonne AS VARCHAR(250);\n" +
-                        "DECLARE @MonSQL AS VARCHAR(MAX)=''; \n" +
-                        "DECLARE @TableName AS VARCHAR(100) = 'F_ARTICLE';\n" +
-                        "DECLARE @isDataSource AS INT = 1; \n" +
-                        "\n" +
-                        "SELECT @MonSQL = 'DELETE FROM '+@TableName+' WHERE EXISTS (SELECT 1 FROM '+@TableName+'_SUPPR WHERE '\n" +
-                        "+@TableName+'.cbMarqSource = '+@TableName+'_SUPPR.cbMarq'\n" +
-                        "\n" +
-                        "IF @isDataSource = 1\n" +
-                        "\tSELECT @MonSQL = @MonSQL + ' AND '+@TableName+'.DataBaseSource = '+@TableName+'_SUPPR.DataBaseSource)'\n" +
-                        "\n" +
-                        "SELECT @MonSQL = @MonSQL + 'IF OBJECT_ID('''+@TableName+'_SUPPR'') IS NOT NULL DROP TABLE '+@TableName+'_SUPPR'\n" +
-                        "\n" +
-                        "SELECT (@MonSQL)\n" +
-                        "\n" +
-                        "END TRY\n" +
-                        "BEGIN CATCH \n" +
-                        "\tINSERT INTO config.DB_Errors\n" +
-                        "\tVALUES\n" +
-                        "\t(\n" +
-                        "\t\tSUSER_SNAME(),\n" +
-                        "\t\tERROR_NUMBER(),\n" +
-                        "\t\tERROR_STATE(),\n" +
-                        "\t\tERROR_SEVERITY(),\n" +
-                        "\t\tERROR_LINE(),\n" +
-                        "\t\tERROR_PROCEDURE(),\n" +
-                        "\t\tERROR_MESSAGE(),\n" +
-                        "\t\t@TableName,\n" +
-                        "\t\t@MonSQL,\n" +
-                        "\t\tGETDATE()\n" +
-                        "\t);\n" +
-                        "END CATCH\n";
-        if ((new File(path + "\\deleteList" + file)).exists())
-        {
+                "DECLARE @MaColonne AS VARCHAR(250);\n" +
+                "DECLARE @MonSQL AS VARCHAR(MAX)=''; \n" +
+                "DECLARE @TableName AS VARCHAR(100) = '"+tablename+"';\n" +
+                "DECLARE @filename AS VARCHAR(100) = '"+fileName+"';\n" +
+                "DECLARE @keySource AS VARCHAR(100) = '"+keySource+"';\n" +
+                "DECLARE @listKeys AS VARCHAR(100) = '"+listKeys+"';\n" +
+                "DECLARE @listKeysQuery AS VARCHAR(MAX) = '';\n" +
+                "\n" +
+                "SELECT @listKeysQuery = STRING_AGG ('ISNULL(src.'+[value] +','''') = ISNULL(suppr.'+[value]+','''')' , ' AND ')\n" +
+                "FROM STRING_SPLIT(@listKeys,',')\n" +
+                "\n" +
+                "SELECT @MonSQL = 'IF OBJECT_ID('''+@TableName+'_SUPPR'') IS NOT NULL '\n" +
+                "\t\t\t\t +'\tDELETE src \n" +
+                "\t\t\t\t\tFROM '+@TableName+' src \n" +
+                "\t\t\t\t\tWHERE EXISTS (\tSELECT 1 \n" +
+                "\t\t\t\t\t\t\t\t\tFROM '+@TableName+'_SUPPR suppr\n" +
+                "\t\t\t\t\t\t\t\t\tWHERE 1=1'\n" +
+                "\t\t\t\t\t\t\t\t\t+ CASE WHEN ISNULL(@listKeysQuery,'') <> '' THEN ' AND '+ @listKeysQuery ELSE '' END \n" +
+                "\t\t\t\t\t\t\t\t\t+ CASE WHEN ISNULL(@keySource,'') <> '' THEN ' AND '+ ('ISNULL(src.'+ @keySource +'Source,'''') = ISNULL(suppr.' + @keySource+' ,'''')') ELSE '' END\n" +
+                "\t\t\t\t\t\t\t\t\t\n" +
+                "\n" +
+                "\n" +
+                "exec sp_executesql @MonSQL\n" +
+                "\n" +
+                "END TRY\n" +
+                "BEGIN CATCH \n" +
+                "INSERT INTO config.DB_Errors\n" +
+                "VALUES\n" +
+                "(\n" +
+                "SUSER_SNAME(),\n" +
+                "ERROR_NUMBER(),\n" +
+                "ERROR_STATE(),\n" +
+                "ERROR_SEVERITY(),\n" +
+                "ERROR_LINE(),\n" +
+                "ERROR_PROCEDURE(),\n" +
+                "ERROR_MESSAGE(),\n" +
+                "'Suppr del ' + @fileName,\n" +
+                "@MonSQL,\n" +
+                "GETDATE()\n" +
+                ");\n" +
+                "END CATCH;";
             executeQuery(sqlCon, query);
-            archiveDocument(path + "\\archive", path, "deleteList" + file);
-        }
     }
 
     public static String listDelete(String table,String listTable,String database){
@@ -616,7 +624,7 @@ public class Table {
                 "    FROM _Source_;\n" +
                 "\t\n" +
                 "\t\n" +
-                "SELECT @keyValue = STRING_AGG( CASE WHEN @isSource = 1 AND col.name = @keySource THEN 'ISNULL(dest.'+ @keySource + ','''') = ISNULL(src.' + @keySource + 'Source,'')' ELSE 'ISNULL(src.'+col.name + ','''') = ISNULL(dest.' + col.name +','''')' END, ' AND ')\n" +
+                "SELECT @keyValue = STRING_AGG( CASE WHEN @isSource = 1 AND col.name = @keySource THEN 'ISNULL(dest.'+ @keySource + ','''') = ISNULL(src.' + @keySource + 'Source,'''')' ELSE 'ISNULL(src.'+col.name + ','''') = ISNULL(dest.' + col.name +','''')' END, ' AND ')\n" +
                 "FROM sys.tables tab\n" +
                 "INNER JOIN sys.columns col\n" +
                 "    ON tab.object_id = col.object_id\n" +
@@ -649,6 +657,8 @@ public class Table {
      * @param fileName nom du fichier traité
      * @param increment détermine si une clé doit être incrémenté
      * @param isSource
+     *    LEFT JOIN F_DEPOTEMPL src ON ISNULL(dest.keySource, '') = ISNULL(src.{keySource}Source, '')
+            AND ISNULL(src.DataBaseSource, '') = ISNULL(dest.DataBaseSource, '')
      * @param incrementValue colonne à incrémenter
      * @param keySource
      * @param setToNull colonne à mettre a null
@@ -790,20 +800,14 @@ public class Table {
         }
     }
 
-    public static void writeOnDb(Connection sqlCon, String path, String fileName, String query)
+    public static void backupFile(String path,String file)
     {
 
-        File filePath = new File(path + "\\" + fileName);
+        File filePath = new File(path + "\\" + file);
         if (filePath.exists())
         {
-            executeQuery(sqlCon,query);
-            archiveDocument(path + "\\archive", path, fileName);
+            archiveDocument(path + "\\archive", path, file);
         }
-    }
-
-    public static void sendData(Connection sqlCon, String path,String file,String query)
-    {
-        writeOnDb(sqlCon, path, file, query);
     }
 
 
@@ -1164,6 +1168,8 @@ public class Table {
     {
 
         insertAvroDataToSqlServer(path.concat("\\").concat(fileInfo),table,sqlCon);
+        backupFile(path, fileInfo);
+
     }
 
     private static String escapeDoubleQuotes(String value) {
