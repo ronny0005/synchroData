@@ -28,9 +28,9 @@ public class Taxe extends Table {
 
     public static void getDataElement(Connection sqlCon, String path,String database,String time)
     {
-        String filename =  file+time+".csv";
+        String filename =  file+time+".avro";
         initTableParam(sqlCon,tableName,configList,"TA_Code");
-        getData(sqlCon, selectSourceTable(tableName,database,true), tableName, path, filename);
+        getData(sqlCon, selectSourceTable(tableName,database,true,""), tableName, path, filename);
         listDeleteAllInfo(sqlCon, path, "deleteList" + filename,tableName,configList,database);
     }
 

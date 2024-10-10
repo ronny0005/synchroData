@@ -44,6 +44,7 @@ IF OBJECT_ID('config.ListCondition', 'U') IS NULL
 CREATE TABLE config.ListCondition (
 	CO_No INT
 	,AR_Ref NVARCHAR(50)
+	,EC_Enumere NVARCHAR(50)
 	,cbMarq INT
     ,DateCreation DATETIME DEFAULT GETDATE()
 )
@@ -192,6 +193,7 @@ IF OBJECT_ID('config.ListLivraison', 'U') IS NULL
 CREATE TABLE config.ListLivraison (
 	LI_No INT
 	,CT_Num NVARCHAR(50)
+    ,DataBaseSource NVARCHAR(50)
 	,cbMarq INT
     ,DateCreation DATETIME DEFAULT GETDATE()
 )
@@ -440,8 +442,14 @@ ALTER TABLE F_LIVRAISON ADD cbMarqSource INT
 IF COL_LENGTH('dbo.F_LIVRAISON', 'LI_NoSource') IS NULL
 ALTER TABLE F_LIVRAISON ADD LI_NoSource INT
 
-IF COL_LENGTH('dbo.F_LIVRAISON', 'DataBaseSource') IS NULL
+    IF COL_LENGTH('dbo.F_LIVRAISON', 'DataBaseSource') IS NULL
 ALTER TABLE F_LIVRAISON ADD DataBaseSource NVARCHAR(50)
+
+    IF COL_LENGTH('config.ListLivraison', 'DataBaseSource') IS NULL
+ALTER TABLE config.ListLivraison ADD DataBaseSource NVARCHAR(50)
+
+    IF COL_LENGTH('config.ListCondition', 'EC_Enumere') IS NULL
+ALTER TABLE config.ListCondition ADD EC_Enumere NVARCHAR(50)
 
 IF COL_LENGTH('config.SelectTable', 'isLoaded') IS NULL
 ALTER TABLE [config].[SelectTable] ADD [isLoaded] [int] NULL

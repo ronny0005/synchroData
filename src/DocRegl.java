@@ -38,7 +38,7 @@ public class DocRegl extends Table {
 
                 executeQuery(sqlCon,insertTmpTable (tableName,tableName+"_DEST","cbMarqSource,DatabaseSource",filename,0,0,"","",""));
                 executeQuery(sqlCon,deleteEmptyDocEntete());
-                executeQuery(sqlCon,insertTable (tableName,tableName+"_TMP","cbMarqSource,DatabaseSource",filename,0,0,"","",""));
+                executeQuery(sqlCon,insertTable (tableName,tableName+"_TMP","cbMarqSource,DatabaseSource",filename,1,0,"DR_No","DR_No",""));
                // deleteTempTable(sqlCon, tableName+"_DEST");
                 enableTrigger(sqlCon,tableName);
 
@@ -54,16 +54,16 @@ public class DocRegl extends Table {
 
     public static void getDataElement(Connection sqlCon, String path, String database, String time, JSONObject type)
     {
-        String filename =  file+time+".csv";
+        String filename =  file+time+".avro";
         dbSource = database;
         initTableParam(sqlCon,tableName,configList,"DO_Domaine,DO_Type,DO_Piece,DR_No,DatabaseSource");
-        getData(sqlCon, selectSourceTable(tableName,database,type), tableName, path, filename);
+        getData(sqlCon, selectSourceTable(tableName,database,type,"DR_No"), tableName, path, filename);
         listDeleteAllInfo(sqlCon, path, "deleteList" + filename,tableName,configList,database);
 
     }
     public static void getDataElementFilterAgency(Connection sqlCon, String path,String database,String time,String agency)
     {
-        String filename =  file+time+".csv";
+        String filename =  file+time+".avro";
         dbSource = database;
         initTableParam(sqlCon,tableName,configList,"DO_Domaine,DO_Type,DO_Piece,DR_No,DatabaseSource");
         getData(sqlCon, selectSourceTableFilterAgencyEnteteLink(tableName,database,agency), tableName, path, filename);

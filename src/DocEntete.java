@@ -50,16 +50,16 @@ public class DocEntete extends Table {
 
     public static void getDataElement(Connection sqlCon, String path,String database,String time,JSONObject type)
     {
-        String filename =  file+time+".csv";
+        String filename =  file+time+".avro";
         dbSource = database;
         initTableParam(sqlCon,tableName,configList,"DO_Domaine,DO_Type,DO_Piece,DatabaseSource");
-        getData(sqlCon, selectSourceTable(tableName,database,type), tableName, path, filename);
+        getData(sqlCon, selectSourceTable(tableName,database,type,""), tableName, path, filename);
         listDeleteAllInfo(sqlCon, path, "deleteList" + filename,tableName,configList,database);
     }
 
     public static void getDataElementFilterAgency(Connection sqlCon, String path,String database,String time,String agency)
     {
-        String filename =  file+time+".csv";
+        String filename =  file+time+".avro";
         dbSource = database;
         initTableParam(sqlCon,tableName,configList,"DO_Domaine,DO_Type,DO_Piece,DatabaseSource");
         getData(sqlCon, selectSourceTableFilterAgency(tableName,database,agency,"DE_No"), tableName, path, filename);

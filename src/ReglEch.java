@@ -10,7 +10,19 @@ public class ReglEch extends Table {
     public static String configList = "listReglEch";
 
     public static String linkDrRGNo (){
-        return "UPDATE dest SET RG_No = cre.[RG_No]\n" +
+        return
+                "\n" +
+                "DELETE FROM F_REGLECH_DEST \n" +
+                "WHERE cbMarqSource IN (SELECT dest.cbMarqSource\n" +
+                "FROM F_REGLECH_DEST dest\n" +
+                "LEFT JOIN F_DOCREGL fdr\n" +
+                "ON ISNULL(fdr.DataBaseSource,'') = ISNULL(dest.DataBaseSource,'')\n" +
+                "AND ISNULL(fdr.DR_NoSource,0) = ISNULL(dest.DR_No,0)\n" +
+                "LEFT JOIN F_CREGLEMENT cre\n" +
+                "ON ISNULL(cre.DataBaseSource,'') = ISNULL(dest.DataBaseSource,'')\n" +
+                "AND ISNULL(cre.RG_NoSource,0) = ISNULL(dest.RG_No,0)\n" +
+                "WHERE cre.RG_No IS NULL OR fdr.DR_No IS NULL);\n"+
+                "UPDATE dest SET RG_No = cre.[RG_No]\n" +
                 "\t\t\t\t,DR_No = fdr.[DR_No]\n" +
                 "FROM F_REGLECH_DEST dest\n" +
                 "LEFT JOIN F_DOCREGL fdr\n" +
@@ -20,9 +32,7 @@ public class ReglEch extends Table {
                 "ON ISNULL(cre.DataBaseSource,'') = ISNULL(dest.DataBaseSource,'')\n" +
                 "AND ISNULL(cre.RG_NoSource,0) = ISNULL(dest.RG_No,0)\n" +
                 "WHERE cre.RG_No IS NOT NULL AND fdr.DR_No IS NOT NULL;\n" +
-                "\n" +
-                "DELETE FROM F_REGLECH_DEST \n" +
-                "WHERE RG_No IS NULL OR DR_No IS NULL;";
+                "\n";
     }
     public static void sendDataElement(Connection sqlCon, String path,String database,int unibase)
     {
@@ -53,16 +63,16 @@ public class ReglEch extends Table {
 
     public static void getDataElement(Connection sqlCon, String path, String database, String time, JSONObject type)
     {
-        String filename =  file+time+".csv";
+        String filename =  file+time+".avro";
         dbSource = database;
         initTableParam(sqlCon,tableName,configList,"DO_Domaine,DO_Type,DO_Piece,DR_No,RG_No,DataBaseSource");
-        getData(sqlCon, selectSourceTable(tableName,database,type), tableName, path, filename);
+        getData(sqlCon, selectSourceTable(tableName,database,type,"DR_No,RG_No"), tableName, path, filename);
         listDeleteAllInfo(sqlCon, path, "deleteList" + filename,tableName,configList,database);
 
     }
     public static void getDataElementFilterAgency(Connection sqlCon, String path,String database,String time,String agency)
     {
-        String filename =  file+time+".csv";
+        String filename =  file+time+".avro";
         dbSource = database;
         initTableParam(sqlCon,tableName,configList,"DO_Domaine,DO_Type,DO_Piece,DR_No,RG_No,DataBaseSource");
         getData(sqlCon, selectSourceTableFilterAgencyEnteteLink(tableName,database,agency), tableName, path, filename);

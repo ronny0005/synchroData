@@ -32,9 +32,9 @@ public class DepotEmpl extends Table {
             for (String filename : children) {
                 readOnFile(path, filename, tableName + "_DEST", sqlCon);
                 executeQuery(sqlCon, updateTableDest("", "'DP_No','DE_No','DP_NoSource'", tableName, tableName + "_DEST", filename,unibase));
-                executeQuery(sqlCon,insertTmpTable (tableName,tableName+"_DEST","DP_No,DatabaseSource",filename,1,1,"DP_No","DP_No","DE_No"));
+                executeQuery(sqlCon,insertTmpTable (tableName,tableName+"_DEST","DP_No,DatabaseSource",filename,0,1,"","DP_No","DE_No"));
                 executeQuery(sqlCon,updateDepotInsert());
-                executeQuery(sqlCon,insertTable (tableName,tableName+"_TMP","DP_No",filename,0,0,"","",""));
+                executeQuery(sqlCon,insertTable (tableName,tableName+"_TMP","DP_No",filename,1,0,"DP_No","",""));
             }
         }
         loadDeleteFile(path,sqlCon,file,tableName,"DP_No","DataBaseSource");
@@ -42,9 +42,9 @@ public class DepotEmpl extends Table {
     }
     public static void getDataElement(Connection sqlCon, String path,String database,String time)
     {
-        String filename =  file+time+".csv";
+        String filename =  file+time+".avro";
         initTableParam(sqlCon,tableName,configList,"DP_No,DatabaseSource");
-        getData(sqlCon, selectSourceTable(tableName,database,true), tableName, path, filename);
+        getData(sqlCon, selectSourceTable(tableName,database,true,"DP_No"), tableName, path, filename);
         listDeleteAllInfo(sqlCon, path, "deleteList" + filename,tableName,configList,database);
     }
 }

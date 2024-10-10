@@ -41,10 +41,11 @@ public class Reglement extends Table {
             System.out.println("Either dir does not exist or is not a directory");
         } else {
             for (String filename : children){
+                readOnFile(path, filename, tableName + "_DEST", sqlCon);
                 disableTrigger(sqlCon,tableName);
-                executeQuery(sqlCon,insertTmpTable (tableName,tableName+"_DEST","RG_No,dataBaseSource",filename,1,1,"RG_No","RG_No","CA_No"));
+                executeQuery(sqlCon,insertTmpTable (tableName,tableName+"_DEST","RG_No,dataBaseSource",filename,0,1,"","RG_No","CA_No"));
                 executeQuery(sqlCon,updateCaisse());
-                executeQuery(sqlCon,insertTable (tableName,tableName+"_TMP","RG_No,dataBaseSource",filename,0,1,"","RG_No",""));
+                executeQuery(sqlCon,insertTable (tableName,tableName+"_TMP","RG_No,dataBaseSource",filename,1,1,"RG_No","RG_No",""));
                 enableTrigger(sqlCon,tableName);
 
             }
@@ -53,16 +54,16 @@ public class Reglement extends Table {
 
     public static void getDataElement(Connection sqlCon, String path,String database,String time)
     {
-        String filename =  file+time+".csv";
+        String filename =  file+time+".avro";
         dbSource = database;
         initTableParam(sqlCon,tableName,configList,"RG_No,DatabaseSource");
-        getData(sqlCon, selectSourceTable(tableName,database,true), tableName, path, filename);
+        getData(sqlCon, selectSourceTable(tableName,database,true,"RG_No"), tableName, path, filename);
         listDeleteAllInfo(sqlCon, path, "deleteList" + filename,tableName,configList,database);
     }
 
     public static void getDataElementFilterAgency(Connection sqlCon, String path,String database,String time,String agency)
     {
-        String filename =  file+time+".csv";
+        String filename =  file+time+".avro";
         dbSource = database;
         initTableParam(sqlCon,tableName,configList,"RG_No,DatabaseSource");
         getData(sqlCon, selectSourceTableFilterAgencyRegltLink(tableName,database,agency), tableName, path, filename);

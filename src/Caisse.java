@@ -33,9 +33,9 @@ public class Caisse extends Table {
             for (String filename : children){
                 readOnFile(path, filename, tableName + "_DEST", sqlCon);
 
-                executeQuery(sqlCon,insertTmpTable (tableName,tableName+"_DEST","CA_No,DatabaseSource",filename,1,1,"CA_No","CA_No","DE_No"));
+                executeQuery(sqlCon,insertTmpTable (tableName,tableName+"_DEST","CA_No,DatabaseSource",filename,0,1,"","CA_No","DE_No"));
                 executeQuery(sqlCon,updateDepotInsert());
-                executeQuery(sqlCon,insertTable (tableName,tableName+"_TMP","CA_No",filename,0,0,"","",""));
+                executeQuery(sqlCon,insertTable (tableName,tableName+"_TMP","CA_No",filename,1,0,"CA_No","",""));
                 //deleteTempTable(sqlCon, tableName+"_DEST");
             }
         }
@@ -43,9 +43,9 @@ public class Caisse extends Table {
 
     public static void getDataElement(Connection sqlCon, String path,String database,String time)
     {
-        String filename =  file+time+".csv";
+        String filename =  file+time+".avro";
         initTableParam(sqlCon,tableName,configList,"CA_No,DatabaseSource");
-        getData(sqlCon, selectSourceTable(tableName,database,true), tableName, path, filename);
+        getData(sqlCon, selectSourceTable(tableName,database,true,"CA_No"), tableName, path, filename);
         listDeleteAllInfo(sqlCon, path, "deleteList" + filename,tableName,configList,database);
     }
 

@@ -28,10 +28,10 @@ public class EcritureC extends Table {
     }
     public static void getDataElement(Connection  sqlCon, String path,String database,String time)
     {
-        String filename =  file+time+".csv";
+        String filename =  file+time+".avro";
         dbSource = database;
         initTableParam(sqlCon,tableName,configList,"EC_No,DatabaseSource");
-        getData(sqlCon, selectSourceTable(tableName,database,true), tableName, path, filename);
+        getData(sqlCon, selectSourceTable(tableName,database,true,"EC_No"), tableName, path, filename);
         listDeleteAllInfo(sqlCon, path, "deleteList" + filename,tableName,configList,database);
 
     }

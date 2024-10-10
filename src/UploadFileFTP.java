@@ -47,7 +47,7 @@ public class UploadFileFTP {
                                 sftpChannel.get(entryFiles.getFilename(), dir.getAbsolutePath() + "\\" + entryFiles.getFilename());
                                 sftpChannel.rm(entryFiles.getFilename());
                             }
-                            listFiles = sftpChannel.ls("*.csv");
+                            listFiles = sftpChannel.ls("*.avro");
                             for (ChannelSftp.LsEntry entryFiles : listFiles) {
                                 if (!(dir).isDirectory())
                                     dir.mkdir();

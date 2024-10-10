@@ -51,7 +51,7 @@ public class Article extends Table {
     public static void getDataElementFilterAgency(Connection sqlCon, String path,String database,String time,String agency)
     {
 
-        String filename =  file+time+".csv";
+        String filename =  file+time+".avro";
         initTableParam(sqlCon,tableName,configList,"AR_Ref");//initTable(sqlCon);
         getData(sqlCon, selectSourceTableFilterAgencyArticle(tableName,database,agency), tableName, path, filename);
         listDeleteAllInfo(sqlCon, path, "deleteList" + filename,tableName,configList,database);
@@ -67,9 +67,9 @@ public class Article extends Table {
 
     public static void getDataElement(Connection sqlCon, String path,String database,String time)
     {
-        String filename =  file+time+".csv";
+        String filename =  file+time+".avro";
         initTableParam(sqlCon,tableName,configList,"AR_Ref");//initTable(sqlCon);
-        getData(sqlCon, selectSourceTable(tableName,database,true), tableName, path, filename);
+        getData(sqlCon, selectSourceTable(tableName,database,true,""), tableName, path, filename);
         listDeleteAllInfo(sqlCon, path, "deleteList" + filename,tableName,configList,database);
         Condition.getDataElement(sqlCon, path,database, time);
         ArticleRessource.getDataElement(sqlCon, path,database,time);

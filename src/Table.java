@@ -27,12 +27,18 @@ public class Table {
     private static final String DATE_FORMAT = "yyyy-MM-dd HH:mm:ss.s";
     private static Statement stmt;
 
-    public static String selectSourceTable(String table,String dataSource,boolean existsCbModification){
+    public static String selectSourceTable(String table,String dataSource,boolean existsCbModification,String sourceColumn){
         return "BEGIN \n" +
                 "\nDECLARE @TableName AS VARCHAR(100) = '"+table+"'; \n" +
+                "DECLARE @sourceColumn AS VARCHAR(100) = '"+sourceColumn+"'; \n" +
+                "DECLARE @querySourceColumn AS NVARCHAR(MAX) = ''; \n" +
                 "\nDECLARE @cbModification VARCHAR(100) = "+ ((!existsCbModification) ? "NULL" : "ISNULL((SELECT CONVERT(NVARCHAR(100),(SELECT MAX(cbModification) FROM " + table + "),25)),'1901-01-01');\n") +
                 "\nDECLARE @lastSynchro VARCHAR(100) = ISNULL((SELECT CONVERT(NVARCHAR(100),(SELECT CASE WHEN ISNULL(isLoaded,0) = 2 THEN lastSynchro ELSE DATEADD(HOUR,-1,lastSynchro) END FROM config.SelectTable WHERE tableName = @TableName),25)),'1901-01-01');" +
-
+                "\nDROP TABLE IF EXISTS #sourceColumn\n" +
+                "SELECT\t[value]\n" +
+                "INTO #sourceColumn\n" +
+                "FROM STRING_SPLIT(@sourceColumn,',')\n" +
+                "WHERE value <> '';\n"+
                 "IF EXISTS(SELECT 1 FROM config.SelectTable WHERE tableName = @TableName) \n" +
                 " UPDATE config.SelectTable " +
                 "     SET lastSynchro =  CONVERT(DATETIME,@cbModification,20) \n" +
@@ -57,6 +63,7 @@ public class Table {
                 "WHERE tab.name = @TableName\n" +
                 "AND col.name NOT IN ('DataBaseSource','cbMarqSource','cbMarq')\n" +
                 "AND t.name NOT IN ('varbinary')\n" +
+                "AND col.name NOT IN (SELECT CONCAT([value],'Source') FROM #sourceColumn)\n" +
                 "\n" +
                 "OPEN @getid\n" +
                 "FETCH NEXT\n" +
@@ -72,8 +79,10 @@ public class Table {
                 "DEALLOCATE @getid\n" +
                 "SELECT @MonSQL = SUBSTRING(@MonSQL,2,LEN(@MonSQL)) \n" +
                 "\n" +
+                "\nSELECT @querySourceColumn = STRING_AGG(CONCAT([value],'Source = ',[value]),',')\n" +
+                "FROM #sourceColumn\n"+
                 "SELECT @MonSQL = 'DECLARE @databaseSource AS VARCHAR (150) = '''+@databaseSource+'''; SELECT ' + @MonSQL \n" +
-                "+',cbMarqSource = [cbMarq],[DataBaseSource] = @databaseSource  FROM '\n" +
+                "+',cbMarqSource = [cbMarq],[DataBaseSource] = @databaseSource '+(CASE WHEN ISNULL(@querySourceColumn,'')<> '' THEN ','+ @querySourceColumn ELSE '' END)+' FROM '\n" +
                 "+ @TableName +  CASE WHEN @cbModification IS NOT NULL THEN ' WHERE cbModification > CONVERT(DATETIME,''' + @lastSynchro +''',20)' ELSE '' END\n" +
                 "IF EXISTS (\tSELECT\tcol.name  \n" +
                 "\t\t\tFROM\tsys.tables tab  \n" +
@@ -86,12 +95,18 @@ public class Table {
                 "END";
     }
 
-    public static String selectSourceTable(String table, String dataSource, JSONObject type){
+    public static String selectSourceTable(String table, String dataSource, JSONObject type,String sourceColumn){
         return "BEGIN \n" +
                 "DECLARE @TableName AS VARCHAR(100) = '"+table+"'; \n" +
+                "DECLARE @sourceColumn AS VARCHAR(100) = '"+sourceColumn+"'; \n"+
+                "DECLARE @querySourceColumn AS NVARCHAR(MAX) = '' \n"+
                 "DECLARE @cbModification VARCHAR(100) = ISNULL((SELECT CONVERT(NVARCHAR(100),(SELECT MAX(cbModification) FROM " + table + "),25)),'1901-01-01');" +
                 "DECLARE @lastSynchro VARCHAR(100) = ISNULL((SELECT CONVERT(NVARCHAR(100),(SELECT CASE WHEN ISNULL(isLoaded,0) = 2 THEN lastSynchro ELSE DATEADD(HOUR,-1,lastSynchro) END FROM config.SelectTable WHERE tableName = @TableName),25)),'1901-01-01');" +
-
+                "DROP TABLE IF EXISTS #sourceColumn\n" +
+                "SELECT\t[value]\n" +
+                "INTO #sourceColumn\n" +
+                "FROM STRING_SPLIT(@sourceColumn,',')\n" +
+                "WHERE value <> '';\n"+
                 "IF EXISTS(SELECT 1 FROM config.SelectTable WHERE tableName = @TableName) \n" +
                 " UPDATE config.SelectTable " +
                 "     SET lastSynchro =  CONVERT(DATETIME,@cbModification,20) \n" +
@@ -124,6 +139,7 @@ public class Table {
                 "WHERE tab.name = @TableName\n" +
                 "AND col.name NOT LIKE 'cb%'" +
                 "AND col.name NOT IN ('DataBaseSource','cbMarqSource')\n" +
+                "AND col.name NOT IN (SELECT CONCAT([value],'Source') FROM #sourceColumn)\n" +
                 "\n" +
                 "OPEN @getid\n" +
                 "FETCH NEXT\n" +
@@ -139,7 +155,9 @@ public class Table {
                 "DEALLOCATE @getid\n" +
                 "SELECT @MonSQL = SUBSTRING(@MonSQL,2,LEN(@MonSQL)) \n" +
                 "\n" +
-                "SELECT @MonSQL = 'SELECT ' + @MonSQL + ',[cbProt],[cbCreateur],[cbModification],[cbReplication],[cbFlag],cbMarqSource = [cbMarq],[DataBaseSource] = ''"+dataSource+"''  FROM '+ @TableName +'" +
+                "SELECT @querySourceColumn = STRING_AGG(CONCAT([value],'Source = ',[value]),',')\n" +
+                "FROM #sourceColumn\n"+
+                "SELECT @MonSQL = 'SELECT ' + @MonSQL + ',[cbProt],[cbCreateur],[cbModification],[cbReplication],[cbFlag],cbMarqSource = [cbMarq],[DataBaseSource] = ''"+dataSource+"'''+(CASE WHEN ISNULL(@querySourceColumn,'')<> '' THEN ','+ @querySourceColumn ELSE '' END)+'  FROM '+ @TableName +'" +
                 "  WHERE cbModification > CONVERT(DATETIME,''' + @lastSynchro +''',20) \n" +
                 "  AND CASE WHEN ' + @vente + ' = 1 AND DO_Domaine = 0 THEN 1 \n" +
                 "           WHEN ' + @facturevente + ' = 1 AND DO_Domaine = 0 AND DO_Type IN (6,7) THEN 1 \n" +
@@ -405,10 +423,10 @@ public class Table {
      ***/
     public static void deleteItem(Connection sqlCon, String tablename,String fileName,String keySource,String listKeys)
     {
-        String query =
+        StringBuilder sql = new StringBuilder("\n" +
                 "BEGIN TRY\n" +
                 "DECLARE @MaColonne AS VARCHAR(250);\n" +
-                "DECLARE @MonSQL AS VARCHAR(MAX)=''; \n" +
+                "DECLARE @MonSQL AS NVARCHAR(MAX)=''; \n" +
                 "DECLARE @TableName AS VARCHAR(100) = '"+tablename+"';\n" +
                 "DECLARE @filename AS VARCHAR(100) = '"+fileName+"';\n" +
                 "DECLARE @keySource AS VARCHAR(100) = '"+keySource+"';\n" +
@@ -426,7 +444,7 @@ public class Table {
                 "\t\t\t\t\t\t\t\t\tWHERE 1=1'\n" +
                 "\t\t\t\t\t\t\t\t\t+ CASE WHEN ISNULL(@listKeysQuery,'') <> '' THEN ' AND '+ @listKeysQuery ELSE '' END \n" +
                 "\t\t\t\t\t\t\t\t\t+ CASE WHEN ISNULL(@keySource,'') <> '' THEN ' AND '+ ('ISNULL(src.'+ @keySource +'Source,'''') = ISNULL(suppr.' + @keySource+' ,'''')') ELSE '' END\n" +
-                "\t\t\t\t\t\t\t\t\t\n" +
+                "\t\t\t\t\t\t\t\t\t+')'\n" +
                 "\n" +
                 "\n" +
                 "exec sp_executesql @MonSQL\n" +
@@ -447,8 +465,8 @@ public class Table {
                 "@MonSQL,\n" +
                 "GETDATE()\n" +
                 ");\n" +
-                "END CATCH;";
-            executeQuery(sqlCon, query);
+                "END CATCH;");
+            executeQuery(sqlCon, sql.toString());
     }
 
     public static String listDelete(String table,String listTable,String database){

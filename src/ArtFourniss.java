@@ -30,9 +30,9 @@ public class ArtFourniss extends Table {
 
     public static void getDataElement(Connection sqlCon, String path,String database,String time)
     {
-        String filename =  file+time+".csv";
+        String filename =  file+time+".avro";
         initTableParam(sqlCon,tableName,configList,"AR_Ref,CT_Num");//initTable(sqlCon);
-        getData(sqlCon, selectSourceTable(tableName,database,true)/*list()*/, tableName, path, filename);
+        getData(sqlCon, selectSourceTable(tableName,database,true,"")/*list()*/, tableName, path, filename);
         listDeleteAllInfo(sqlCon, path, "deleteList" + filename,tableName,configList,database);
     }
 
