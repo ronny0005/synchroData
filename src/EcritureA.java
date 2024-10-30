@@ -80,7 +80,7 @@ public class EcritureA extends Table {
             for (String filename : children) {
                 dbSource = database;
                 readOnFile(path, filename, tableName + "_DEST", sqlCon);
-                executeQuery(sqlCon, updateTableDest("", "'EC_No','N_Analytique'", tableName, tableName + "_DEST", filename,unibase));
+                executeQuery(sqlCon, updateTableDest("", "EC_No,N_Analytique", tableName, tableName + "_DEST", filename,unibase));
 
                 executeQuery(sqlCon,insertTmpTable (tableName,tableName+"_DEST","cbMarqSource,dataBaseSource",filename,0,0,"","","EC_No"));
                 executeQuery(sqlCon,updateECNo());

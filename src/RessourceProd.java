@@ -18,7 +18,7 @@ public class RessourceProd extends Table {
         } else {
             for (String filename : children) {
                 readOnFile(path, filename, tableName + "_DEST", sqlCon);
-                executeQuery(sqlCon, updateTableDest("RP_Code,RP_Type", "'RP_Code','RP_Type','RP_TypeRess'", tableName, tableName + "_DEST", filename,unibase));
+                executeQuery(sqlCon, updateTableDest("RP_Code,RP_Type", "RP_Code,RP_Type,RP_TypeRess", tableName, tableName + "_DEST", filename,unibase));
                 executeQuery(sqlCon,insertTable (tableName,tableName+"_DEST","RP_Code",filename,0,0,"","",""));
 
                 deleteTempTable(sqlCon, tableName + "_DEST");

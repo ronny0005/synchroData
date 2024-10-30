@@ -1,4 +1,5 @@
 
+import org.apache.avro.InvalidAvroMagicException;
 import org.json.simple.JSONObject;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
@@ -522,7 +523,7 @@ public class Table {
                 "END CATCH\n";
     }
     public static String updateTableDest(String key,String exclude,String tableName,String tableNameDest,String filename,int unibase){
-        String[] keys = key.split(",");
+        /*String[] keys = key.split(",");
         StringBuilder sql = new StringBuilder("\n" +
                 "BEGIN TRY\n" +
                 "SET DATEFORMAT ymd;\n" +
@@ -571,6 +572,110 @@ public class Table {
                 sql.append("+' AND '+@TableName + '.").append(keys[i]).append(" = '+ @TableNameDest+'.").append(keys[i]).append(" '");
         }
         sql.append("\n").append("EXEC (@MonSQL) \n").append("\n").append("END TRY\n").append("BEGIN CATCH \n").append("\tINSERT INTO config.DB_Errors\n").append("\tVALUES\n").append("\t(\n").append("\t\tSUSER_SNAME(),\n").append("\t\tERROR_NUMBER(),\n").append("\t\tERROR_STATE(),\n").append("\t\tERROR_SEVERITY(),\n").append("\t\tERROR_LINE(),\n").append("\t\tERROR_PROCEDURE(),\n").append("\t\tERROR_MESSAGE(),\n").append("\t\t@TableName + ' ").append(filename).append("',\n").append("\t\t@MonSQL,\n").append("\t\tGETDATE()\n").append("\t);\n").append("END CATCH");
+
+
+        "DECLARE @UniBase AS INT = "+unibase+"; \n" +
+                "DECLARE @isKey AS INT=CASE WHEN '" + key + "' = '' THEN 0 ELSE 1 END; \n" +
+                "DECLARE @Key AS NVARCHAR(250) = '" + key + "'; \n" +
+                "DECLARE @TableName AS VARCHAR(100) = '" + tableName + "'; \n" +
+                "DECLARE @TableNameDest AS VARCHAR(100) = '" + tableNameDest + "'; \n" +
+                */
+        StringBuilder sql = new StringBuilder("\n" +
+        "BEGIN TRY\n" +
+                "\n" +
+                "DECLARE @tableName VARCHAR(150) = '" + tableName + "'\n" +
+                "DECLARE @tableNameDest VARCHAR(150) = '" + tableNameDest + "'\n" +
+                "DECLARE @keyJoin VARCHAR(150) = '"+ key +"'\n" +
+                "DECLARE @exclusionColumn VARCHAR(MAX) = '"+ exclude +"'\n" +
+                "DECLARE @filename VARCHAR(150) = '"+ filename +"'\n" +
+                "DECLARE @columnsSource NVARCHAR(MAX);\n" +
+                "DECLARE @columnsDest NVARCHAR(MAX);\n" +
+                "DECLARE @sql NVARCHAR(MAX);\n" +
+                "DECLARE @columns NVARCHAR(MAX);\n" +
+                "DECLARE @keyValue VARCHAR(MAX) = ''\n" +
+                "DROP TABLE IF EXISTS #keyJoin;\n" +
+                "DROP TABLE IF EXISTS #exclusionColumn;\n" +
+                "-- Obtenir la liste des colonnes non-IDENTITY\n" +
+                "SELECT *\n" +
+                "\tINTO #keyJoin\n" +
+                "FROM STRING_SPLIT(@keyJoin,',')\n" +
+                "\n" +
+                "SELECT *\n" +
+                "\tINTO #exclusionColumn\n" +
+                "FROM STRING_SPLIT(@exclusionColumn,',')\n" +
+                "\n" +
+                "SELECT @columnsSource = STRING_AGG(col.name,',')\n" +
+                "FROM sys.tables tab\n" +
+                "INNER JOIN sys.columns col\n" +
+                "\tON tab.object_id = col.object_id\n" +
+                "INNER JOIN sys.types t\n" +
+                "\tON col.user_type_id = t.user_type_id\n" +
+                "WHERE tab.name = @tableName\n" +
+                "AND t.name NOT IN ('varbinary')\n" +
+                "AND col.is_identity <> 1\n" +
+                "\n" +
+                ";\n" +
+                "WITH _Source_ AS (\n" +
+                "SELECT  \n" +
+                "    CASE \n" +
+                "        -- Vérifier si la colonne existe dans F_COMPTETG_DEST\n" +
+                "        WHEN EXISTS (\n" +
+                "            SELECT 1 \n" +
+                "            FROM sys.columns c\n" +
+                "            INNER JOIN sys.tables t ON t.object_id = c.object_id\n" +
+                "            WHERE t.name = @tableNameDest\n" +
+                "            AND c.name = col.name\n" +
+                "        ) AND col.name NOT IN (SELECT value FROM #keyJoin) AND col.name NOT IN (SELECT value FROM #exclusionColumn)\n" +
+                "        THEN ''+col.name +' = dest.' + col.name   -- Si la colonne existe, on l'inclut\n" +
+                "    END AS Col\n" +
+                "FROM sys.tables tab\n" +
+                "INNER JOIN sys.columns col\n" +
+                "    ON tab.object_id = col.object_id\n" +
+                "INNER JOIN sys.types t\n" +
+                "    ON col.user_type_id = t.user_type_id\n" +
+                "WHERE tab.name = @tableName\n" +
+                "AND t.name NOT IN ('varbinary')\n" +
+                "AND col.is_identity <> 1\n" +
+                ")\n" +
+                "SELECT @columnsDest = STRING_AGG(col,',')\n" +
+                "    FROM _Source_;\n" +
+                "\t\n" +
+                "SELECT @keyValue = STRING_AGG(  'src.'+col.name + ' = dest.' + col.name , ' AND ')\n" +
+                "FROM sys.tables tab\n" +
+                "INNER JOIN sys.columns col\n" +
+                "    ON tab.object_id = col.object_id\n" +
+                "INNER JOIN sys.types t\n" +
+                "    ON col.user_type_id = t.user_type_id\n" +
+                "WHERE tab.name = @tableName\n" +
+                "AND col.name IN (SELECT [value] FROM #keyJoin)\n" +
+                "\n" +
+                "SELECT @sql =\n" +
+                "'SET DATEFORMAT ymd; '+\n" +
+                "\n" +
+                "' IF OBJECT_ID('''+@tableNameDest+''') IS NOT NULL ' + \n" +
+                "' UPDATE src SET ' + @columnsDest +\n" +
+                "' FROM '+ @tableNameDest + ' dest ' +\n" +
+                "' INNER JOIN ' + @tableName + ' src ON ' + @keyValue \n" +
+                "\n" +
+                "exec sp_executesql @sql\n" +
+                "\n" +
+                "END TRY\n" +
+                "BEGIN CATCH \n" +
+                "\tINSERT INTO config.DB_Errors\n" +
+                "\tVALUES\n" +
+                "\t(\n" +
+                "\t\tSUSER_SNAME(),\n" +
+                "\t\tERROR_NUMBER(),\n" +
+                "\t\tERROR_STATE(),\n" +
+                "\t\tERROR_SEVERITY(),\n" +
+                "\t\tERROR_LINE(),\n" +
+                "\t\tERROR_PROCEDURE(),\n" +
+                "\t\tERROR_MESSAGE(),\n" +
+                "\t\t@TableName + ' ' + @filename,\n" +
+                "\t\t@sql,\n" +
+                "\t\tGETDATE()\n" +
+                "\t);\n" +
+                "END CATCH");
         return sql.toString();
     }
 
@@ -718,6 +823,7 @@ public class Table {
                 "\tWHERE tab.name = @tableName\n" +
                 "\tAND t.name NOT IN ('varbinary')\n" +
                 "\tAND col.is_identity <> 1\n" +
+                "\tAND col.name NOT LIKE 'cb%'\n" +
                 "\n" +
                 ";\n" +
                 "WITH _Source_ AS (\n" +
@@ -745,6 +851,7 @@ public class Table {
                 "WHERE tab.name = @tableName\n" +
                 "AND t.name NOT IN ('varbinary')\n" +
                 "AND col.is_identity <> 1\n" +
+                "AND col.name NOT LIKE 'cb%'\n" +
                 ")\n" +
                 "SELECT @columnsDest = STRING_AGG(col,',')\n" +
                 "    FROM _Source_;\n" +
@@ -760,7 +867,6 @@ public class Table {
                 "AND col.name IN (SELECT [value] FROM #keyJoin)\n" +
                 "\n" +
                 "SELECT @sql =\n" +
-                "'BEGIN TRY '+\n" +
                 "'SET DATEFORMAT ymd; '+\n" +
                 "'IF OBJECT_ID('''+ @tableNameDest+''') IS NOT NULL '+\n" +
                 "'INSERT INTO ' + @tableName + ' (' + @columnsSource + ')'\n" +
@@ -769,22 +875,25 @@ public class Table {
                 "+ ' LEFT JOIN ' + @tableName + ' src '\n" +
                 "+ ' ON ' + @keyValue\n" +
                 "+ ' WHERE src.' + (SELECT TOP 1 value FROM #keyJoin) + ' IS NULL;'\n" +
-                "+ ' END TRY '\n" +
-                "+ ' BEGIN CATCH '\n" +
-                "+ ' INSERT INTO config.DB_Errors VALUES '\n" +
-                "+ ' (SUSER_SNAME(),'\n" +
-                "+ ' ERROR_NUMBER(),'\n" +
-                "+ ' ERROR_STATE(),' \n" +
-                "+ ' ERROR_SEVERITY(),' \n" +
-                "+ ' ERROR_LINE(), '\n" +
-                "+ ' ERROR_PROCEDURE(), ' \n" +
-                "+ ' ERROR_MESSAGE(), ' \n" +
-                "+ ' ''Insert '+ @filename + ''', ' \n" +
-                "+ ' '''+ @tableName +''',' \n" +
-                "+ ' GETDATE()); '\n" +
-                "+ 'END CATCH';\n" +
+                ";\n" +
                 "\n" +
-                "exec sp_executesql @sql");
+                "BEGIN TRY \n" +
+                "\texec sp_executesql @sql\n" +
+                "\n" +
+                "END TRY \n" +
+                "BEGIN CATCH \n" +
+                "\tINSERT INTO config.DB_Errors VALUES \n" +
+                " (SUSER_SNAME(),\n" +
+                " ERROR_NUMBER(),\n" +
+                " ERROR_STATE(),\n" +
+                " ERROR_SEVERITY(),\n" +
+                " ERROR_LINE(), \n" +
+                " ERROR_PROCEDURE(), \n" +
+                " ERROR_MESSAGE(), \n" +
+                " 'Insert '+ @filename,\n" +
+                " @sql,\n" +
+                " GETDATE()); \n" +
+                "END CATCH");
         return sql.toString();
     }
     public static void archiveDocument(String archive, String source,String file)
@@ -1038,10 +1147,37 @@ public class Table {
         }
     }
 
+    public static boolean isValidAvroFile(String filePath) {
+        try (FileInputStream fis = new FileInputStream(filePath)) {
+            byte[] magicBytes = new byte[4];
+            if (fis.read(magicBytes) != 4) {
+                return false; // Fichier trop petit pour être un fichier Avro valide
+            }
+            // Comparer les octets magiques avec ceux attendus pour Avro
+            return (magicBytes[0] == 0x4F && magicBytes[1] == 0x62 &&
+                    magicBytes[2] == 0x6A && magicBytes[3] == 0x01);
+        } catch (IOException e) {
+            // Gérer les erreurs liées à la lecture du fichier
+            System.err.println("Erreur lors de la lecture du fichier: " + filePath);
+            return false;
+        }
+    }
 
     // Lire le fichier Avro et insérer les données dans la base de données
     public static void insertAvroDataToSqlServer(String avroFilePath, String tableName, Connection conn) {
+        // Vérifier si le fichier est un fichier Avro valide avant de le lire
+        if (!isValidAvroFile(avroFilePath)) {
+            System.err.println("Le fichier n'est pas un fichier Avro valide: " + avroFilePath);
+            return;
+        }
+
         File avroFile = new File(avroFilePath);
+
+        if (!avroFile.exists()) {
+            System.err.println("File does not exist: " + avroFilePath);
+            return;
+        }
+
         DatumReader<GenericRecord> datumReader = new GenericDatumReader<>();
 
         try (org.apache.avro.file.FileReader<GenericRecord> dataFileReader = DataFileReader.openReader(avroFile, datumReader)) {
@@ -1062,9 +1198,12 @@ public class Table {
                     preparedStatement.executeUpdate();
                 }
             }
-
-        } catch (Exception e) {
-            e.printStackTrace();
+        } catch (InvalidAvroMagicException e) {
+            System.err.println("Error: Not a valid Avro file. Path: " + avroFilePath);
+        } catch (IOException e) {
+            System.err.println("IO Exception while reading file: " + avroFilePath);
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
         }
     }
 

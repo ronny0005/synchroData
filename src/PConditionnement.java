@@ -18,7 +18,7 @@ public class PConditionnement extends Table{
         } else {
             for (String filename : children) {
                 readOnFile(path, filename, tableName + "_DEST", sqlCon);
-                executeQuery(sqlCon, updateTableDest("cbIndice", "'cbIndice'", tableName, tableName + "_DEST", filename,unibase));
+                executeQuery(sqlCon, updateTableDest("cbIndice", "cbIndice", tableName, tableName + "_DEST", filename,unibase));
                 executeQuery(sqlCon,insertTable (tableName,tableName+"_DEST","cbIndice",filename,0,0,"","",""));
 
 

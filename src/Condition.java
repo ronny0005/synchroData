@@ -19,7 +19,7 @@ public class Condition extends Table{
         } else {
             for (String filename : children) {
                 readOnFile(path, filename, tableName + "_DEST", sqlCon);
-                executeQuery(sqlCon, updateTableDest("CO_No,AR_Ref,EC_Enumere", "'CO_No','AR_Ref'", tableName, tableName + "_DEST", filename,unibase));
+                executeQuery(sqlCon, updateTableDest("CO_No,AR_Ref,EC_Enumere", "CO_No,AR_Ref", tableName, tableName + "_DEST", filename,unibase));
                 executeQuery(sqlCon,insertTable (tableName,tableName+"_DEST","CO_No,AR_Ref,EC_Enumere",filename,0,0,"","",""));
 
             }

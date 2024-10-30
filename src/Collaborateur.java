@@ -18,7 +18,7 @@ public class Collaborateur extends Table {
         } else {
             for (String filename : children) {
                 readOnFile(path, filename, tableName + "_DEST", sqlCon);
-                executeQuery(sqlCon, updateTableDest("CO_No", "'CO_No','CO_Nom'", tableName, tableName + "_DEST", filename,unibase));
+                executeQuery(sqlCon, updateTableDest("CO_No", "CO_No,CO_Nom", tableName, tableName + "_DEST", filename,unibase));
                 executeQuery(sqlCon,insertTable (tableName,tableName+"_DEST","CO_No",filename,0,0,"","",""));
 
                 deleteTempTable(sqlCon, tableName + "_DEST");

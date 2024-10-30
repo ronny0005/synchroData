@@ -31,7 +31,7 @@ public class DepotEmpl extends Table {
         } else {
             for (String filename : children) {
                 readOnFile(path, filename, tableName + "_DEST", sqlCon);
-                executeQuery(sqlCon, updateTableDest("", "'DP_No','DE_No','DP_NoSource'", tableName, tableName + "_DEST", filename,unibase));
+                executeQuery(sqlCon, updateTableDest("", "DP_No,DE_No,DP_NoSource", tableName, tableName + "_DEST", filename,unibase));
                 executeQuery(sqlCon,insertTmpTable (tableName,tableName+"_DEST","DP_No,DatabaseSource",filename,0,1,"","DP_No","DE_No"));
                 executeQuery(sqlCon,updateDepotInsert());
                 executeQuery(sqlCon,insertTable (tableName,tableName+"_TMP","DP_No",filename,1,0,"DP_No","",""));

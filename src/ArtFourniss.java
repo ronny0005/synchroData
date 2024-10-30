@@ -18,7 +18,7 @@ public class ArtFourniss extends Table {
         } else {
             for (String filename : children) {
                 readOnFile(path, filename, tableName + "_DEST", sqlCon);
-                executeQuery(sqlCon, updateTableDest("AR_Ref,CT_Num", "'AR_Ref','CT_Num'", tableName, tableName + "_DEST", filename,unibase));
+                executeQuery(sqlCon, updateTableDest("AR_Ref,CT_Num", "AR_Ref,CT_Num", tableName, tableName + "_DEST", filename,unibase));
                 executeQuery(sqlCon,insertTable (tableName,tableName+"_DEST","AR_Ref,CT_Num",filename,0,0,"","",""));
 
                 deleteTempTable(sqlCon, tableName + "_DEST");

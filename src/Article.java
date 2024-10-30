@@ -32,7 +32,7 @@ public class Article extends Table {
         } else {
             for (String filename : children) {
                 readOnFile(path, filename, tableName + "_DEST", sqlCon);
-                executeQuery(sqlCon, updateTableDest("AR_Ref", "'AR_Ref','AR_SuiviStock'", tableName, tableName + "_DEST", filename,unibase));
+                executeQuery(sqlCon, updateTableDest("AR_Ref", "AR_Ref,AR_SuiviStock", tableName, tableName + "_DEST", filename,unibase));
                 executeQuery(sqlCon,insertTable (tableName,tableName+"_DEST","AR_Ref",filename,0,0,"","",""));
                 Condition.sendDataElement(sqlCon, path,unibase);
                 RessourceProd.sendDataElement(sqlCon, path,unibase);

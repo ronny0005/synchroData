@@ -18,7 +18,7 @@ public class FJournaux extends Table {
         } else {
             for (String filename : children) {
                 readOnFile(path, filename, tableName + "_DEST", sqlCon);
-                executeQuery(sqlCon, updateTableDest("JO_Num,JO_Type", "'JO_Num','JO_Type','CG_Num','JO_IFRS'", tableName, tableName + "_DEST", filename,unibase));
+                executeQuery(sqlCon, updateTableDest("JO_Num,JO_Type", "JO_Num,JO_Type,CG_Num,JO_IFRS", tableName, tableName + "_DEST", filename,unibase));
                 executeQuery(sqlCon,insertTable (tableName,tableName+"_DEST","JO_Num",filename,0,0,"","",""));
 
                 deleteTempTable(sqlCon, tableName + "_DEST");

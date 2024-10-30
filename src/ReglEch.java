@@ -52,7 +52,7 @@ public class ReglEch extends Table {
             for (String filename : children) {
                 disableTrigger(sqlCon,tableName);
                 readOnFile(path, filename, tableName + "_DEST", sqlCon);
-                executeQuery(sqlCon, updateTableDest("", "'RG_No','DR_No'", tableName, tableName + "_DEST",filename,unibase));
+                executeQuery(sqlCon, updateTableDest("", "'RG_No',DR_No", tableName, tableName + "_DEST",filename,unibase));
                 executeQuery(sqlCon,linkDrRGNo());
                 executeQuery(sqlCon,insertTable (tableName,tableName+"_DEST","cbMarqSource,dataBaseSource",filename,0,1,"","cbMarqSource,DR_NoSource",""));
                 enableTrigger(sqlCon,tableName);

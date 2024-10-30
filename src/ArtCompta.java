@@ -18,7 +18,7 @@ public class ArtCompta extends Table {
             for (String filename : children) {
                 readOnFile(path, filename, tableName + "_DEST", sqlCon);
 
-                executeQuery(sqlCon, updateTableDest(keyColumns, "'AR_Ref','ACP_Type','ACP_Champ'", tableName, tableName + "_DEST", filename,unibase));
+                executeQuery(sqlCon, updateTableDest(keyColumns, keyColumns, tableName, tableName + "_DEST", filename,unibase));
                 executeQuery(sqlCon,insertTable (tableName,tableName+"_DEST",keyColumns,filename,0,0,"","",""));
 
                 deleteTempTable(sqlCon, tableName + "_DEST");

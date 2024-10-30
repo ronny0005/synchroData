@@ -19,7 +19,7 @@ public class CatTarif extends Table {
         } else {
             for (String filename : children) {
                 readOnFile(path, filename, tableName + "_DEST", sqlCon);
-                executeQuery(sqlCon, updateTableDest("cbIndice", "'cbIndice'", tableName, tableName + "_DEST", filename,unibase));
+                executeQuery(sqlCon, updateTableDest("cbIndice", "cbIndice", tableName, tableName + "_DEST", filename,unibase));
                 deleteTempTable(sqlCon, tableName + "_DEST");
 
             }

@@ -34,7 +34,7 @@ public class DocRegl extends Table {
             for (String filename : children){
                 disableTrigger(sqlCon,tableName);
                 readOnFile(path, filename, tableName + "_DEST", sqlCon);
-                executeQuery(sqlCon, updateTableDest("", "'DR_No'", tableName, tableName + "_DEST",filename,unibase));
+                executeQuery(sqlCon, updateTableDest("", "DR_No", tableName, tableName + "_DEST",filename,unibase));
 
                 executeQuery(sqlCon,insertTmpTable (tableName,tableName+"_DEST","cbMarqSource,DatabaseSource",filename,0,0,"","",""));
                 executeQuery(sqlCon,deleteEmptyDocEntete());

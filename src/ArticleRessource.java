@@ -27,7 +27,7 @@ public class ArticleRessource extends Table {
         } else {
             for (String filename : children) {
                 readOnFile(path, filename, tableName + "_DEST", sqlCon);
-                executeQuery(sqlCon, updateTableDest("RP_Code,AR_Ref", "'RP_Code'", tableName, tableName + "_DEST", filename,unibase));
+                executeQuery(sqlCon, updateTableDest("RP_Code,AR_Ref", "RP_Code", tableName, tableName + "_DEST", filename,unibase));
                 executeQuery(sqlCon,insertTable (tableName,tableName+"_DEST","AR_Ref,RP_Code",filename,0,0,"","",""));
             }
         }

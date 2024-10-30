@@ -311,147 +311,163 @@ CREATE TABLE [config].[DB_Errors]
           Query			 VARCHAR(MAX),
           ErrorDateTime  DATETIME)
 
-    IF COL_LENGTH('dbo.F_DOCREGL', 'cbMarqSource') IS NULL
+    IF OBJECT_ID('dbo.F_DOCREGL', 'U') IS NOT NULL AND COL_LENGTH('dbo.F_DOCREGL', 'cbMarqSource') IS NULL
 ALTER TABLE F_DOCREGL ADD cbMarqSource INT
 
-    IF COL_LENGTH('config.ListCollaborateur', 'DateCreation') IS NULL
+    IF OBJECT_ID('config.ListCollaborateur', 'U') IS NOT NULL AND COL_LENGTH('config.ListCollaborateur', 'DateCreation') IS NULL
 ALTER TABLE config.ListCollaborateur ADD DateCreation DATETIME DEFAULT GETDATE()
-    IF COL_LENGTH('config.listComptet', 'DateCreation') IS NULL
+
+    IF OBJECT_ID('config.listComptet', 'U') IS NOT NULL AND COL_LENGTH('config.listComptet', 'DateCreation') IS NULL
 ALTER TABLE config.listComptet ADD DateCreation DATETIME DEFAULT GETDATE()
-    IF COL_LENGTH('config.listLivraison', 'DateCreation') IS NULL
+
+    IF OBJECT_ID('config.listLivraison', 'U') IS NOT NULL AND COL_LENGTH('config.listLivraison', 'DateCreation') IS NULL
 ALTER TABLE config.listLivraison ADD DateCreation DATETIME DEFAULT GETDATE()
-    IF COL_LENGTH('config.listFamille', 'DateCreation') IS NULL
+
+    IF OBJECT_ID('config.listFamille', 'U') IS NOT NULL AND COL_LENGTH('config.listFamille', 'DateCreation') IS NULL
 ALTER TABLE config.listFamille ADD DateCreation DATETIME DEFAULT GETDATE()
-    IF COL_LENGTH('config.listFamCompta', 'DateCreation') IS NULL
+
+    IF OBJECT_ID('config.listFamCompta', 'U') IS NOT NULL AND COL_LENGTH('config.listFamCompta', 'DateCreation') IS NULL
 ALTER TABLE config.listFamCompta ADD DateCreation DATETIME DEFAULT GETDATE()
-    IF COL_LENGTH('config.listArticle', 'DateCreation') IS NULL
+
+    IF OBJECT_ID('config.listArticle', 'U') IS NOT NULL AND COL_LENGTH('config.listArticle', 'DateCreation') IS NULL
 ALTER TABLE config.listArticle ADD DateCreation DATETIME DEFAULT GETDATE()
-    IF COL_LENGTH('config.listCondition', 'DateCreation') IS NULL
+
+    IF OBJECT_ID('config.listCondition', 'U') IS NOT NULL AND COL_LENGTH('config.listCondition', 'DateCreation') IS NULL
 ALTER TABLE config.listCondition ADD DateCreation DATETIME DEFAULT GETDATE()
-    IF COL_LENGTH('config.ListArticleRessource', 'DateCreation') IS NULL
+
+    IF OBJECT_ID('config.ListArticleRessource', 'U') IS NOT NULL AND COL_LENGTH('config.ListArticleRessource', 'DateCreation') IS NULL
 ALTER TABLE config.ListArticleRessource ADD DateCreation DATETIME DEFAULT GETDATE()
-    IF COL_LENGTH('config.listRessourceProd', 'DateCreation') IS NULL
+
+    IF OBJECT_ID('config.listRessourceProd', 'U') IS NOT NULL AND COL_LENGTH('config.listRessourceProd', 'DateCreation') IS NULL
 ALTER TABLE config.listRessourceProd ADD DateCreation DATETIME DEFAULT GETDATE()
-    IF COL_LENGTH('config.listArtCompta', 'DateCreation') IS NULL
+
+    IF OBJECT_ID('config.listArtCompta', 'U') IS NOT NULL AND COL_LENGTH('config.listArtCompta', 'DateCreation') IS NULL
 ALTER TABLE config.listArtCompta ADD DateCreation DATETIME DEFAULT GETDATE()
-    IF COL_LENGTH('config.listArtClient', 'DateCreation') IS NULL
+
+    IF OBJECT_ID('config.listArtClient', 'U') IS NOT NULL AND COL_LENGTH('config.listArtClient', 'DateCreation') IS NULL
 ALTER TABLE config.listArtClient ADD DateCreation DATETIME DEFAULT GETDATE()
-    IF COL_LENGTH('config.listArtFourniss', 'DateCreation') IS NULL
+
+    IF OBJECT_ID('config.listArtFourniss', 'U') IS NOT NULL AND COL_LENGTH('config.listArtFourniss', 'DateCreation') IS NULL
 ALTER TABLE config.listArtFourniss ADD DateCreation DATETIME DEFAULT GETDATE()
-    IF COL_LENGTH('config.listDocEntete', 'DateCreation') IS NULL
+
+    IF OBJECT_ID('config.listDocEntete', 'U') IS NOT NULL AND COL_LENGTH('config.listDocEntete', 'DateCreation') IS NULL
 ALTER TABLE config.listDocEntete ADD DateCreation DATETIME DEFAULT GETDATE()
-    IF COL_LENGTH('config.listDocRegl', 'DateCreation') IS NULL
+
+    IF OBJECT_ID('config.listDocRegl', 'U') IS NOT NULL AND COL_LENGTH('config.listDocRegl', 'DateCreation') IS NULL
 ALTER TABLE config.listDocRegl ADD DateCreation DATETIME DEFAULT GETDATE()
-    IF COL_LENGTH('config.listDocLigne', 'DateCreation') IS NULL
+
+    IF OBJECT_ID('config.listDocLigne', 'U') IS NOT NULL AND COL_LENGTH('config.listDocLigne', 'DateCreation') IS NULL
 ALTER TABLE config.listDocLigne ADD DateCreation DATETIME DEFAULT GETDATE()
-    IF COL_LENGTH('config.listCompteg', 'DateCreation') IS NULL
+
+    IF OBJECT_ID('config.listCompteg', 'U') IS NOT NULL AND COL_LENGTH('config.listCompteg', 'DateCreation') IS NULL
 ALTER TABLE config.listCompteg ADD DateCreation DATETIME DEFAULT GETDATE()
-    IF COL_LENGTH('config.listCollaborateur', 'DateCreation') IS NULL
+
+    IF OBJECT_ID('config.listCollaborateur', 'U') IS NOT NULL AND COL_LENGTH('config.listCollaborateur', 'DateCreation') IS NULL
 ALTER TABLE config.listCollaborateur ADD DateCreation DATETIME DEFAULT GETDATE()
 
-IF COL_LENGTH('dbo.F_DOCREGL', 'DataBaseSource') IS NULL
+IF OBJECT_ID('dbo.F_DOCREGL', 'U') IS NOT NULL AND COL_LENGTH('dbo.F_DOCREGL', 'DataBaseSource') IS NULL
 ALTER TABLE F_DOCREGL ADD DataBaseSource NVARCHAR(50)
 
-IF COL_LENGTH('dbo.F_DOCREGL', 'DR_NoSource') IS NULL
+IF OBJECT_ID('dbo.F_DOCREGL', 'U') IS NOT NULL AND COL_LENGTH('dbo.F_DOCREGL', 'DR_NoSource') IS NULL
 ALTER TABLE F_DOCREGL ADD DR_NoSource INT 
 
-IF COL_LENGTH('dbo.F_CREGLEMENT', 'cbMarqSource') IS NULL
+IF OBJECT_ID('dbo.F_CREGLEMENT', 'U') IS NOT NULL AND COL_LENGTH('dbo.F_CREGLEMENT', 'cbMarqSource') IS NULL
 ALTER TABLE F_CREGLEMENT ADD cbMarqSource INT 
 
-IF COL_LENGTH('dbo.F_CREGLEMENT', 'DataBaseSource') IS NULL
+IF OBJECT_ID('dbo.F_CREGLEMENT', 'U') IS NOT NULL AND COL_LENGTH('dbo.F_CREGLEMENT', 'DataBaseSource') IS NULL
 ALTER TABLE F_CREGLEMENT ADD DataBaseSource NVARCHAR(50)
 
-IF COL_LENGTH('dbo.F_CREGLEMENT', 'RG_NoSource') IS NULL
+IF OBJECT_ID('dbo.F_CREGLEMENT', 'U') IS NOT NULL AND COL_LENGTH('dbo.F_CREGLEMENT', 'RG_NoSource') IS NULL
 ALTER TABLE F_CREGLEMENT ADD RG_NoSource INT 
 
-IF COL_LENGTH('dbo.F_REGLECH', 'cbMarqSource') IS NULL
+IF OBJECT_ID('dbo.F_REGLECH', 'U') IS NOT NULL AND COL_LENGTH('dbo.F_REGLECH', 'cbMarqSource') IS NULL
 ALTER TABLE F_REGLECH ADD cbMarqSource INT 
 
-IF COL_LENGTH('dbo.F_REGLECH', 'DataBaseSource') IS NULL
+IF OBJECT_ID('dbo.F_REGLECH', 'U') IS NOT NULL AND COL_LENGTH('dbo.F_REGLECH', 'DataBaseSource') IS NULL
 ALTER TABLE F_REGLECH ADD DataBaseSource NVARCHAR(50)
 
-IF COL_LENGTH('dbo.F_REGLECH', 'DR_NoSource') IS NULL
+IF OBJECT_ID('dbo.F_REGLECH', 'U') IS NOT NULL AND COL_LENGTH('dbo.F_REGLECH', 'DR_NoSource') IS NULL
 ALTER TABLE F_REGLECH ADD DR_NoSource INT 
 
-IF COL_LENGTH('dbo.F_REGLECH', 'RG_NoSource') IS NULL
+IF OBJECT_ID('dbo.F_REGLECH', 'U') IS NOT NULL AND COL_LENGTH('dbo.F_REGLECH', 'RG_NoSource') IS NULL
 ALTER TABLE F_REGLECH ADD RG_NoSource INT 
 
-IF COL_LENGTH('dbo.F_DOCLIGNE', 'cbMarqSource') IS NULL
+IF OBJECT_ID('dbo.F_DOCLIGNE', 'U') IS NOT NULL AND COL_LENGTH('dbo.F_DOCLIGNE', 'cbMarqSource') IS NULL
 ALTER TABLE F_DOCLIGNE ADD cbMarqSource INT          
 
-IF COL_LENGTH('dbo.F_DOCLIGNE', 'DataBaseSource') IS NULL
+IF OBJECT_ID('dbo.F_DOCLIGNE', 'U') IS NOT NULL AND COL_LENGTH('dbo.F_DOCLIGNE', 'DataBaseSource') IS NULL
 ALTER TABLE F_DOCLIGNE ADD DataBaseSource NVARCHAR(50)     
 
-IF COL_LENGTH('dbo.F_DOCENTETE', 'DataBaseSource') IS NULL
+IF OBJECT_ID('dbo.F_DOCENTETE', 'U') IS NOT NULL AND COL_LENGTH('dbo.F_DOCENTETE', 'DataBaseSource') IS NULL
 ALTER TABLE F_DOCENTETE ADD DataBaseSource NVARCHAR(50) 
 
-IF COL_LENGTH('dbo.F_DOCENTETE', 'cbMarqSource') IS NULL
+IF OBJECT_ID('dbo.F_DOCENTETE', 'U') IS NOT NULL AND COL_LENGTH('dbo.F_DOCENTETE', 'cbMarqSource') IS NULL
 ALTER TABLE F_DOCENTETE ADD cbMarqSource INT
 
-    IF COL_LENGTH('dbo.F_ECRITUREC', 'DataBaseSource') IS NULL
+IF OBJECT_ID('dbo.F_ECRITUREC', 'U') IS NOT NULL AND COL_LENGTH('dbo.F_ECRITUREC', 'DataBaseSource') IS NULL
 ALTER TABLE F_ECRITUREC ADD DataBaseSource NVARCHAR(50)
 
-IF COL_LENGTH('dbo.F_ECRITUREC', 'cbMarqSource') IS NULL
+IF OBJECT_ID('dbo.F_ECRITUREC', 'U') IS NOT NULL AND COL_LENGTH('dbo.F_ECRITUREC', 'cbMarqSource') IS NULL
 ALTER TABLE F_ECRITUREC ADD cbMarqSource INT 
 
-IF COL_LENGTH('dbo.F_ECRITUREC', 'EC_NoSource') IS NULL
+IF OBJECT_ID('dbo.F_ECRITUREC', 'U') IS NOT NULL AND COL_LENGTH('dbo.F_ECRITUREC', 'EC_NoSource') IS NULL
 ALTER TABLE F_ECRITUREC ADD EC_NoSource INT
 
-IF COL_LENGTH('dbo.F_ECRITUREA', 'DataBaseSource') IS NULL
+IF OBJECT_ID('dbo.F_ECRITUREA', 'U') IS NOT NULL AND COL_LENGTH('dbo.F_ECRITUREA', 'DataBaseSource') IS NULL
 ALTER TABLE F_ECRITUREA ADD DataBaseSource NVARCHAR(50)
 
-IF COL_LENGTH('dbo.F_ECRITUREA', 'cbMarqSource') IS NULL
+IF OBJECT_ID('dbo.F_ECRITUREA', 'U') IS NOT NULL AND COL_LENGTH('dbo.F_ECRITUREA', 'cbMarqSource') IS NULL
 ALTER TABLE F_ECRITUREA ADD cbMarqSource INT
 
-IF COL_LENGTH('dbo.F_DEPOT', 'DataBaseSource') IS NULL
+IF OBJECT_ID('dbo.F_DEPOT', 'U') IS NOT NULL AND COL_LENGTH('dbo.F_DEPOT', 'DataBaseSource') IS NULL
 ALTER TABLE F_DEPOT ADD DataBaseSource NVARCHAR(50)
 
-IF COL_LENGTH('dbo.F_DEPOT', 'DE_NoSource') IS NULL
+IF OBJECT_ID('dbo.F_DEPOT', 'U') IS NOT NULL AND COL_LENGTH('dbo.F_DEPOT', 'DE_NoSource') IS NULL
 ALTER TABLE F_DEPOT ADD DE_NoSource INT
 
-IF COL_LENGTH('dbo.F_DEPOT', 'cbMarqSource') IS NULL
+IF OBJECT_ID('dbo.F_DEPOT', 'U') IS NOT NULL AND COL_LENGTH('dbo.F_DEPOT', 'cbMarqSource') IS NULL
 ALTER TABLE F_DEPOT ADD cbMarqSource INT
 
-IF COL_LENGTH('dbo.F_CAISSE', 'DataBaseSource') IS NULL
+IF OBJECT_ID('dbo.F_CAISSE', 'U') IS NOT NULL AND COL_LENGTH('dbo.F_CAISSE', 'DataBaseSource') IS NULL
 ALTER TABLE F_CAISSE ADD DataBaseSource NVARCHAR(50)
 
-IF COL_LENGTH('dbo.F_CAISSE', 'CA_NoSource') IS NULL
+IF OBJECT_ID('dbo.F_CAISSE', 'U') IS NOT NULL AND COL_LENGTH('dbo.F_CAISSE', 'CA_NoSource') IS NULL
 ALTER TABLE F_CAISSE ADD CA_NoSource INT
 
-    IF COL_LENGTH('dbo.F_CAISSE', 'cbMarqSource') IS NULL
+IF OBJECT_ID('dbo.F_CAISSE', 'U') IS NOT NULL AND COL_LENGTH('dbo.F_CAISSE', 'cbMarqSource') IS NULL
 ALTER TABLE F_CAISSE ADD cbMarqSource INT
 
-    IF COL_LENGTH('config.ListDepot', 'DataBaseSource') IS NULL
+IF OBJECT_ID('config.ListDepot', 'U') IS NOT NULL AND COL_LENGTH('config.ListDepot', 'DataBaseSource') IS NULL
 ALTER TABLE config.ListDepot ADD DataBaseSource NVARCHAR(50)
 
-IF COL_LENGTH('config.ListDepotEmpl', 'DataBaseSource') IS NULL
+IF OBJECT_ID('config.ListDepotEmpl', 'U') IS NOT NULL AND COL_LENGTH('config.ListDepotEmpl', 'DataBaseSource') IS NULL
 ALTER TABLE config.ListDepotEmpl ADD DataBaseSource NVARCHAR(50)
 
-IF COL_LENGTH('dbo.F_DEPOTEMPL', 'DataBaseSource') IS NULL
+IF OBJECT_ID('dbo.F_DEPOTEMPL', 'U') IS NOT NULL AND COL_LENGTH('dbo.F_DEPOTEMPL', 'DataBaseSource') IS NULL
 ALTER TABLE F_DEPOTEMPL ADD DataBaseSource NVARCHAR(50)
 
-IF COL_LENGTH('dbo.F_DEPOTEMPL', 'DP_NoSource') IS NULL
+IF OBJECT_ID('dbo.F_DEPOTEMPL', 'U') IS NOT NULL AND COL_LENGTH('dbo.F_DEPOTEMPL', 'DP_NoSource') IS NULL
 ALTER TABLE F_DEPOTEMPL ADD DP_NoSource INT
 
-IF COL_LENGTH('dbo.F_DEPOTEMPL', 'cbMarqSource') IS NULL
+IF OBJECT_ID('dbo.F_DEPOTEMPL', 'U') IS NOT NULL AND COL_LENGTH('dbo.F_DEPOTEMPL', 'cbMarqSource') IS NULL
 ALTER TABLE F_DEPOTEMPL ADD cbMarqSource INT
 
-IF COL_LENGTH('dbo.F_LIVRAISON', 'cbMarqSource') IS NULL
+IF OBJECT_ID('dbo.F_LIVRAISON', 'U') IS NOT NULL AND COL_LENGTH('dbo.F_LIVRAISON', 'cbMarqSource') IS NULL
 ALTER TABLE F_LIVRAISON ADD cbMarqSource INT
 
-IF COL_LENGTH('dbo.F_LIVRAISON', 'LI_NoSource') IS NULL
+IF OBJECT_ID('dbo.F_LIVRAISON', 'U') IS NOT NULL AND COL_LENGTH('dbo.F_LIVRAISON', 'LI_NoSource') IS NULL
 ALTER TABLE F_LIVRAISON ADD LI_NoSource INT
 
-    IF COL_LENGTH('dbo.F_LIVRAISON', 'DataBaseSource') IS NULL
+IF OBJECT_ID('dbo.F_LIVRAISON', 'U') IS NOT NULL AND COL_LENGTH('dbo.F_LIVRAISON', 'DataBaseSource') IS NULL
 ALTER TABLE F_LIVRAISON ADD DataBaseSource NVARCHAR(50)
 
-    IF COL_LENGTH('config.ListLivraison', 'DataBaseSource') IS NULL
+IF OBJECT_ID('config.ListLivraison', 'U') IS NOT NULL AND COL_LENGTH('config.ListLivraison', 'DataBaseSource') IS NULL
 ALTER TABLE config.ListLivraison ADD DataBaseSource NVARCHAR(50)
 
-    IF COL_LENGTH('config.ListCondition', 'EC_Enumere') IS NULL
+IF OBJECT_ID('config.ListCondition', 'U') IS NOT NULL AND COL_LENGTH('config.ListCondition', 'EC_Enumere') IS NULL
 ALTER TABLE config.ListCondition ADD EC_Enumere NVARCHAR(50)
 
-IF COL_LENGTH('config.SelectTable', 'isLoaded') IS NULL
+IF OBJECT_ID('config.SelectTable', 'U') IS NOT NULL AND COL_LENGTH('config.SelectTable', 'isLoaded') IS NULL
 ALTER TABLE [config].[SelectTable] ADD [isLoaded] [int] NULL
 
 IF NOT EXISTS (SELECT 1 FROM sys.server_principals WHERE name = 'reports')

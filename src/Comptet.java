@@ -30,7 +30,7 @@ public class Comptet extends Table {
                 readOnFile(path, filename, tableName + "_DEST", sqlCon);
 
                 disableTrigger(sqlCon,tableName);
-                executeQuery(sqlCon, updateTableDest("CT_Num,CT_Type", "'CT_Num','CT_Type','DE_No'", tableName, tableName + "_DEST", filename,unibase));
+                executeQuery(sqlCon, updateTableDest("CT_Num,CT_Type", "CT_Num,CT_Type,DE_No", tableName, tableName + "_DEST", filename,unibase));
                 executeQuery(sqlCon,insertTmpTable (tableName,tableName+"_DEST","CT_Num,CT_Type",filename,0,0,"","","DE_No"));
                 //executeQuery(sqlCon,updateDepotInsert());
                 executeQuery(sqlCon,insertTable (tableName,tableName+"_TMP","CT_Num,CT_Type",filename,0,0,"","",""));

@@ -117,6 +117,7 @@ public class ArtStock extends Table {
                 deleteArtStock(sqlCon, database);
             }
         }
+        loadDeleteFile(path,sqlCon,file,tableName,"cbMarq","DatabaseSource");
     }
 
     public static String selectSourceTable(String table,String dataSource){
@@ -175,6 +176,20 @@ public class ArtStock extends Table {
         initTableParam(sqlCon,tableName,configList,"AR_Ref,DE_No");
         getData(sqlCon, selectSourceTableFilterAgency(tableName,database,agency,"DE_No"), tableName, path, filename);
         listDeleteAllInfo(sqlCon, path, "deleteList" + filename,tableName,configList,database);
+    }
+
+    public static void loadDeleteFile(String path,Connection sqlCon,String file,String tableName,String keySource,String listKeys) {
+        File dir = new File(path);
+        FilenameFilter filter = (dir1, name) -> name.startsWith("deleteList"+file);
+        String [] children = dir.list(filter);
+        if (children == null) {
+            System.out.println("Either dir does not exist or is not a directory");
+        } else {
+            for (String filename : children) {
+                readOnFile(path, filename, tableName + "_SUPPR", sqlCon);
+               // deleteItem(sqlCon, tableName,filename,keySource,listKeys);
+            }
+        }
     }
 
     public static void deleteArtStock(Connection sqlCon,String database)

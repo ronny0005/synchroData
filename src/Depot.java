@@ -33,7 +33,7 @@ public class Depot extends Table{
         } else {
             for (String filename : children) {
                 readOnFile(path, filename, tableName + "_DEST", sqlCon);
-                executeQuery(sqlCon, updateTableDest("", "'DE_No','DP_NoDefaut','DE_Code','DE_NoSource','DatabaseSource','DE_Intitule'", tableName, tableName + "_DEST", filename,unibase));
+                executeQuery(sqlCon, updateTableDest("", "DE_No,DP_NoDefaut,DE_Code,DE_NoSource,DatabaseSource,DE_Intitule", tableName, tableName + "_DEST", filename,unibase));
                 disableTrigger(sqlCon,tableName);
                 executeQuery(sqlCon,insertTable (tableName,tableName+"_DEST","DE_No,DatabaseSource",filename,1,1,"DE_No","DE_No","DP_NoDefaut,DE_Code"));
                 enableTrigger(sqlCon,tableName);

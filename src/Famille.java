@@ -18,7 +18,7 @@ public class Famille extends Table {
         } else {
             for (String filename : children) {
                 readOnFile(path, filename, tableName + "_DEST", sqlCon);
-                executeQuery(sqlCon, updateTableDest("FA_CodeFamille", "'FA_CodeFamille','FA_Type'", tableName, tableName + "_DEST", filename,unibase));
+                executeQuery(sqlCon, updateTableDest("FA_CodeFamille", "FA_CodeFamille,FA_Type", tableName, tableName + "_DEST", filename,unibase));
                 executeQuery(sqlCon,insertTable (tableName,tableName+"_DEST","FA_CodeFamille",filename,0,0,"","",""));
 
                 FamCompta.sendDataElement(sqlCon, path,unibase);

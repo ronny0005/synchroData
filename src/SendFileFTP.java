@@ -24,7 +24,7 @@ public class SendFileFTP {
                 if (list.get("envoi").equals("1") && list.get("active").equals("1")) {
                     try {
                         //session = jsch.getSession("u85460117-upload", "home631778145.1and1-data.host", 22);
-                        session = jsch.getSession("u94723657", "home751918776.1and1-data.host", 22);
+                        session = jsch.getSession("u94723657", "217.160.123.210", 22);
                         session.setPassword("ilIBWTvZme4CZD5BzMez");
                         //session.setPassword("FyK6cIAgpeNOSbEdfrpC*");
                         session.setConfig("StrictHostKeyChecking", "no");
@@ -36,25 +36,37 @@ public class SendFileFTP {
                         File dir = new File((String) list.get("path"));
 
                         File[] directoryListing = dir.listFiles();
-                        try {
-                            sftpChannel.mkdir((String) list.get("folderftp"));
-                        } catch (SftpException e) {
-                            System.out.println(e.id); // Prints "Failure"
-                            System.out.println(e.getMessage()); // Prints "null"
-                            assert (e.id == ChannelSftp.SSH_FX_FAILURE);
-                            assert (e.id == 4);
-                        }
-                        File backup = new File(list.get("path") + "/archive");
-                        if (directoryListing != null) {
-                            for (File child : directoryListing) {
-                                if (child.isFile()) {
-                                    sftpChannel.put(child.getAbsolutePath(), "/" + list.get("folderftp") + "/" + child.getName());
+
+                        // Récupérer les dossiers FTP séparés par des virgules
+                        String[] folderFtpList = ((String) list.get("folderftp")).split(";");
+
+                        // Itérer sur chaque dossier FTP
+                        for (String folderFtp : folderFtpList) {
+                            try {
+                                sftpChannel.mkdir(folderFtp);  // Crée le dossier sur le serveur FTP
+                            } catch (SftpException e) {
+                                // Si le dossier existe déjà, on ignore l'exception
+                                System.out.println("Dossier déjà présent ou erreur: " + e.getMessage());
+                                assert (e.id == ChannelSftp.SSH_FX_FAILURE || e.id == 4);
+                            }
+
+                            // Transférer les fichiers vers chaque dossier
+                            if (directoryListing != null) {
+                                for (File child : directoryListing) {
+                                    if (child.isFile()) {
+                                        sftpChannel.put(child.getAbsolutePath(), "/" + folderFtp + "/" + child.getName());
+                                    }
                                 }
-                                // Do something with child
                             }
                         }
+
+                        // Créer un dossier d'archive local s'il n'existe pas
+                        File backup = new File(list.get("path") + "/archive");
+
                         if (!backup.isDirectory())
                             backup.mkdir();
+
+                        // Déplacer les fichiers dans le dossier d'archive local
                         if (directoryListing != null) {
                             for (File child : directoryListing) {
                                 if (child.isFile()) {
@@ -62,8 +74,10 @@ public class SendFileFTP {
                                 }
                             }
                         }
+
                         sftpChannel.exit();
                         session.disconnect();
+
                     } catch (JSchException | SftpException e) {
                         e.printStackTrace();
                     }

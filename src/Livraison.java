@@ -18,7 +18,7 @@ public class Livraison extends Table {
         } else {
             for (String filename : children) {
                 readOnFile(path, filename, tableName + "_DEST", sqlCon);
-                executeQuery(sqlCon, updateTableDest("", "'LI_NoSource','LI_No','CT_Num','DataBaseSource'", tableName, tableName + "_DEST", filename,unibase));
+                executeQuery(sqlCon, updateTableDest("", "LI_NoSource,LI_No,CT_Num,DataBaseSource", tableName, tableName + "_DEST", filename,unibase));
 
             }
         }

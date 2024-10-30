@@ -19,7 +19,7 @@ public class FamCompta extends Table {
         } else {
             for (String filename : children) {
                 readOnFile(path, filename, tableName + "_DEST", sqlCon);
-                executeQuery(sqlCon, updateTableDest("FA_CodeFamille,FCP_Type,FCP_Champ", "'FA_CodeFamille','FCP_Type','FCP_Champ'", tableName, tableName + "_DEST", filename,unibase));
+                executeQuery(sqlCon, updateTableDest("FA_CodeFamille,FCP_Type,FCP_Champ", "FA_CodeFamille,FCP_Type,FCP_Champ", tableName, tableName + "_DEST", filename,unibase));
             }
         }
         loadDeleteFile(path,sqlCon,file,tableName,"","FA_CodeFamille,FCP_Type,FCP_Champ");

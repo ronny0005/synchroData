@@ -20,7 +20,7 @@ public class EcritureC extends Table {
             for (String filename : children) {
                 dbSource = database;
                 readOnFile(path, filename, tableName + "_DEST", sqlCon);
-                executeQuery(sqlCon, updateTableDest("", "'EC_No','JM_Date','JO_Num','EC_CType'", tableName, tableName + "_DEST", filename,unibase));
+                executeQuery(sqlCon, updateTableDest("", "EC_No,JM_Date,JO_Num,EC_CType", tableName, tableName + "_DEST", filename,unibase));
                 executeQuery(sqlCon,insertTable (tableName,tableName+"_DEST","cbMarqSource,dataBaseSource",filename,1,1,"RG_No","RG_No",""));
             }
         }

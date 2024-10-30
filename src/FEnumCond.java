@@ -18,7 +18,7 @@ public class FEnumCond extends Table{
         } else {
             for (String filename : children) {
                 readOnFile(path, filename, tableName + "_DEST", sqlCon);
-                executeQuery(sqlCon, updateTableDest("EC_Enumere,EC_Champ", "'EC_Enumere','EC_Champ'", tableName, tableName + "_DEST", filename,unibase));
+                executeQuery(sqlCon, updateTableDest("EC_Enumere,EC_Champ", "EC_Enumere,EC_Champ", tableName, tableName + "_DEST", filename,unibase));
                 executeQuery(sqlCon,insertTable (tableName,tableName+"_DEST","EC_Champ,EC_Enumere",filename,0,0,"","",""));
 
 
