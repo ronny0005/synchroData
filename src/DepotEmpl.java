@@ -9,8 +9,9 @@ public class DepotEmpl extends Table {
     public static String configList = "listDepotEmpl";
 
     public static String updateDepotInsert(){
-        return "UPDATE dest SET DE_No = ISNULL(srcDep.DE_No,dest.[DE_No])\n" +
-                "FROM F_DEPOTEMPL_TMP dest\n" +
+        return "UPDATE tmp SET DE_No = ISNULL(srcDep.DE_No,dest.[DE_No])\n" +
+                "FROM F_DEPOTEMPL_TMP tmp\n" +
+                "INNER JOIN F_DEPOTEMPL_DEST dest ON tmp.cbMarqSource = dest.cbMarqSource\n"+
                 "LEFT JOIN (SELECT DatabaseSource,DE_NoSource,DE_No FROM F_DEPOT) srcDep\n" +
                 "ON ISNULL(dest.DE_No,0) = ISNULL(srcDep.DE_NoSource,0)\n" +
                 "AND ISNULL(dest.DataBaseSource,'') = ISNULL(srcDep.DataBaseSource,'')\n" +

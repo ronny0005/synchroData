@@ -20,8 +20,11 @@ public class EcritureC extends Table {
             for (String filename : children) {
                 dbSource = database;
                 readOnFile(path, filename, tableName + "_DEST", sqlCon);
+
+                disableTrigger(sqlCon,tableName);
                 executeQuery(sqlCon, updateTableDest("", "EC_No,JM_Date,JO_Num,EC_CType", tableName, tableName + "_DEST", filename,unibase));
-                executeQuery(sqlCon,insertTable (tableName,tableName+"_DEST","cbMarqSource,dataBaseSource",filename,1,1,"RG_No","RG_No",""));
+                executeQuery(sqlCon,insertTable (tableName,tableName+"_DEST","cbMarqSource,dataBaseSource",filename,1,1,"EC_No","EC_No",""));
+                enableTrigger(sqlCon,tableName);
             }
         }
         loadDeleteFile(path,sqlCon,file,tableName,"EC_No","dataBaseSource");

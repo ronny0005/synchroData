@@ -27,7 +27,7 @@ public class Livraison extends Table {
     public static void getDataElement(Connection sqlCon, String path,String database,String time)
     {
         String filename =  file+time+".avro";
-        initTableParam(sqlCon,tableName,configList,"LI_No,CT_Num");
+        initTableParam(sqlCon,tableName,configList,"LI_No,CT_Num,DataBaseSource");
         getData(sqlCon, selectSourceTable(tableName,database,true,"LI_No"), tableName, path, filename);
         listDeleteAllInfo(sqlCon, path, "deleteList" + filename,tableName,configList,database);
     }

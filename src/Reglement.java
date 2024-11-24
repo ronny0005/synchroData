@@ -19,8 +19,9 @@ public class Reglement extends Table {
     }
 
     public static String updateCaisse(){
-        return  " UPDATE dest SET CA_No = ISNULL(cai.[CA_No],dest.[CA_No]) \n"+
-                " FROM F_CREGLEMENT_TMP dest \n" +
+        return  " UPDATE tmp SET CA_No = ISNULL(cai.[CA_No],dest.[CA_No]) \n"+
+                " FROM F_CREGLEMENT_TMP tmp \n" +
+                " INNER JOIN F_CREGLEMENT_DEST dest ON dest.cbMarqSource = tmp.cbMarqSource \n" +
                 " LEFT JOIN F_CAISSE cai ON ISNULL(cai.CA_NoSource,0) = ISNULL(dest.CA_No,0)\n" +
                 " AND ISNULL(cai.dataBaseSource,'') = ISNULL(dest.dataBaseSource,'')  \n";
     }

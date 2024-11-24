@@ -1,0 +1,8 @@
+Manifest-Version: 1.0
+Main-Class: UpdateDatabasePeriod
+Class-Path: commons-compress-1.0.20.2-jre15.jar json-simple-1.1.1.jar ms
+ sql-jdbc-8.2.2.jre13.jar mssql-jdbc-8.2.2.jre11.jar mssql-jdbc-8.2.2.jr
+ e8.jar opencsv-5.2.jar jsch-0.1.55.jar avro-1.11.1.jar jackson-core-2.1
+ 7.2.jar jackson-annotations-2.17.2.jar jackson-databind-2.17.2.jar slf4
+ j-api-2.0.16.jar slf4j-simple-2.0.16.jar
+

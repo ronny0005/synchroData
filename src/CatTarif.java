@@ -7,6 +7,7 @@ public class CatTarif extends Table {
     public static String file ="catTarif_";
     public static String tableName = "P_CATTARIF";
     public static String configList = "listCatTarif";
+    public static String keyColumns = "cbIndice";
 
     public static void sendDataElement(Connection sqlCon, String path,int unibase)
     {
@@ -19,7 +20,7 @@ public class CatTarif extends Table {
         } else {
             for (String filename : children) {
                 readOnFile(path, filename, tableName + "_DEST", sqlCon);
-                executeQuery(sqlCon, updateTableDest("cbIndice", "cbIndice", tableName, tableName + "_DEST", filename,unibase));
+                executeQuery(sqlCon, updateTableDest(keyColumns, "cbIndice", tableName, tableName + "_DEST", filename,unibase));
                 deleteTempTable(sqlCon, tableName + "_DEST");
 
             }
@@ -29,7 +30,7 @@ public class CatTarif extends Table {
     public static void getDataElement(Connection sqlCon, String path,String database,String time)
     {
         String filename =  file+time+".avro";
-        initTableParam(sqlCon,tableName,configList,"cbIndice");//initTable(sqlCon);
+        initTableParam(sqlCon,tableName,configList,keyColumns);//initTable(sqlCon);
         getData(sqlCon, selectSourceTable(tableName,database,true,""), tableName, path, filename);
         listDeleteAllInfo(sqlCon, path, "deleteList" + filename,tableName,configList,database);
 

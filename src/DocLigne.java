@@ -17,8 +17,9 @@ public class DocLigne extends Table {
     }
 
     public static String updateDepot(){
-        return  "UPDATE dest SET DE_No = ISNULL(dsrc.[DE_No],dest.DE_No) \n"+
-                " FROM F_DOCLIGNE_TMP dest  \n" +
+        return  "UPDATE tmp SET DE_No = ISNULL(dsrc.[DE_No],dest.DE_No) \n"+
+                " FROM F_DOCLIGNE_TMP tmp  \n" +
+                " INNER JOIN F_DOCLIGNE_DEST dest ON tmp.cbMarqSource = dest.cbMarqSource  \n" +
                 " LEFT JOIN F_DEPOT dsrc  \n" +
                 "  ON ISNULL(dsrc.DE_NoSource,0) = ISNULL(dest.DE_No,0)  \n" +
                 "  AND ISNULL(dsrc.dataBaseSource,'') = ISNULL(dest.dataBaseSource,'')  \n";
@@ -34,9 +35,9 @@ public class DocLigne extends Table {
                 readOnFile(path, filename, tableName + "_DEST", sqlCon);
                 executeQuery(sqlCon, updateDocLigne(filename));
 
-                executeQuery(sqlCon,insertTmpTable (tableName,tableName+"_DEST","cbMarqSource,databaseSource",filename,0,0,"","","DE_No"));
+                executeQuery(sqlCon,insertTmpTable(tableName,tableName+"_DEST","cbMarqSource,databaseSource",filename,0,0,"","","DE_No"));
                 executeQuery(sqlCon,updateDepot());
-                executeQuery(sqlCon,insertTable (tableName,tableName+"_TMP","cbMarqSource,databaseSource",filename,0,0,"","",""));
+                executeQuery(sqlCon,insertTable(tableName,tableName+"_TMP","cbMarqSource,databaseSource",filename,1,0,"DL_No","",""));
 //                sendData(sqlCon, path, filename, insert(filename));
                 enableTrigger(sqlCon,tableName);
                 //deleteTempTable(sqlCon, tableName+"_DEST");

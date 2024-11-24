@@ -7,6 +7,7 @@ public class Compteg extends Table {
     public static String file = "compteg_";
     public static String tableName = "F_COMPTEG";
     public static String configList = "listCompteg";
+    public static String keyColumns = "CG_Num,CG_Type";
 
     public static void sendDataElement(Connection sqlCon, String path,int unibase)
     {
@@ -19,7 +20,7 @@ public class Compteg extends Table {
         } else {
             for (String filename : children) {
                 readOnFile(path, filename, tableName + "_DEST", sqlCon);
-                executeQuery(sqlCon, updateTableDest("CG_Num,CG_Type", "CG_Num,CG_Type", tableName, tableName + "_DEST", filename,unibase));
+                executeQuery(sqlCon, updateTableDest(keyColumns, "CG_Num,CG_Type", tableName, tableName + "_DEST", filename,unibase));
                 executeQuery(sqlCon,insertTable (tableName,tableName+"_DEST","CG_Num",filename,0,0,"","",""));
 
                 deleteTempTable(sqlCon, tableName + "_DEST");

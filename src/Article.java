@@ -6,6 +6,7 @@ public class Article extends Table {
     public static String file = "article_";
     public static String tableName = "F_ARTICLE";
     public static String configList = "listArticle";
+    public static String keyColumns = "AR_Ref";
 
     public static void linkArticle(Connection sqlCon)
     {
@@ -32,8 +33,8 @@ public class Article extends Table {
         } else {
             for (String filename : children) {
                 readOnFile(path, filename, tableName + "_DEST", sqlCon);
-                executeQuery(sqlCon, updateTableDest("AR_Ref", "AR_Ref,AR_SuiviStock", tableName, tableName + "_DEST", filename,unibase));
-                executeQuery(sqlCon,insertTable (tableName,tableName+"_DEST","AR_Ref",filename,0,0,"","",""));
+                executeQuery(sqlCon, updateTableDest(keyColumns, "AR_Ref,AR_SuiviStock", tableName, tableName + "_DEST", filename,unibase));
+                executeQuery(sqlCon,insertTable (tableName,tableName+"_DEST",keyColumns,filename,0,0,"","",""));
                 Condition.sendDataElement(sqlCon, path,unibase);
                 RessourceProd.sendDataElement(sqlCon, path,unibase);
                 ArticleRessource.sendDataElement(sqlCon, path,unibase);
@@ -45,14 +46,14 @@ public class Article extends Table {
 
             }
         }
-        loadDeleteFile(path,sqlCon,file,tableName,"","AR_Ref");
+        loadDeleteFile(path,sqlCon,file,tableName,"",keyColumns);
     }
 
     public static void getDataElementFilterAgency(Connection sqlCon, String path,String database,String time,String agency)
     {
 
         String filename =  file+time+".avro";
-        initTableParam(sqlCon,tableName,configList,"AR_Ref");//initTable(sqlCon);
+        initTableParam(sqlCon,tableName,configList,keyColumns);//initTable(sqlCon);
         getData(sqlCon, selectSourceTableFilterAgencyArticle(tableName,database,agency), tableName, path, filename);
         listDeleteAllInfo(sqlCon, path, "deleteList" + filename,tableName,configList,database);
         Condition.getDataElement(sqlCon, path,database, time);
@@ -68,7 +69,7 @@ public class Article extends Table {
     public static void getDataElement(Connection sqlCon, String path,String database,String time)
     {
         String filename =  file+time+".avro";
-        initTableParam(sqlCon,tableName,configList,"AR_Ref");//initTable(sqlCon);
+        initTableParam(sqlCon,tableName,configList,keyColumns);//initTable(sqlCon);
         getData(sqlCon, selectSourceTable(tableName,database,true,""), tableName, path, filename);
         listDeleteAllInfo(sqlCon, path, "deleteList" + filename,tableName,configList,database);
         Condition.getDataElement(sqlCon, path,database, time);

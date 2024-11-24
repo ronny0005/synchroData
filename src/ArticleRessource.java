@@ -7,6 +7,8 @@ public class ArticleRessource extends Table {
     public static String file ="articleressource_";
     public static String tableName = "F_ARTICLERESSOURCE";
     public static String configList = "ListArticleRessource";
+    public static String keyColumns = "RP_Code,AR_Ref";
+
     public static String list()
     {
         return "SELECT\t[AR_Ref],[RP_Code],[cbProt],[cbMarq]\n" +
@@ -27,18 +29,18 @@ public class ArticleRessource extends Table {
         } else {
             for (String filename : children) {
                 readOnFile(path, filename, tableName + "_DEST", sqlCon);
-                executeQuery(sqlCon, updateTableDest("RP_Code,AR_Ref", "RP_Code", tableName, tableName + "_DEST", filename,unibase));
+                executeQuery(sqlCon, updateTableDest(keyColumns, "RP_Code", tableName, tableName + "_DEST", filename,unibase));
                 executeQuery(sqlCon,insertTable (tableName,tableName+"_DEST","AR_Ref,RP_Code",filename,0,0,"","",""));
             }
         }
 
-        loadDeleteFile(path,sqlCon,file,tableName,"","AR_Ref,RP_Code");
+        loadDeleteFile(path,sqlCon,file,tableName,"",keyColumns);
     }
 
     public static void getDataElement(Connection sqlCon, String path,String database,String time)
     {
         String filename =  file+time+".avro";
-        initTableParam(sqlCon,tableName,configList,"RP_Code,AR_Ref");//initTable(sqlCon);
+        initTableParam(sqlCon,tableName,configList,keyColumns);//initTable(sqlCon);
         getData(sqlCon, selectSourceTable(tableName,database,true,""), tableName, path, filename);
         listDeleteAllInfo(sqlCon, path, "deleteList" + filename,tableName,configList,database);
     }

@@ -60,13 +60,14 @@ public class EcritureA extends Table {
     }
 
     public static String updateECNo (){
-        return  "UPDATE dest SET EC_No = ecr.[EC_No]" +
-                "FROM\t[F_ECRITUREA_TMP] dest\n" +
+        return  "UPDATE tmp SET EC_No = ISNULL(ecr.EC_No,dest.[EC_No])" +
+                "FROM\tF_ECRITUREA_TMP tmp\n" +
+                "INNER JOIN\tF_ECRITUREA_DEST dest ON dest.cbMarqSource = tmp.cbMarqSource\n" +
                 "LEFT JOIN F_ECRITUREC ecr\n" +
                 "\tON\tISNULL(ecr.EC_NoSource,0) = ISNULL(dest.EC_No,0)\n" +
                 "\tAND ISNULL(ecr.DataBaseSource,'') = ISNULL(dest.DataBaseSource,'');" +
                 "\nDELETE FROM [F_ECRITUREA_TMP]\n" +
-                "\nWHERE EC_No IS NOT NULL;\n";
+                "\nWHERE EC_No IS NULL;\n";
     }
     public static void sendDataElement(Connection  sqlCon, String path,String database,int unibase)
     {
@@ -80,14 +81,14 @@ public class EcritureA extends Table {
             for (String filename : children) {
                 dbSource = database;
                 readOnFile(path, filename, tableName + "_DEST", sqlCon);
+
+                disableTrigger(sqlCon,tableName);
                 executeQuery(sqlCon, updateTableDest("", "EC_No,N_Analytique", tableName, tableName + "_DEST", filename,unibase));
 
                 executeQuery(sqlCon,insertTmpTable (tableName,tableName+"_DEST","cbMarqSource,dataBaseSource",filename,0,0,"","","EC_No"));
                 executeQuery(sqlCon,updateECNo());
                 executeQuery(sqlCon,insertTable (tableName,tableName+"_TMP","cbMarqSource,dataBaseSource",filename,0,0,"","",""));
-
-                deleteTempTable(sqlCon, tableName + "_DEST");
-
+                enableTrigger(sqlCon,tableName);
             }
         }
         loadDeleteFile(path,sqlCon,file,tableName,"cbMarq","dataBaseSource");

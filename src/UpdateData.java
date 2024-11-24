@@ -48,7 +48,7 @@ public class UpdateData {
             for (Object o : listObject) {
                 JSONObject list = (JSONObject) o;
 
-                if (list.get("reception").equals("1")) {
+                if (list.get("reception").equals("1") && list.get("active").equals("1")) {
                     int unibase = 0;
                     String path = ((String) list.get("path"));
                     FileFilter zipFileFilter = (file) -> {

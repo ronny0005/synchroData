@@ -7,6 +7,7 @@ public class ArtFourniss extends Table {
     public static String file ="ArtFourniss_";
     public static String tableName = "F_ARTFOURNISS";
     public static String configList = "listArtFourniss";
+    public static String keyColumns = "AR_Ref,CT_Num";
 
     public static void sendDataElement(Connection sqlCon, String path,int unibase)
     {
@@ -18,8 +19,8 @@ public class ArtFourniss extends Table {
         } else {
             for (String filename : children) {
                 readOnFile(path, filename, tableName + "_DEST", sqlCon);
-                executeQuery(sqlCon, updateTableDest("AR_Ref,CT_Num", "AR_Ref,CT_Num", tableName, tableName + "_DEST", filename,unibase));
-                executeQuery(sqlCon,insertTable (tableName,tableName+"_DEST","AR_Ref,CT_Num",filename,0,0,"","",""));
+                executeQuery(sqlCon, updateTableDest(keyColumns, keyColumns, tableName, tableName + "_DEST", filename,unibase));
+                executeQuery(sqlCon,insertTable (tableName,tableName+"_DEST",keyColumns,filename,0,0,"","",""));
 
                 deleteTempTable(sqlCon, tableName + "_DEST");
 
@@ -31,7 +32,7 @@ public class ArtFourniss extends Table {
     public static void getDataElement(Connection sqlCon, String path,String database,String time)
     {
         String filename =  file+time+".avro";
-        initTableParam(sqlCon,tableName,configList,"AR_Ref,CT_Num");//initTable(sqlCon);
+        initTableParam(sqlCon,tableName,configList,keyColumns);//initTable(sqlCon);
         getData(sqlCon, selectSourceTable(tableName,database,true,"")/*list()*/, tableName, path, filename);
         listDeleteAllInfo(sqlCon, path, "deleteList" + filename,tableName,configList,database);
     }

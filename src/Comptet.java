@@ -11,8 +11,9 @@ public class Comptet extends Table {
 
     public static String updateDepotInsert() {
 
-        return "UPDATE dest SET DE_No = ISNULL(dep.DE_No,dest.[DE_No])\n" +
-                "FROM F_COMPTET_TMP dest\n" +
+        return "UPDATE tmp SET DE_No = ISNULL(dep.DE_No,dest.[DE_No])\n" +
+                "FROM F_COMPTET_TMP tmp\n" +
+                "INNER JOIN F_COMPTET_DEST dest ON dest.[cbMarqSource] = dest.[cbMarqSource]\n" +
                 "LEFT JOIN F_DEPOT dep ON ISNULL(dep.DE_NoSource,0) = ISNULL(dest.DE_No,0) AND ISNULL(dep.dataBaseSource,'') = ISNULL(dest.dataBaseSource,'')   \n" +
                 "\n";
     }
@@ -32,7 +33,7 @@ public class Comptet extends Table {
                 disableTrigger(sqlCon,tableName);
                 executeQuery(sqlCon, updateTableDest("CT_Num,CT_Type", "CT_Num,CT_Type,DE_No", tableName, tableName + "_DEST", filename,unibase));
                 executeQuery(sqlCon,insertTmpTable (tableName,tableName+"_DEST","CT_Num,CT_Type",filename,0,0,"","","DE_No"));
-                //executeQuery(sqlCon,updateDepotInsert());
+                executeQuery(sqlCon,updateDepotInsert());
                 executeQuery(sqlCon,insertTable (tableName,tableName+"_TMP","CT_Num,CT_Type",filename,0,0,"","",""));
 
                 //             deleteTempTable(sqlCon, tableName + "_DEST");
