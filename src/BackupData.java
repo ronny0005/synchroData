@@ -11,12 +11,18 @@ import java.util.Properties;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
+/**
+ * The BackupData class provides methods to handle database information and to create zip archives of specific files.
+ * It interacts with the database to extract, process, and backup data based on user-defined conditions.
+ */
 public class BackupData {
+
+    public static ConfigInfo configInfo;
 
     public static void zip(File path,String creationDate){
 
         FileFilter csvFileFilter = (file) -> {
-            return file.getName().endsWith(".avro");
+            return file.getName().endsWith(".csv");
         };
 
         File[] files = path.listFiles(csvFileFilter);
@@ -53,7 +59,7 @@ public class BackupData {
         String databaseSourceFile = "resource/databaseSource.json";
         if(args.length > 0)
             databaseSourceFile = args[0];
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyyMMddHHmmssSSS");
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyyMMddHHmmss");
 
         try {
             Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
@@ -72,17 +78,19 @@ public class BackupData {
                         Properties properties = new Properties();
                         properties.put("user", list.get("username"));
                         properties.put("password", list.get("password"));
+                        configInfo = new ConfigInfo((String) list.get("servername"),(String) list.get("username"),(String) list.get("password"),(String) list.get("database"));
+
                         Connection sqlCon = DriverManager.getConnection(dbURL, properties);
                         sqlCon.setAutoCommit(true);
 
-    //            ReglEch.getDataElement(sqlCon, path,list.get(1));
+          //            ReglEch.getDataElement(sqlCon, path,list.get(1));
                         String database = (String) list.get("database");
                         Object valueSelect = list.get("taxe");
 
                         valueSelect = list.get("taxe");
                         if (valueSelect != null && valueSelect.equals("1")) {
                             System.out.println("--Sauvegarde taxe--");
-                            Taxe.getDataElement(sqlCon, path, database, simpleDateFormat.format(new Date()));
+                            Taxe.getDataElement(sqlCon, path, database, simpleDateFormat.format(new Date()),configInfo);
                         }
                         valueSelect = list.get("depot");
                         if (valueSelect != null && valueSelect.equals("1")) {

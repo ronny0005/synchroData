@@ -1,3 +1,4 @@
+import java.io.File;
 import java.sql.Connection;
 
 public class Reglement extends Table {
@@ -20,7 +21,9 @@ public class Reglement extends Table {
 
     public static String updateCaisse(){
         return  " UPDATE tmp SET CA_No = ISNULL(cai.[CA_No],dest.[CA_No]) \n"+
+                " ,CG_Num = cptg.CG_Num \n" +
                 " FROM F_CREGLEMENT_TMP tmp \n" +
+                " LEFT JOIN F_COMPTEG cptg ON cptg.CG_Num = tmp.CG_Num\n" +
                 " INNER JOIN F_CREGLEMENT_DEST dest ON dest.cbMarqSource = tmp.cbMarqSource \n" +
                 " LEFT JOIN F_CAISSE cai ON ISNULL(cai.CA_NoSource,0) = ISNULL(dest.CA_No,0)\n" +
                 " AND ISNULL(cai.dataBaseSource,'') = ISNULL(dest.dataBaseSource,'')  \n";
@@ -33,7 +36,6 @@ public class Reglement extends Table {
         disableTrigger(sqlCon,tableName);
         loadDeleteFile(path,sqlCon,file,tableName,"RG_No","dataBaseSource");
         enableTrigger(sqlCon,tableName);
-//        DocEntete.loadDeleteFile(path,sqlCon);
     }
 
     public static void loadFile(String path,Connection sqlCon){
@@ -55,16 +57,19 @@ public class Reglement extends Table {
 
     public static void getDataElement(Connection sqlCon, String path,String database,String time)
     {
-        String filename =  file+time+".avro";
+        String filename =  file+time+".csv";
         dbSource = database;
         initTableParam(sqlCon,tableName,configList,"RG_No,DatabaseSource");
         getData(sqlCon, selectSourceTable(tableName,database,true,"RG_No"), tableName, path, filename);
+        File avroFile = new File(path + "//" + filename);
+        if (avroFile.exists())
+            executeQuery(sqlCon,updateSelectTable(tableName,true));
         listDeleteAllInfo(sqlCon, path, "deleteList" + filename,tableName,configList,database);
     }
 
     public static void getDataElementFilterAgency(Connection sqlCon, String path,String database,String time,String agency)
     {
-        String filename =  file+time+".avro";
+        String filename =  file+time+".csv";
         dbSource = database;
         initTableParam(sqlCon,tableName,configList,"RG_No,DatabaseSource");
         getData(sqlCon, selectSourceTableFilterAgencyRegltLink(tableName,database,agency), tableName, path, filename);

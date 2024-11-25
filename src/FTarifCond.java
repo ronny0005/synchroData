@@ -28,9 +28,12 @@ public class FTarifCond extends Table{
     }
     public static void getDataElement(Connection sqlCon, String path,String database,String time)
     {
-        String filename =  file+time+".avro";
+        String filename =  file+time+".csv";
         initTableParam(sqlCon,tableName,configList,"AR_Ref,CO_No");
         getData(sqlCon, selectSourceTable(tableName,database,true,""), tableName, path, filename);
+        File avroFile = new File(path + "//" + filename);
+        if (avroFile.exists())
+            executeQuery(sqlCon,updateSelectTable(tableName,true));
         listDeleteAllInfo(sqlCon, path, "deleteList" + filename,tableName,configList,database);
 
     }

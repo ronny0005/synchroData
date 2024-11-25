@@ -144,7 +144,7 @@ public class ArtStock extends Table {
                 " SELECT @MonSQL = @MonSQL+ ',' + @MaColonne \n" +
                 "\n" +
                 " FETCH NEXT\n" +
-                "    FROM @getid INTO @MaColonne --, @name\n" +
+                "    FROM @getid INTO @MaColonne /*, @name*/\n" +
                 "END\n" +
                 "CLOSE @getid\n" +
                 "DEALLOCATE @getid\n" +
@@ -164,15 +164,18 @@ public class ArtStock extends Table {
 
     public static void getDataElement(Connection  sqlCon, String path,String database,String time)
     {
-        String filename =  file+time+".avro";
+        String filename =  file+time+".csv";
         initTableParam(sqlCon,tableName,configList,"AR_Ref,DE_No");
         getData(sqlCon, selectSourceTable(tableName,database), tableName, path, filename);
+        File avroFile = new File(path + "//" + filename);
+        if (avroFile.exists())
+            executeQuery(sqlCon,updateSelectTable(tableName,true));
         listDeleteAllInfo(sqlCon, path, "deleteList" + filename,tableName,configList,database);
     }
 
     public static void getDataElementFilterAgency(Connection  sqlCon, String path,String database,String time,String agency)
     {
-        String filename =  file+time+".avro";
+        String filename =  file+time+".csv";
         initTableParam(sqlCon,tableName,configList,"AR_Ref,DE_No");
         getData(sqlCon, selectSourceTableFilterAgency(tableName,database,agency,"DE_No"), tableName, path, filename);
         listDeleteAllInfo(sqlCon, path, "deleteList" + filename,tableName,configList,database);

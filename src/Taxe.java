@@ -16,7 +16,8 @@ public class Taxe extends Table {
         } else {
             for (String filename : children) {
                 readOnFile(path, filename, tableName + "_DEST", sqlCon);
-                executeQuery(sqlCon, updateTableDest("TA_Code", "TA_Code", tableName, tableName + "_DEST", filename,unibase));
+                BCPExporter.importDataToBCP(path+"//" +filename, tableName + "_DEST",  sqlCon);
+               // executeQuery(sqlCon, updateTableDest("TA_Code", "TA_Code", tableName, tableName + "_DEST", filename,unibase));
                 executeQuery(sqlCon,insertTable (tableName,tableName+"_DEST","TA_Code",filename,0,0,"","",""));
 
                 deleteTempTable(sqlCon, tableName + "_DEST");
@@ -26,11 +27,16 @@ public class Taxe extends Table {
         loadDeleteFile(path,sqlCon,file,tableName,"","TA_Code");
     }
 
-    public static void getDataElement(Connection sqlCon, String path,String database,String time)
+    public static void getDataElement(Connection sqlCon, String path,String database,String time,ConfigInfo configInfo)
     {
-        String filename =  file+time+".avro";
+        String filename =  file+time+".csv";
         initTableParam(sqlCon,tableName,configList,"TA_Code");
+        //getDataNew(configInfo, selectSourceTable(tableName,database,true,""), path,  filename);
         getData(sqlCon, selectSourceTable(tableName,database,true,""), tableName, path, filename);
+        File avroFile = new File(path + "//" + filename);
+        if (avroFile.exists())
+            executeQuery(sqlCon,updateSelectTable(tableName,true));
+
         listDeleteAllInfo(sqlCon, path, "deleteList" + filename,tableName,configList,database);
     }
 

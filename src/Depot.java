@@ -46,7 +46,7 @@ public class Depot extends Table{
     }
     public static void getDataElement(Connection sqlCon, String path,String database,String time)
     {
-        String filename =  file+time+".avro";
+        String filename =  file+time+".csv";
         initTableParam(sqlCon,tableName,configList,"DE_No,DatabaseSource");
         getData(sqlCon, selectSourceTable(tableName,database,true,"DE_No"), tableName, path, filename);
         listDeleteAllInfo(sqlCon, path, "deleteList" + filename,tableName,configList,database);
@@ -55,9 +55,12 @@ public class Depot extends Table{
     }
     public static void getDataElementFilterAgency(Connection sqlCon, String path,String database,String time,String agency)
     {
-        String filename =  file+time+".avro";
+        String filename =  file+time+".csv";
         initTableParam(sqlCon,tableName,configList,"DE_No,DatabaseSource");
         getData(sqlCon, selectSourceTableFilterAgency(tableName,database,agency,"DE_No,DatabaseSource"), tableName, path, filename);
+        File avroFile = new File(path + "//" + filename);
+        if (avroFile.exists())
+            executeQuery(sqlCon,updateSelectTable(tableName,true));
         listDeleteAllInfo(sqlCon, path, "deleteList" + filename,tableName,configList,database);
 
         DepotEmpl.getDataElement(sqlCon, path,database, time);

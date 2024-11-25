@@ -74,14 +74,14 @@ public class UpdateData {
                         String database = (String) list.get("database");
     //            DocLigne.sendDataElement(sqlCon, path,list.get(1));
 
+                        if ((list.get("taxe")).equals("1")) {
+                            System.out.println("--Chargement Taxe--");
+                            Taxe.sendDataElement(sqlCon, path,unibase);
+                        }
                         Object valueSelect = list.get("compteg");
                         if ((list.get("compteg")).equals("1")) {
                             System.out.println("--Chargement Compte Général--");
                             Compteg.sendDataElement(sqlCon, path,unibase);
-                        }
-                        if ((list.get("taxe")).equals("1")) {
-                            System.out.println("--Chargement Taxe--");
-                            Taxe.sendDataElement(sqlCon, path,unibase);
                         }
                         if ((list.get("collaborateur")).equals("1")) {
                             System.out.println("--Chargement Collaborateur--");

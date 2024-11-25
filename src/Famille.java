@@ -31,10 +31,12 @@ public class Famille extends Table {
 
     public static void getDataElement(Connection sqlCon, String path,String database,String time)
     {
-        String filename =  file+time+".avro";
+        String filename =  file+time+".csv";
         initTableParam(sqlCon,tableName,configList,"FA_CodeFamille");
         getData(sqlCon, selectSourceTable(tableName,database,true,""), tableName, path, filename);
-
+        File avroFile = new File(path + "//" + filename);
+        if (avroFile.exists())
+            executeQuery(sqlCon,updateSelectTable(tableName,true));
         FamCompta.getDataElement(sqlCon, path,database, time);
         listDeleteAllInfo(sqlCon, path, "deleteList" + filename,tableName,configList,database);
 

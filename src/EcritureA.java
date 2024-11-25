@@ -95,29 +95,13 @@ public class EcritureA extends Table {
     }
     public static void getDataElement(Connection  sqlCon, String path,String database,String time)
     {
-        String filename =  file+time+".avro";
+        String filename =  file+time+".csv";
         dbSource = database;
         initTableParam(sqlCon,tableName,configList,"EC_No,DataBaseSource");
         getData(sqlCon, selectSourceTable(tableName,database,true,"EC_No"), tableName, path, filename);
+        File avroFile = new File(path + "//" + filename);
+        if (avroFile.exists())
+            executeQuery(sqlCon,updateSelectTable(tableName,true));
         listDeleteAllInfo(sqlCon, path, "deleteList" + filename,tableName,configList,database);
-    }
-
-    public static void listDeleteEcritureA(Connection sqlCon, String path)
-    {
-        String query = " SELECT lart.EC_No,lart.cbMarq " +
-                " FROM config.ListEcritureA lart " +
-                " LEFT JOIN dbo.F_ECRITUREA fart " +
-                "    ON lart.cbMarq = fart.cbMarq " +
-                " WHERE fart.cbMarq IS NULL " +
-                ";";
-
-        writeToFileAvro(path + "\\deleteList" + file, query, sqlCon);
-        writeOnFile(path + "\\deleteList" + file, query, sqlCon);
-
-        query = " DELETE FROM config.ListEcritureA " +
-                " WHERE NOT EXISTS(SELECT   1 " +
-                "                  FROM     F_ECRITUREA " +
-                "                  WHERE    dbo.F_ECRITUREA.cbMarq = config.ListEcritureA.cbMarq);";
-        executeQuery(sqlCon, query);
     }
 }

@@ -1,5 +1,6 @@
 import org.json.simple.JSONObject;
 
+import java.io.File;
 import java.sql.Connection;
 
 public class DocEntete extends Table {
@@ -33,7 +34,7 @@ public class DocEntete extends Table {
             System.out.println("Either dir does not exist or is not a directory");
         } else {
             for (String filename : children) {
-        //        readOnFile(path, filename, tableName + "_DEST", sqlCon);
+                readOnFile(path, filename, tableName + "_DEST", sqlCon);
                 disableTrigger(sqlCon,tableName);
                 executeQuery(sqlCon,insertTmpTable (tableName,tableName+"_DEST","DO_Piece,DO_Domaine,DO_Type",filename,0,0,"","","DE_No,CA_No,LI_No"));
                 executeQuery(sqlCon,updateDepotInsert());
@@ -51,7 +52,7 @@ public class DocEntete extends Table {
 
     public static void getDataElement(Connection sqlCon, String path,String database,String time,JSONObject type)
     {
-        String filename =  file+time+".avro";
+        String filename =  file+time+".csv";
         dbSource = database;
         initTableParam(sqlCon,tableName,configList,"DO_Domaine,DO_Type,DO_Piece,DatabaseSource");
         getData(sqlCon, selectSourceTable(tableName,database,type,""), tableName, path, filename);
@@ -60,10 +61,13 @@ public class DocEntete extends Table {
 
     public static void getDataElementFilterAgency(Connection sqlCon, String path,String database,String time,String agency)
     {
-        String filename =  file+time+".avro";
+        String filename =  file+time+".csv";
         dbSource = database;
         initTableParam(sqlCon,tableName,configList,"DO_Domaine,DO_Type,DO_Piece,DatabaseSource");
         getData(sqlCon, selectSourceTableFilterAgency(tableName,database,agency,"DE_No"), tableName, path, filename);
+        File avroFile = new File(path + "//" + filename);
+        if (avroFile.exists())
+            executeQuery(sqlCon,updateSelectTable(tableName,true));
         listDeleteAllInfo(sqlCon, path, "deleteList" + filename,tableName,configList,database);
     }
 }

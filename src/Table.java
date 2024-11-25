@@ -27,8 +27,27 @@ import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 public class Table {
 
     private static final String DATE_FORMAT = "yyyy-MM-dd HH:mm:ss.s";
+    private static String extension = ".csv";
     private static Statement stmt;
 
+    public static String updateSelectTable(String table,boolean existsCbModification){
+        return "BEGIN \n" +
+                "\nDECLARE @TableName AS VARCHAR(100) = '"+table+"'; \n" +
+                "\nDECLARE @cbModification VARCHAR(100) = "+ ((!existsCbModification) ? "NULL" : "ISNULL((SELECT CONVERT(NVARCHAR(100),(SELECT MAX(cbModification) FROM " + table + "),25)),'1901-01-01');\n") +
+
+                "IF EXISTS(SELECT 1 FROM config.SelectTable WHERE tableName = @TableName) \n" +
+                " UPDATE config.SelectTable " +
+                "     SET lastSynchro =  CONVERT(DATETIME,@cbModification,20) \n" +
+                "     , isLoaded =  CASE WHEN CONVERT(DATETIME,@cbModification,20) = lastSynchro THEN " +
+                "                               CASE WHEN ISNULL(isLoaded,0) < 2 THEN  ISNULL(isLoaded,0) + 1 ELSE  ISNULL(isLoaded,0) END" +
+                "                       ELSE 0 END\n" +
+                " WHERE tableName = @TableName; \n" +
+                "         ELSE \n" +
+                "             INSERT INTO config.SelectTable(tableName,lastSynchro,isLoaded) VALUES(@TableName,CONVERT(DATETIME,@cbModification,20),0); \n"+
+
+                "\n" +
+                "END";
+    }
     public static String selectSourceTable(String table,String dataSource,boolean existsCbModification,String sourceColumn){
         return "BEGIN \n" +
                 "\nDECLARE @TableName AS VARCHAR(100) = '"+table+"'; \n" +
@@ -41,7 +60,7 @@ public class Table {
                 "INTO #sourceColumn\n" +
                 "FROM STRING_SPLIT(@sourceColumn,',')\n" +
                 "WHERE value <> '';\n"+
-                "IF EXISTS(SELECT 1 FROM config.SelectTable WHERE tableName = @TableName) \n" +
+        /*"IF EXISTS(SELECT 1 FROM config.SelectTable WHERE tableName = @TableName) \n" +
                 " UPDATE config.SelectTable " +
                 "     SET lastSynchro =  CONVERT(DATETIME,@cbModification,20) \n" +
                 "     , isLoaded =  CASE WHEN CONVERT(DATETIME,@cbModification,20) = lastSynchro THEN " +
@@ -49,7 +68,7 @@ public class Table {
                 "                       ELSE 0 END\n" +
                 " WHERE tableName = @TableName; \n" +
                 "         ELSE \n" +
-                "             INSERT INTO config.SelectTable(tableName,lastSynchro,isLoaded) VALUES(@TableName,CONVERT(DATETIME,@cbModification,20),0); \n"+
+                "             INSERT INTO config.SelectTable(tableName,lastSynchro,isLoaded) VALUES(@TableName,CONVERT(DATETIME,@cbModification,20),0); \n"+*/
                 "DECLARE @MaColonne AS VARCHAR(250);\n" +
                 "DECLARE @MonSQL AS VARCHAR(MAX)=''; \n" +
                 "DECLARE @databaseSource AS VARCHAR(150) = '"+dataSource+"'; \n" +
@@ -75,7 +94,7 @@ public class Table {
                 " SELECT @MonSQL = @MonSQL+ ',' + @MaColonne \n" +
                 "\n" +
                 " FETCH NEXT\n" +
-                "    FROM @getid INTO @MaColonne --, @name\n" +
+                "    FROM @getid INTO @MaColonne /*, @name*/\n" +
                 "END\n" +
                 "CLOSE @getid\n" +
                 "DEALLOCATE @getid\n" +
@@ -151,7 +170,7 @@ public class Table {
                 " SELECT @MonSQL = @MonSQL+ ',' + @MaColonne \n" +
                 "\n" +
                 " FETCH NEXT\n" +
-                "    FROM @getid INTO @MaColonne --, @name\n" +
+                "    FROM @getid INTO @MaColonne /*, @name*/\n" +
                 "END\n" +
                 "CLOSE @getid\n" +
                 "DEALLOCATE @getid\n" +
@@ -208,7 +227,7 @@ public class Table {
                 " SELECT @MonSQL = @MonSQL+ ',' + @MaColonne \n" +
                 "\n" +
                 " FETCH NEXT\n" +
-                "    FROM @getid INTO @MaColonne --, @name\n" +
+                "    FROM @getid INTO @MaColonne /*, @name*/\n" +
                 "END\n" +
                 "CLOSE @getid\n" +
                 "DEALLOCATE @getid\n" +
@@ -256,7 +275,7 @@ public class Table {
                 " SELECT @MonSQL = @MonSQL+ ',' + @MaColonne \n" +
                 "\n" +
                 " FETCH NEXT\n" +
-                "    FROM @getid INTO @MaColonne --, @name\n" +
+                "    FROM @getid INTO @MaColonne /*, @name*/\n" +
                 "END\n" +
                 "CLOSE @getid\n" +
                 "DEALLOCATE @getid\n" +
@@ -295,7 +314,7 @@ public class Table {
                 " SELECT @MonSQL = @MonSQL+ ',' + @MaColonne \n" +
                 "\n" +
                 " FETCH NEXT\n" +
-                "    FROM @getid INTO @MaColonne --, @name\n" +
+                "    FROM @getid INTO @MaColonne /*, @name*/\n" +
                 "END\n" +
                 "CLOSE @getid\n" +
                 "DEALLOCATE @getid\n" +
@@ -340,7 +359,7 @@ public class Table {
                 " SELECT @MonSQL = @MonSQL+ ',' + @MaColonne \n" +
                 "\n" +
                 " FETCH NEXT\n" +
-                "    FROM @getid INTO @MaColonne --, @name\n" +
+                "    FROM @getid INTO @MaColonne /*, @name*/\n" +
                 "END\n" +
                 "CLOSE @getid\n" +
                 "DEALLOCATE @getid\n" +
@@ -368,10 +387,16 @@ public class Table {
     public static void listDeleteAllInfo(Connection sqlCon, String path, String file,String table,String listTable,String database)
     {
         String query = listDelete(table,listTable,database);
-        writeToFileAvro(path + "\\" + file, query, sqlCon);
-        writeOnFile(path + "\\" + file, query, sqlCon);
-
+        //AvroConverter.writeToFileAvro(path + "\\" + file, query, sqlCon);
+        CsvConverter.writeOnFile(path + "\\" + file, query, sqlCon);
         query = listDeleteItem(table,listTable);
+        executeQuery(sqlCon, query);
+    }
+
+    public static void listExistsKeys(Connection sqlCon, String path, String file,String table,String keySource,String limitDate)
+    {
+        String query = listExistsKey(table,keySource,limitDate);
+        AvroConverter.writeToFileAvro(path + "\\" + file, query, sqlCon);
         executeQuery(sqlCon, query);
     }
 
@@ -471,6 +496,38 @@ public class Table {
             executeQuery(sqlCon, sql.toString());
     }
 
+    public static String listExistsKey(String table,String keySource,String limitDate){
+        return "BEGIN TRY\n" +
+                "    DECLARE @MaColonne AS VARCHAR(250);\n" +
+                "    DECLARE @MonSQL AS VARCHAR(MAX)=''; \n" +
+                "    DECLARE @TableName AS VARCHAR(100) = '" + table +"';\n" +
+                "    DECLARE @keyColumns AS VARCHAR(100) = ' "+ keySource+"'; \n" +
+                "     DECLARE @limitDate AS INT = "+limitDate+"; \n" +
+                "    \n" +
+                "\t\n" +
+                "\tSELECT @MonSQL = CONCAT('SELECT '+@keyColumns,',DataBaseSource = DB_Name()  FROM ', @TableName,CASE WHEN @limitDate = 1 THEN ' WHERE cbModification > DATEADD(DAY,-365,GETDATE()) ' ELSE '' END);\n" +
+                "    \n" +
+                "\tEXEC (@MonSQL)\n" +
+                "                \n" +
+                "    END TRY\n" +
+                "    BEGIN CATCH \n" +
+                "    INSERT INTO config.DB_Errors\n" +
+                "    VALUES\n" +
+                "    (\n" +
+                "    SUSER_SNAME(),\n" +
+                "    ERROR_NUMBER(),\n" +
+                "    ERROR_STATE(),\n" +
+                "    ERROR_SEVERITY(),\n" +
+                "    ERROR_LINE(),\n" +
+                "    ERROR_PROCEDURE(),\n" +
+                "    ERROR_MESSAGE(),\n" +
+                "    @TableName,\n" +
+                "    @MonSQL,\n" +
+                "    GETDATE()\n" +
+                "    );\n" +
+                "    END CATCH";
+    }
+
     public static String listDelete(String table,String listTable,String database){
         return  "BEGIN TRY\n" +
                 "DECLARE @MaColonne AS VARCHAR(250);\n" +
@@ -524,63 +581,6 @@ public class Table {
                 "END CATCH\n";
     }
     public static String updateTableDest(String key,String exclude,String tableName,String tableNameDest,String filename,int unibase){
-        /*String[] keys = key.split(",");
-        StringBuilder sql = new StringBuilder("\n" +
-                "BEGIN TRY\n" +
-                "SET DATEFORMAT ymd;\n" +
-                "DECLARE @MaColonne AS VARCHAR(250);\n" +
-                "DECLARE @MonSQL AS VARCHAR(MAX) = ''; \n" +
-                "DECLARE @UniBase AS INT = "+unibase+"; \n" +
-                "DECLARE @isKey AS INT=CASE WHEN '" + key + "' = '' THEN 0 ELSE 1 END; \n" +
-                "DECLARE @Key AS NVARCHAR(250) = '" + key + "'; \n" +
-                "DECLARE @TableName AS VARCHAR(100) = '" + tableName + "'; \n" +
-                "DECLARE @TableNameDest AS VARCHAR(100) = '" + tableNameDest + "'; \n" +
-                "DECLARE @getid CURSOR\n" +
-                "\n" +
-                "SET @getid = CURSOR FOR\n" +
-                "SELECT col.name\n" +
-                "FROM sys.tables tab\n" +
-                "INNER JOIN sys.columns col\n" +
-                "\tON tab.object_id = col.object_id\n" +
-                "WHERE tab.name = @TableName\n" +
-                "AND col.name NOT LIKE 'cb%'\n" +
-                "AND col.name NOT IN (" + exclude + ")\n" +
-                "\n" +
-                "OPEN @getid\n" +
-                "FETCH NEXT\n" +
-                "FROM @getid INTO @MaColonne\n" +
-                "WHILE @@FETCH_STATUS = 0\n" +
-                "BEGIN\n" +
-                " SELECT @MonSQL = @MonSQL+ ',' + @MaColonne +' = ' + @TableNameDest + '.' + @MaColonne \n" +
-                " FETCH NEXT\n" +
-                "    FROM @getid INTO @MaColonne \n" +
-                "END\n" +
-                "CLOSE @getid\n" +
-                "DEALLOCATE @getid\n" +
-                " SELECT @MonSQL = 'IF OBJECT_ID('''+@TableNameDest+''') IS NOT NULL UPDATE '+@TableName+' SET '+ SUBSTRING(@MonSQL,2,LEN(@MonSQL));\n" +
-                " SELECT @MonSQL = @MonSQL + ' FROM ' + @TableNameDest  +' WHERE '\n" +
-                "IF @isKey = 0 \n" +
-                "\tSELECT @MonSQL = @MonSQL + @TableName + '.cbMarqSource = '+ @TableNameDest+'.cbMarqSource '\n" +
-                "\t\t\t\t\t\t+' AND CASE WHEN '+CAST(@UniBase AS VARCHAR(150))+'= 0 AND '+@TableName + '.DataBaseSource = '+ @TableNameDest+'.DataBaseSource THEN 1'\n" +
-                "\t\t\t\t\t\t+'             WHEN '+CAST(@UniBase AS VARCHAR(150))+'= 1 THEN 1 ELSE 0 END = 1'\n" +
-                "ELSE \n");
-        for (int i = 0;i< keys.length;i++) {
-            if(i== 0 ) {
-                sql.append(" SELECT @MonSQL = @MonSQL ");
-                sql.append("+ @TableName + '.").append(keys[i]).append(" = '+ @TableNameDest+'.").append(keys[i]).append(" '");
-            }
-            if(i>0)
-                sql.append("+' AND '+@TableName + '.").append(keys[i]).append(" = '+ @TableNameDest+'.").append(keys[i]).append(" '");
-        }
-        sql.append("\n").append("EXEC (@MonSQL) \n").append("\n").append("END TRY\n").append("BEGIN CATCH \n").append("\tINSERT INTO config.DB_Errors\n").append("\tVALUES\n").append("\t(\n").append("\t\tSUSER_SNAME(),\n").append("\t\tERROR_NUMBER(),\n").append("\t\tERROR_STATE(),\n").append("\t\tERROR_SEVERITY(),\n").append("\t\tERROR_LINE(),\n").append("\t\tERROR_PROCEDURE(),\n").append("\t\tERROR_MESSAGE(),\n").append("\t\t@TableName + ' ").append(filename).append("',\n").append("\t\t@MonSQL,\n").append("\t\tGETDATE()\n").append("\t);\n").append("END CATCH");
-
-
-        "DECLARE @UniBase AS INT = "+unibase+"; \n" +
-                "DECLARE @isKey AS INT=CASE WHEN '" + key + "' = '' THEN 0 ELSE 1 END; \n" +
-                "DECLARE @Key AS NVARCHAR(250) = '" + key + "'; \n" +
-                "DECLARE @TableName AS VARCHAR(100) = '" + tableName + "'; \n" +
-                "DECLARE @TableNameDest AS VARCHAR(100) = '" + tableNameDest + "'; \n" +
-                */
         StringBuilder sql = new StringBuilder("\n" +
         "BEGIN TRY\n" +
                 "\n" +
@@ -596,7 +596,7 @@ public class Table {
                 "DECLARE @keyValue VARCHAR(MAX) = ''\n" +
                 "DROP TABLE IF EXISTS #keyJoin;\n" +
                 "DROP TABLE IF EXISTS #exclusionColumn;\n" +
-                "-- Obtenir la liste des colonnes non-IDENTITY\n" +
+                "/* Obtenir la liste des colonnes non-IDENTITY*/\n" +
                 "SELECT *\n" +
                 "\tINTO #keyJoin\n" +
                 "FROM STRING_SPLIT(@keyJoin,',')\n" +
@@ -619,7 +619,7 @@ public class Table {
                 "WITH _Source_ AS (\n" +
                 "SELECT  \n" +
                 "    CASE \n" +
-                "        -- Vérifier si la colonne existe dans F_COMPTETG_DEST\n" +
+                "        /* Vérifier si la colonne existe dans F_COMPTETG_DEST*/\n" +
                 "        WHEN EXISTS (\n" +
                 "            SELECT 1 \n" +
                 "            FROM sys.columns c\n" +
@@ -627,7 +627,7 @@ public class Table {
                 "            WHERE t.name = @tableNameDest\n" +
                 "            AND c.name = col.name\n" +
                 "        ) AND col.name NOT IN (SELECT value FROM #keyJoin) AND col.name NOT IN (SELECT value FROM #exclusionColumn)\n" +
-                "        THEN ''+col.name +' = dest.' + col.name   -- Si la colonne existe, on l'inclut\n" +
+                "        THEN ''+col.name +' = dest.' + col.name   /* Si la colonne existe, on l'inclut*/\n" +
                 "    END AS Col\n" +
                 "FROM sys.tables tab\n" +
                 "INNER JOIN sys.columns col\n" +
@@ -712,7 +712,7 @@ public class Table {
                 "DECLARE @columns NVARCHAR(MAX);\n" +
                 "DROP TABLE IF EXISTS #keyJoin;\n" +
                 "DROP TABLE IF EXISTS #setToNull;\n" +
-                "-- Obtenir la liste des colonnes non-IDENTITY\n" +
+                "/* Obtenir la liste des colonnes non-IDENTITY*/\n" +
                 "SELECT *\n" +
                 "\tINTO #keyJoin\n" +
                 "FROM STRING_SPLIT(@keyJoin,',')\n" +
@@ -734,7 +734,7 @@ public class Table {
                 "WITH _Source_ AS (\n" +
                 "SELECT  \n" +
                 "    CASE \n" +
-                "        -- Vérifier si la colonne existe dans F_COMPTETG_DEST\n" +
+                "        /* Vérifier si la colonne existe dans F_COMPTETG_DEST */\n" +
                 "        WHEN EXISTS (\n" +
                 "            SELECT 1 \n" +
                 "            FROM sys.columns c\n" +
@@ -745,8 +745,8 @@ public class Table {
                 "        THEN CASE WHEN @increment  = 1 AND col.name = @incrementValue THEN '(SELECT ISNULL((SELECT MAX('+@incrementValue+') FROM '+@tableName+'),0)) + ROW_NUMBER() OVER(ORDER BY dest.' + @incrementValue + ' ) AS ' + col.name\n" +
                 "\t\t\t\t\tWHEN @isSource = 1 AND col.name = @keySource+'Source' THEN  'dest.'+@keySource +' AS ' + col.name\n" +
                 "\t\t\t\t\tWHEN col.name IN (SELECT [value] FROM #setToNull) THEN  'NULL AS ' + col.name \n" +
-                "\t\t\t\t\tELSE  'dest.' + col.name  END-- Si la colonne existe, on l'inclut\n" +
-                "        ELSE 'NULL AS ' + col.name  -- Si elle n'existe pas, on met NULL\n" +
+                "\t\t\t\t\tELSE  'dest.' + col.name  END /* Si la colonne existe, on l'inclut */\n" +
+                "        ELSE 'NULL AS ' + col.name  /* Si elle n'existe pas, on met NULL */\n" +
                 "    END AS Col\n" +
                 "FROM sys.tables tab\n" +
                 "INNER JOIN sys.columns col\n" +
@@ -820,7 +820,7 @@ public class Table {
                 "DECLARE @columns NVARCHAR(MAX);\n" +
                 "DROP TABLE IF EXISTS #keyJoin;\n" +
                 "DROP TABLE IF EXISTS #setToNull;\n" +
-                "-- Obtenir la liste des colonnes non-IDENTITY\n" +
+                "/* Obtenir la liste des colonnes non-IDENTITY */\n" +
                 "SELECT *\n" +
                 "\tINTO #keyJoin\n" +
                 "FROM STRING_SPLIT(@keyJoin,',')\n" +
@@ -843,7 +843,7 @@ public class Table {
                 "WITH _Source_ AS (\n" +
                 "SELECT  \n" +
                 "    CASE \n" +
-                "        -- Vérifier si la colonne existe dans F_COMPTETG_DEST\n" +
+                "        /* Vérifier si la colonne existe dans F_COMPTETG_DEST */\n" +
                 "        WHEN EXISTS (\n" +
                 "            SELECT 1 \n" +
                 "            FROM sys.columns c\n" +
@@ -854,8 +854,8 @@ public class Table {
                 "        THEN CASE WHEN @increment  = 1 AND col.name = @incrementValue THEN '(SELECT ISNULL((SELECT MAX('+@incrementValue+') FROM '+@tableName+'),0)) + ROW_NUMBER() OVER(ORDER BY dest.' + @incrementValue + ' ) AS ' + col.name\n" +
                 "\t\t\t\t\tWHEN @isSource = 1 AND col.name = @keySource+'Source' THEN  'dest.'+@keySource +' AS ' + col.name\n" +
                 "\t\t\t\t\tWHEN col.name IN (SELECT [value] FROM #setToNull) THEN  'NULL AS ' + col.name \n" +
-                "\t\t\t\t\tELSE  'dest.' + col.name  END-- Si la colonne existe, on l'inclut\n" +
-                "        ELSE 'NULL AS ' + col.name  -- Si elle n'existe pas, on met NULL\n" +
+                "\t\t\t\t\tELSE  'dest.' + col.name  END /* Si la colonne existe, on l'inclut */\n" +
+                "        ELSE 'NULL AS ' + col.name  /* Si elle n'existe pas, on met NULL */\n" +
                 "    END AS Col \n" +
                 " FROM sys.tables tab\n" +
                 "INNER JOIN sys.columns col\n" +
@@ -952,489 +952,20 @@ public class Table {
     }
 
 
-    public static boolean isDateValid(String date)
-    {
-        try {
-            DateFormat df = new SimpleDateFormat(DATE_FORMAT);
-            df.setLenient(false);
-            df.parse(date);
-            return true;
-        } catch (ParseException e) {
-            return false;
-        }
-    }
-
-    // Fonction de mappage SQL -> Avro
-    private static String mapSQLTypeToAvroType(String sqlType) {
-        switch (sqlType.toLowerCase()) {
-            case "int":
-            case "integer":
-                return "[\"null\", \"int\"]";
-            case "bigint":
-                return "[\"null\", \"long\"]";
-            case "float":
-            case "real":
-                return "[\"null\", \"float\"]";
-            case "double":
-            case "numeric":
-            case "decimal":
-                return "[\"null\", \"string\"]";
-            //return "[\"null\", \"double\"]";
-            case "bit":
-            case "boolean":
-                return "[\"null\", \"boolean\"]";
-            case "char":
-            case "varchar":
-            case "nvarchar":
-            case "text":
-                return "[\"null\", \"string\"]";
-            case "date":
-            case "time":
-            case "timestamp":
-                return "[\"null\", {\"type\": \"string\", \"logicalType\": \"timestamp-millis\"}]";
-            case "smallint":
-                return "[\"null\", \"int\"]";
-            case "tinyint":
-                return "[\"null\", \"int\"]";
-            default:
-                return "[\"null\", \"string\"]";
-        }
-    }
-    // Méthode principale pour écrire et valider un fichier Avro
-    public static void writeToFileAvro(String fileName, String query, Connection sqlCon) {
-        boolean isValid = false;
-        int maxRetries = 3; // Limiter les tentatives pour éviter des boucles infinies
-        int attempts = 0;
-
-        while (!isValid && attempts < maxRetries) {
-            attempts++;
-            try {
-                // Écrire le fichier Avro
-                writeAvroFile(fileName, query, sqlCon);
-
-                // Valider le fichier Avro
-                isValid = validateAvroFile(fileName);
-
-                if (!isValid) {
-                    System.err.println("Le fichier Avro est invalide. Tentative de recréation...");
-                    // Supprimer le fichier corrompu avant de le recréer
-                    new File(fileName).delete();
-                }
-            } catch (Exception e) {
-
-                String queryMessage = "INSERT INTO config.DB_Errors\n" +
-                        "    VALUES\n" +
-                        "  (SUSER_SNAME(),\n" +
-                        "   ERROR_NUMBER(),\n" +
-                        "   ERROR_STATE(),\n" +
-                        "   ERROR_SEVERITY(),\n" +
-                        "   ERROR_LINE(),\n" +
-                        "   ERROR_PROCEDURE(),\n" +
-                        "   '"+ e.getMessage().replace("'","''") +"',\n" +
-                        "   '"+ fileName +"',\n" +
-                        "   NULL,\n" +
-                        "   GETDATE());\n";
-                executeQuery(sqlCon, queryMessage);
-                System.err.println("Erreur lors de la création ou de la validation du fichier Avro : " + e.getMessage());
-            }
-        }
-
-        if (!isValid) {
-            System.err.println("Impossible de créer un fichier Avro valide après " + maxRetries + " tentatives.");
-
-            String queryMessage = "INSERT INTO config.DB_Errors\n" +
-                    "    VALUES\n" +
-                    "  (SUSER_SNAME(),\n" +
-                    "   ERROR_NUMBER(),\n" +
-                    "   ERROR_STATE(),\n" +
-                    "   ERROR_SEVERITY(),\n" +
-                    "   ERROR_LINE(),\n" +
-                    "   ERROR_PROCEDURE(),\n" +
-                    "   '"+ query.replace("'","''") +"',\n" +
-                    "   '"+ fileName +"',\n" +
-                    "   NULL,\n" +
-                    "   GETDATE());\n";
-            executeQuery(sqlCon, queryMessage);
-        } else {
-            System.out.println("Fichier Avro créé et validé avec succès !");
-        }
-    }
-    // Méthode pour écrire le fichier Avro
-    private static void writeAvroFile(String fileName, String query, Connection sqlCon) throws Exception {
-        try (Statement statement = sqlCon.createStatement();
-             ResultSet resultSet = statement.executeQuery(query)) {
-
-            // Récupérer les métadonnées pour construire le schéma Avro
-            ResultSetMetaData metaData = resultSet.getMetaData();
-            int columnCount = metaData.getColumnCount();
-
-            StringBuilder schemaBuilder = new StringBuilder();
-            schemaBuilder.append("{\"type\":\"record\",\"name\":\"ResultSetRecord\",\"fields\":[");
-
-            for (int i = 1; i <= columnCount; i++) {
-                String columnName = metaData.getColumnName(i);
-                String columnType = mapSQLTypeToAvroType(metaData.getColumnTypeName(i));
-                schemaBuilder.append("{\"name\":\"").append(columnName)
-                        .append("\",\"type\":").append(columnType)
-                        .append("}");
-                if (i < columnCount) {
-                    schemaBuilder.append(",");
-                }
-            }
-            schemaBuilder.append("]}");
-
-            org.apache.avro.Schema schema = new org.apache.avro.Schema.Parser().parse(schemaBuilder.toString());
-
-            // Créer un Avro DataFileWriter
-            File file = new File(fileName);
-            DataFileWriter<GenericRecord> dataFileWriter = new DataFileWriter<>(new GenericDatumWriter<>());
-            dataFileWriter.create(schema, file);
-
-            // Ecrire les résultats dans le fichier Avro
-            while (resultSet.next()) {
-                GenericRecord record = new GenericData.Record(schema);
-                for (int i = 1; i <= columnCount; i++) {
-                    Object value = resultSet.getObject(i);
-                    String columnName = metaData.getColumnName(i);
-
-                    if (value == null) {
-                        record.put(columnName, null);
-                    } else {
-                        // Gérer les différents types
-                        if (value instanceof BigDecimal) {
-                            // Convertir BigDecimal en chaîne pour éviter les erreurs de type
-                            record.put(columnName, value.toString());
-                        } else if (value instanceof Short) {
-                            // Convertir Short en int
-                            record.put(columnName, ((Short) value).intValue());
-                        } else if (value instanceof Number) {
-                            // Gérer les types numériques simples
-                            record.put(columnName, value);
-                        } else {
-                            // Convertir les autres types en chaîne
-                            record.put(columnName, value.toString());
-                        }
-                    }
-                }
-                dataFileWriter.append(record);
-            }
-
-            // Fermer le writer
-            dataFileWriter.close();
-        }
-    }
 
 
 
-    // Méthode pour valider un fichier Avro
-    private static boolean validateAvroFile(String fileName) {
-        try (DataFileReader<GenericRecord> reader = new DataFileReader<>(new File(fileName), new GenericDatumReader<>())) {
-            while (reader.hasNext()) {
-                reader.next();
-            }
-            return true; // Le fichier est valide
-        } catch (Exception e) {
-            System.err.println("Erreur de validation du fichier Avro : " + e.getMessage());
-            return false;
-        }
-    }
 
-    public static void writeOnFile(String fileName, String query, Connection sqlCon)
-    {
-        ResultSet result;
-        FileWriter fileWriter;
-        try {
-            result = executeQueryResult(sqlCon,query);
-
-            if(result.isBeforeFirst()) {          //res.isBeforeFirst() is true if the cursor
-                fileWriter = new FileWriter(fileName, StandardCharsets.ISO_8859_1);
-                int columnCount = writeHeaderLine(result, fileWriter);
-                while (result.next()) {
-                    String line = "";
-
-                    for (int i = 1; i <= columnCount; i++) {
-                        Object valueObject = result.getObject(i);
-                        String valueString = "";
-
-                        if (valueObject != null) valueString = valueObject.toString();
-
-                        if (valueObject instanceof String) {
-                            valueString = "\"" + escapeDoubleQuotes(valueString) + "\"";
-                        }
-
-                        if (isDateValid(valueString)) {
-                            valueString = "\"" + valueString.replace(".0", "") + "\"";
-                        }
-
-                        line = line.concat(valueString);
-
-                        if (i != columnCount) {
-                            line = line.concat(";");
-                        }
-                    }
-
-                    fileWriter.write(line + "\n");
-                    fileWriter.flush();
-                }
-                fileWriter.close();
-                stmt.close();
-            }
-        } catch (SQLException | IOException throwables) {
-            throwables.printStackTrace();
-        }
-    }
-
-    // Method to map Avro types to SQL Server types
-    private static String mapAvroTypeToSQLType(org.apache.avro.Schema schema) {
-        org.apache.avro.Schema.Type avroType = schema.getType();
-        if (avroType == org.apache.avro.Schema.Type.UNION) {
-            // If it's a union, find the non-null type
-            List<org.apache.avro.Schema> types = schema.getTypes();
-            for (org.apache.avro.Schema type : types) {
-                if (!type.getType().equals(org.apache.avro.Schema.Type.NULL)) {
-                    avroType = type.getType();
-                    break;
-                }
-            }
-        }
-
-        switch (avroType) {
-            case INT:
-                return "INT";
-            case LONG:
-                return "BIGINT";
-            case FLOAT:
-                return "REAL";
-            case DOUBLE:
-                return "FLOAT";
-            case BOOLEAN:
-                return "BIT";
-            case STRING:
-                return "NVARCHAR(MAX)";
-            case BYTES:
-                return "VARBINARY(MAX)";
-            default:
-                return "NVARCHAR(MAX)";
-        }
-    }
-
-    public static boolean isValidAvroFile(String filePath) {
-        try (FileInputStream fis = new FileInputStream(filePath)) {
-            byte[] magicBytes = new byte[4];
-            if (fis.read(magicBytes) != 4) {
-                return false; // Fichier trop petit pour être un fichier Avro valide
-            }
-            // Comparer les octets magiques avec ceux attendus pour Avro
-            return (magicBytes[0] == 0x4F && magicBytes[1] == 0x62 &&
-                    magicBytes[2] == 0x6A && magicBytes[3] == 0x01);
-        } catch (IOException e) {
-            // Gérer les erreurs liées à la lecture du fichier
-            System.err.println("Erreur lors de la lecture du fichier: " + filePath);
-            return false;
-        }
-    }
-
-    // Lire le fichier Avro et insérer les données dans la base de données
-    public static void insertAvroDataToSqlServer(String avroFilePath, String tableName, Connection conn) {
-        // Vérifier si le fichier est un fichier Avro valide avant de le lire
-        if (!isValidAvroFile(avroFilePath)) {
-            System.err.println("Le fichier n'est pas un fichier Avro valide: " + avroFilePath);
-
-            String queryMessage = "INSERT INTO config.DB_Errors\n" +
-                    "    VALUES\n" +
-                    "  (SUSER_SNAME(),\n" +
-                    "   ERROR_NUMBER(),\n" +
-                    "   ERROR_STATE(),\n" +
-                    "   ERROR_SEVERITY(),\n" +
-                    "   ERROR_LINE(),\n" +
-                    "   ERROR_PROCEDURE(),\n" +
-                    "   '"+ avroFilePath +"',\n" +
-                    "   '"+ avroFilePath +"',\n" +
-                    "   '"+ tableName +"',\n" +
-                    "   GETDATE());\n";
-            executeQuery(conn, queryMessage);
-
-            return;
-        }
-
-        File avroFile = new File(avroFilePath);
-
-        if (!avroFile.exists()) {
-            System.err.println("File does not exist: " + avroFilePath);
-            return;
-        }
-
-        DatumReader<GenericRecord> datumReader = new GenericDatumReader<>();
-
-        try (org.apache.avro.file.FileReader<GenericRecord> dataFileReader = DataFileReader.openReader(avroFile, datumReader)) {
-            // Get Avro schema
-            org.apache.avro.Schema schema = dataFileReader.getSchema();
-
-            // Create table dynamically
-            createTableFromSchema(conn, schema, tableName);
-
-            // Prepare insert query
-            String sqlInsertQuery = generateInsertQuery(schema, tableName);
-            try (PreparedStatement preparedStatement = conn.prepareStatement(sqlInsertQuery)) {
-
-                // Read each Avro record and insert into the database
-                while (dataFileReader.hasNext()) {
-                    GenericRecord record = dataFileReader.next();
-                    setPreparedStatementParameters(preparedStatement, record);
-                    preparedStatement.executeUpdate();
-                }
-            }
-        } catch (InvalidAvroMagicException e) {
-            System.err.println("Error: Not a valid Avro file. Path: " + avroFilePath);
-        } catch (IOException e) {
-            System.err.println("IO Exception while reading file: " + avroFilePath);
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    // Method to create a SQL Server table from Avro schema
-    private static void createTableFromSchema(Connection conn, org.apache.avro.Schema schema, String tableName) throws SQLException {
-        StringBuilder createTableQuery = new StringBuilder("DROP TABLE IF EXISTS ").append(tableName).append("; CREATE TABLE ");
-        createTableQuery.append(tableName).append(" (");
-
-        for (org.apache.avro.Schema.Field field : schema.getFields()) {
-            createTableQuery.append(field.name()).append(" ");
-            createTableQuery.append(mapAvroTypeToSQLType(field.schema())).append(",");
-        }
-
-        // Remove the last comma
-        createTableQuery.setLength(createTableQuery.length() - 1);
-        createTableQuery.append(");");
-
-        try (Statement stmt = conn.createStatement()) {
-            stmt.execute(createTableQuery.toString());
-        }
-    }
-
-    // Method to generate the SQL insert query from Avro schema
-    private static String generateInsertQuery(org.apache.avro.Schema schema, String tableName) {
-        StringBuilder insertQuery = new StringBuilder("INSERT INTO ");
-        insertQuery.append(tableName).append(" (");
-
-        StringBuilder valuesPart = new StringBuilder(" VALUES (");
-
-        for (org.apache.avro.Schema.Field field : schema.getFields()) {
-            insertQuery.append(field.name()).append(",");
-            valuesPart.append("?,");
-        }
-
-        // Remove the last comma
-        insertQuery.setLength(insertQuery.length() - 1);
-        valuesPart.setLength(valuesPart.length() - 1);
-
-        insertQuery.append(") ").append(valuesPart).append(");");
-        return insertQuery.toString();
-    }
-
-    // Method to set parameters for PreparedStatement from GenericRecord
-    private static void setPreparedStatementParameters(PreparedStatement preparedStatement, GenericRecord record) throws SQLException {
-        int index = 1;
-        for (org.apache.avro.Schema.Field field : record.getSchema().getFields()) {
-            Object value = record.get(field.name());
-            org.apache.avro.Schema fieldSchema = field.schema();
-            org.apache.avro.Schema.Type fieldType = fieldSchema.getType();
-
-            // Handle union types by finding the non-null type
-            if (fieldType == org.apache.avro.Schema.Type.UNION) {
-                List<org.apache.avro.Schema> types = fieldSchema.getTypes();
-                for (org.apache.avro.Schema type : types) {
-                    if (!type.getType().equals(org.apache.avro.Schema.Type.NULL)) {
-                        fieldType = type.getType();
-                        break;
-                    }
-                }
-            }
-
-            if (value == null) {
-                preparedStatement.setNull(index, getSqlType(fieldType));
-            } else {
-                switch (fieldType) {
-                    case INT:
-                        preparedStatement.setInt(index, (Integer) value);
-                        break;
-                    case LONG:
-                        preparedStatement.setLong(index, (Long) value);
-                        break;
-                    case FLOAT:
-                        preparedStatement.setFloat(index, (Float) value);
-                        break;
-                    case DOUBLE:
-                        preparedStatement.setDouble(index, (Double) value);
-                        break;
-                    case BOOLEAN:
-                        preparedStatement.setBoolean(index, (Boolean) value);
-                        break;
-                    case STRING:
-                        preparedStatement.setString(index, value.toString());
-                        break;
-                    case BYTES:
-                        preparedStatement.setBytes(index, (byte[]) value);
-                        break;
-                    default:
-                        preparedStatement.setObject(index, value.toString());
-                        break;
-                }
-            }
-            index++;
-        }
-    }
-
-    // Helper method to get SQL type from Avro schema type
-    private static int getSqlType(org.apache.avro.Schema.Type avroType) {
-        switch (avroType) {
-            case INT:
-                return java.sql.Types.INTEGER;
-            case LONG:
-                return java.sql.Types.BIGINT;
-            case FLOAT:
-                return java.sql.Types.FLOAT;
-            case DOUBLE:
-                return java.sql.Types.DOUBLE;
-            case BOOLEAN:
-                return java.sql.Types.BIT;
-            case STRING:
-                return java.sql.Types.NVARCHAR;
-            case BYTES:
-                return java.sql.Types.VARBINARY;
-            default:
-                return java.sql.Types.VARCHAR;
-        }
-    }
 
     public static void readOnFile(String path,String fileInfo,String table,Connection sqlCon)
     {
 
-        insertAvroDataToSqlServer(path.concat("\\").concat(fileInfo),table,sqlCon);
+        //AvroConverter.insertAvroDataToSqlServer(path.concat("\\").concat(fileInfo),table,sqlCon);
+        AvroConverter.insertAvroDataToSqlServer(path.concat("\\").concat(fileInfo),table,sqlCon);
         backupFile(path, fileInfo);
 
     }
 
-    private static String escapeDoubleQuotes(String value) {
-        return value.replaceAll("\"", "\"\"");
-    }
-
-    private static int writeHeaderLine(ResultSet result,FileWriter fileWriter) throws SQLException, IOException {
-        // write header line containing column names
-        ResultSetMetaData metaData = result.getMetaData();
-        int numberOfColumns = metaData.getColumnCount();
-        String headerLine = "";
-
-        // exclude the first column which is the ID field
-        for (int i = 1; i <= numberOfColumns; i++) {
-            String columnName = metaData.getColumnName(i);
-            headerLine = headerLine.concat(columnName).concat(";");
-        }
-
-        fileWriter.write(headerLine.substring(0, headerLine.length() - 1)+"\n");
-
-        return numberOfColumns;
-    }
 
     public static void updateSelectTable(String table, Connection sqlCon)
     {
@@ -1455,10 +986,16 @@ public class Table {
 
     public static void getData(Connection sqlCon, String query,String table,String path,String file)
     {
-        //updateSelectTable(table, sqlCon);
+        CsvConverter.writeOnFile(path + "\\" + file, query, sqlCon);
+     //   AvroConverter.writeToFileAvro(path + "\\" + file, query, sqlCon);
+    }
 
-        writeToFileAvro(path + "\\" + file, query, sqlCon);
-        //writeOnFile(path+"\\"+file, query, sqlCon);
+    public static void getDataNew(ConfigInfo configInfo, String query, String path, String file)
+    {
+        //writeToFileAvro(path + "\\" + file, query, sqlCon);
+        //BCPExporter.exportDataToBCP(query, path + "\\" + file, configInfo.serverName, configInfo.databaseName, configInfo.userName, configInfo.password);
+        BCPExporter.exportDataToBCPWithFormat(query, path + "\\" + file, path + "\\" + file.replace(".bcp",".fmt")
+                , configInfo.serverName, configInfo.databaseName, configInfo.userName, configInfo.password);
     }
 
     public static void executeQuery(Connection sqlCon, String query)

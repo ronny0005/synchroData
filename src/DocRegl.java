@@ -1,5 +1,6 @@
 import org.json.simple.JSONObject;
 
+import java.io.File;
 import java.sql.Connection;
 
 public class DocRegl extends Table {
@@ -54,16 +55,19 @@ public class DocRegl extends Table {
 
     public static void getDataElement(Connection sqlCon, String path, String database, String time, JSONObject type)
     {
-        String filename =  file+time+".avro";
+        String filename =  file+time+".csv";
         dbSource = database;
         initTableParam(sqlCon,tableName,configList,"DO_Domaine,DO_Type,DO_Piece,DR_No,DatabaseSource");
         getData(sqlCon, selectSourceTable(tableName,database,type,"DR_No"), tableName, path, filename);
+        File avroFile = new File(path + "//" + filename);
+        if (avroFile.exists())
+            executeQuery(sqlCon,updateSelectTable(tableName,true));
         listDeleteAllInfo(sqlCon, path, "deleteList" + filename,tableName,configList,database);
 
     }
     public static void getDataElementFilterAgency(Connection sqlCon, String path,String database,String time,String agency)
     {
-        String filename =  file+time+".avro";
+        String filename =  file+time+".csv";
         dbSource = database;
         initTableParam(sqlCon,tableName,configList,"DO_Domaine,DO_Type,DO_Piece,DR_No,DatabaseSource");
         getData(sqlCon, selectSourceTableFilterAgencyEnteteLink(tableName,database,agency), tableName, path, filename);
