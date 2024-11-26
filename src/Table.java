@@ -388,7 +388,7 @@ public class Table {
     {
         String query = listDelete(table,listTable,database);
         //AvroConverter.writeToFileAvro(path + "\\" + file, query, sqlCon);
-        CsvConverter.writeOnFile(path + "\\" + file, query, sqlCon);
+        CsvConverter.exportToCsvWithTypes(path + "\\" + file, query, sqlCon);
         query = listDeleteItem(table,listTable);
         executeQuery(sqlCon, query);
     }
@@ -961,7 +961,7 @@ public class Table {
     {
 
         //AvroConverter.insertAvroDataToSqlServer(path.concat("\\").concat(fileInfo),table,sqlCon);
-        AvroConverter.insertAvroDataToSqlServer(path.concat("\\").concat(fileInfo),table,sqlCon);
+        CsvConverter.importCsvAndCreateTable(sqlCon,path.concat("\\").concat(fileInfo), table);
         backupFile(path, fileInfo);
 
     }
@@ -986,7 +986,7 @@ public class Table {
 
     public static void getData(Connection sqlCon, String query,String table,String path,String file)
     {
-        CsvConverter.writeOnFile(path + "\\" + file, query, sqlCon);
+        CsvConverter.exportToCsvWithTypes(path + "\\" + file, query, sqlCon);
      //   AvroConverter.writeToFileAvro(path + "\\" + file, query, sqlCon);
     }
 

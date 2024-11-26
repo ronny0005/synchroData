@@ -16,12 +16,10 @@ public class JMouv extends Table {
         } else {
             for (String filename : children) {
                 readOnFile(path, filename, tableName + "_DEST", sqlCon);
-
+                disableTrigger(sqlCon,tableName);
                 executeQuery(sqlCon, updateTableDest("JO_Num,JM_Date", "JO_Num,JM_Date", tableName, tableName + "_DEST", filename,unibase));
                 executeQuery(sqlCon,insertTable (tableName,tableName+"_DEST","JO_Num,JM_Date",filename,0,0,"","",""));
-
-                deleteTempTable(sqlCon, tableName + "_DEST");
-
+                enableTrigger(sqlCon,tableName);
             }
         }
         loadDeleteFile(path,sqlCon,file,tableName,"","JO_Num,JM_Date");

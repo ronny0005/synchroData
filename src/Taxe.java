@@ -16,7 +16,7 @@ public class Taxe extends Table {
         } else {
             for (String filename : children) {
                 readOnFile(path, filename, tableName + "_DEST", sqlCon);
-                BCPExporter.importDataToBCP(path+"//" +filename, tableName + "_DEST",  sqlCon);
+                //BCPExporter.importDataToBCP(path+"//" +filename, tableName + "_DEST",  sqlCon);
                // executeQuery(sqlCon, updateTableDest("TA_Code", "TA_Code", tableName, tableName + "_DEST", filename,unibase));
                 executeQuery(sqlCon,insertTable (tableName,tableName+"_DEST","TA_Code",filename,0,0,"","",""));
 
