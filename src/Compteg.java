@@ -12,6 +12,7 @@ public class Compteg extends Table {
     public static void sendDataElement(Connection sqlCon, String path,int unibase)
     {
 
+        deleteAllTable(sqlCon,tableName);
         File dir = new File(path);
         FilenameFilter filter = (dir1, name) -> name.startsWith(file);
         String[] children = dir.list(filter);
@@ -19,8 +20,8 @@ public class Compteg extends Table {
             System.out.println("Either dir does not exist or is not a directory");
         } else {
             for (String filename : children) {
-                readOnFile(path, filename, tableName + "_DEST", sqlCon);
-                executeQuery(sqlCon, updateTableDest(keyColumns, "CG_Num,CG_Type", tableName, tableName + "_DEST", filename,unibase));
+                importFiles(sqlCon, tableName,path,filename);
+                executeQuery(sqlCon, updateTableDest(keyColumns, "CG_Num,CG_Type", tableName, tableName + "_DEST", filename,unibase,0,""));
                 executeQuery(sqlCon,insertTable (tableName,tableName+"_DEST","CG_Num",filename,0,0,"","",""));
 
                 deleteTempTable(sqlCon, tableName + "_DEST");

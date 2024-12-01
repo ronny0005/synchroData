@@ -29,16 +29,18 @@ public class DocEntete extends Table {
     }
 
     public static void loadFile(String path,Connection sqlCon){
+        deleteAllTable(sqlCon,tableName);
         String [] children = getFile(path,file);
         if (children == null) {
             System.out.println("Either dir does not exist or is not a directory");
         } else {
             for (String filename : children) {
-                readOnFile(path, filename, tableName + "_DEST", sqlCon);
+                importFiles(sqlCon, tableName,path,filename);
                 disableTrigger(sqlCon,tableName);
                 executeQuery(sqlCon,insertTmpTable (tableName,tableName+"_DEST","DO_Piece,DO_Domaine,DO_Type",filename,0,0,"","","DE_No,CA_No,LI_No"));
                 executeQuery(sqlCon,updateDepotInsert());
                 executeQuery(sqlCon,insertTable (tableName,tableName+"_TMP","DO_Piece,DO_Domaine,DO_Type",filename,0,0,"","",""));
+                executeQuery(sqlCon, updateTableDest("cbMarqSource,DatabaseSource", "", tableName, tableName + "_TMP", filename,0,0,""));
                 enableTrigger(sqlCon,tableName);
 
             }

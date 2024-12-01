@@ -11,6 +11,7 @@ public class EcritureC extends Table {
 
     public static void sendDataElement(Connection  sqlCon, String path,String database,int unibase)
     {
+        deleteAllTable(sqlCon,tableName);
         File dir = new File(path);
         FilenameFilter filter = (dir1, name) -> name.startsWith(file);
         String[] children = dir.list(filter);
@@ -19,11 +20,11 @@ public class EcritureC extends Table {
         } else {
             for (String filename : children) {
                 dbSource = database;
-                readOnFile(path, filename, tableName + "_DEST", sqlCon);
+                importFiles(sqlCon, tableName,path,filename);
 
                 disableTrigger(sqlCon,tableName);
-                executeQuery(sqlCon, updateTableDest("", "EC_No,JM_Date,JO_Num,EC_CType", tableName, tableName + "_DEST", filename,unibase));
                 executeQuery(sqlCon,insertTable (tableName,tableName+"_DEST","cbMarqSource,dataBaseSource",filename,1,1,"EC_No","EC_No",""));
+                executeQuery(sqlCon, updateTableDest("EC_No", "EC_No,JM_Date,JO_Num,EC_CType", tableName, tableName + "_DEST", filename,unibase,0,"EC_No"));
                 enableTrigger(sqlCon,tableName);
             }
         }

@@ -27,21 +27,20 @@ public class DocLigne extends Table {
     }
 
     public static void loadFile(String path,Connection sqlCon){
+        deleteAllTable(sqlCon,tableName);
         String [] children = getFile(path,file);
         if (children == null) {
             System.out.println("Either dir does not exist or is not a directory");
         } else {
             for (String filename : children){
+                importFiles(sqlCon, tableName,path,filename);
                 disableTrigger(sqlCon,tableName);
-                readOnFile(path, filename, tableName + "_DEST", sqlCon);
-                executeQuery(sqlCon, updateDocLigne(filename));
-
+                //executeQuery(sqlCon, updateDocLigne(filename));
                 executeQuery(sqlCon,insertTmpTable(tableName,tableName+"_DEST","cbMarqSource,databaseSource",filename,0,0,"","","DE_No"));
                 executeQuery(sqlCon,updateDepot());
                 executeQuery(sqlCon,insertTable(tableName,tableName+"_TMP","cbMarqSource,databaseSource",filename,1,0,"DL_No","",""));
-//                sendData(sqlCon, path, filename, insert(filename));
+                executeQuery(sqlCon, updateTableDest("cbMarqSource,DatabaseSource", "", tableName, tableName + "_TMP", filename,0,0,""));
                 enableTrigger(sqlCon,tableName);
-                //deleteTempTable(sqlCon, tableName+"_DEST");
             }
         }
     }

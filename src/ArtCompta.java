@@ -6,9 +6,10 @@ public class ArtCompta extends Table {
     public static String file ="ArtCompta_";
     public static String tableName = "F_ARTCOMPTA";
     public static String configList = "listArtCompta";
-    public static String keyColumns = "AR_Ref,ACP_Type,ACP_Champ";
+    public static String keyColumns = "AR_Ref,ACP_Type,ACP_Champ,ACP_TypeFacture";
 
     public static void sendDataElement(Connection sqlCon, String path,int unibase) {
+        deleteAllTable(sqlCon,tableName);
         File dir = new File(path);
         FilenameFilter filter = (dir1, name) -> name.startsWith(file);
         String[] children = dir.list(filter);
@@ -16,13 +17,11 @@ public class ArtCompta extends Table {
             System.out.println("Either dir does not exist or is not a directory");
         } else {
             for (String filename : children) {
-                readOnFile(path, filename, tableName + "_DEST", sqlCon);
-
-                executeQuery(sqlCon, updateTableDest(keyColumns, keyColumns, tableName, tableName + "_DEST", filename,unibase));
+                importFiles(sqlCon, tableName,path,filename);
+                disableTrigger(sqlCon,tableName);
+                executeQuery(sqlCon, updateTableDest(keyColumns, keyColumns, tableName, tableName + "_DEST", filename,unibase,0,""));
                 executeQuery(sqlCon,insertTable (tableName,tableName+"_DEST",keyColumns,filename,0,0,"","",""));
-
-                deleteTempTable(sqlCon, tableName + "_DEST");
-
+                enableTrigger(sqlCon,tableName);
             }
         }
         loadDeleteFile(path,sqlCon,file,tableName,"",keyColumns);

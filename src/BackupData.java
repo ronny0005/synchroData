@@ -90,7 +90,7 @@ public class BackupData {
                         valueSelect = list.get("taxe");
                         if (valueSelect != null && valueSelect.equals("1")) {
                             System.out.println("--Sauvegarde taxe--");
-                            Taxe.getDataElement(sqlCon, path, database, simpleDateFormat.format(new Date()),configInfo);
+                            Taxe.getDataElement(sqlCon, path, database, simpleDateFormat.format(new Date()));
                         }
                         valueSelect = list.get("depot");
                         if (valueSelect != null && valueSelect.equals("1")) {

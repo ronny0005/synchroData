@@ -10,6 +10,7 @@ public class Livraison extends Table {
 
     public static void sendDataElement(Connection sqlCon, String path,int unibase)
     {
+        deleteAllTable(sqlCon,tableName);
         File dir = new File(path);
         FilenameFilter filter = (dir1, name) -> name.startsWith(file);
         String[] children = dir.list(filter);
@@ -17,13 +18,16 @@ public class Livraison extends Table {
             System.out.println("Either dir does not exist or is not a directory");
         } else {
             for (String filename : children) {
-                readOnFile(path, filename, tableName + "_DEST", sqlCon);
-                executeQuery(sqlCon, updateTableDest("", "LI_NoSource,LI_No,CT_Num,DataBaseSource", tableName, tableName + "_DEST", filename,unibase));
+                importFiles(sqlCon, tableName,path,filename);
+                executeQuery(sqlCon, updateTableDest("LI_No,CT_Num", "LI_NoSource,LI_No,CT_Num,DataBaseSource", tableName, tableName + "_DEST", filename,unibase,0,"LI_No"));
 
+                executeQuery(sqlCon,insertTmpTable (tableName,tableName+"_DEST","LI_No,CT_Num,DatabaseSource",filename,0,1,"","LI_No",""));
+                executeQuery(sqlCon,insertTable (tableName,tableName+"_TMP","LI_No,CT_Num,DatabaseSource",filename,1,0,"LI_No","",""));
             }
         }
         loadDeleteFile(path,sqlCon,file,tableName,"LI_No","CT_Num,DataBaseSource");
     }
+
     public static void getDataElement(Connection sqlCon, String path,String database,String time)
     {
         String filename =  file+time+".csv";

@@ -23,7 +23,7 @@ public class DepotEmpl extends Table {
 
     public static void sendDataElement(Connection sqlCon, String path,int unibase)
     {
-
+        deleteAllTable(sqlCon,tableName);
         File dir = new File(path);
         FilenameFilter filter = (dir1, name) -> name.startsWith(file);
         String[] children = dir.list(filter);
@@ -31,11 +31,11 @@ public class DepotEmpl extends Table {
             System.out.println("Either dir does not exist or is not a directory");
         } else {
             for (String filename : children) {
-                readOnFile(path, filename, tableName + "_DEST", sqlCon);
-                executeQuery(sqlCon, updateTableDest("", "DP_No,DE_No,DP_NoSource", tableName, tableName + "_DEST", filename,unibase));
+                importFiles(sqlCon, tableName,path,filename);
                 executeQuery(sqlCon,insertTmpTable (tableName,tableName+"_DEST","DP_No,DatabaseSource",filename,0,1,"","DP_No","DE_No"));
                 executeQuery(sqlCon,updateDepotInsert());
                 executeQuery(sqlCon,insertTable (tableName,tableName+"_TMP","DP_No",filename,1,0,"DP_No","",""));
+                executeQuery(sqlCon, updateTableDest("DP_No,DatabaseSource", "DP_No,DE_No,DP_NoSource", tableName, tableName + "_TMP", filename,unibase,1,"DP_No"));
             }
         }
         loadDeleteFile(path,sqlCon,file,tableName,"DP_No","DataBaseSource");

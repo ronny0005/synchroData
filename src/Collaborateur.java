@@ -11,6 +11,7 @@ public class Collaborateur extends Table {
 
     public static void sendDataElement(Connection sqlCon, String path,int unibase)
     {
+        deleteAllTable(sqlCon,tableName);
         File dir = new File(path);
         FilenameFilter filter = (dir1, name) -> name.startsWith(file);
         String[] children = dir.list(filter);
@@ -18,8 +19,8 @@ public class Collaborateur extends Table {
             System.out.println("Either dir does not exist or is not a directory");
         } else {
             for (String filename : children) {
-                readOnFile(path, filename, tableName + "_DEST", sqlCon);
-                executeQuery(sqlCon, updateTableDest(keyColumns, "CO_No,CO_Nom", tableName, tableName + "_DEST", filename,unibase));
+                importFiles(sqlCon, tableName,path,filename);
+                executeQuery(sqlCon, updateTableDest(keyColumns, "CO_No,CO_Nom", tableName, tableName + "_DEST", filename,unibase,0,""));
                 executeQuery(sqlCon,insertTable (tableName,tableName+"_DEST","CO_No",filename,0,0,"","",""));
 
                 deleteTempTable(sqlCon, tableName + "_DEST");

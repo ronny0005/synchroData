@@ -10,7 +10,7 @@ public class FamCompta extends Table {
 
     public static void sendDataElement(Connection sqlCon, String path,int unibase)
     {
-
+        deleteAllTable(sqlCon,tableName);
         File dir = new File(path);
         FilenameFilter filter = (dir1, name) -> name.startsWith(file);
         String[] children = dir.list(filter);
@@ -18,8 +18,8 @@ public class FamCompta extends Table {
             System.out.println("Either dir does not exist or is not a directory");
         } else {
             for (String filename : children) {
-                readOnFile(path, filename, tableName + "_DEST", sqlCon);
-                executeQuery(sqlCon, updateTableDest("FA_CodeFamille,FCP_Type,FCP_Champ", "FA_CodeFamille,FCP_Type,FCP_Champ", tableName, tableName + "_DEST", filename,unibase));
+                importFiles(sqlCon, tableName,path,filename);
+                executeQuery(sqlCon, updateTableDest("FA_CodeFamille,FCP_Type,FCP_Champ", "FA_CodeFamille,FCP_Type,FCP_Champ", tableName, tableName + "_DEST", filename,unibase,0,""));
             }
         }
         loadDeleteFile(path,sqlCon,file,tableName,"","FA_CodeFamille,FCP_Type,FCP_Champ");

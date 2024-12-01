@@ -46,16 +46,17 @@ public class ReglEch extends Table {
     }
 
     public static void loadFile(String path,Connection sqlCon,int unibase){
+        deleteAllTable(sqlCon,tableName);
         String [] children = getFile(path,file);
         if (children == null) {
             System.out.println("Either dir does not exist or is not a directory");
         } else {
             for (String filename : children) {
+                importFiles(sqlCon, tableName,path,filename);
                 disableTrigger(sqlCon,tableName);
-                readOnFile(path, filename, tableName + "_DEST", sqlCon);
-                executeQuery(sqlCon, updateTableDest("", "RG_No,DR_No", tableName, tableName + "_DEST",filename,unibase));
                 executeQuery(sqlCon,linkDrRGNo());
                 executeQuery(sqlCon,insertTable (tableName,tableName+"_DEST","cbMarqSource,dataBaseSource",filename,0,1,"","cbMarqSource,DR_NoSource",""));
+                executeQuery(sqlCon, updateTableDest("cbMarqSource,DatabaseSource", "RG_No,DR_No", tableName, tableName + "_DEST",filename,unibase,0,""));
                 enableTrigger(sqlCon,tableName);
 
             }

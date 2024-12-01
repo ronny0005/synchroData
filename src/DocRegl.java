@@ -20,7 +20,7 @@ public class DocRegl extends Table {
 
     public static String deleteEmptyDocEntete(){
         return "DELETE dest\n" +
-                "FROM F_DOCREGL_DEST dest\n" +
+                "FROM F_DOCREGL_TMP dest\n" +
                 "LEFT JOIN F_DOCENTETE docE\n" +
                 "ON docE.DO_Domaine = dest.DO_Domaine\n"+
                 "AND docE.DO_Type = dest.DO_Type\n"+
@@ -28,19 +28,18 @@ public class DocRegl extends Table {
                 "WHERE docE.DO_Piece IS NULL";
     }
     public static void loadFile(String path,Connection sqlCon,int unibase){
+        deleteAllTable(sqlCon,tableName);
         String [] children = getFile(path,file);
         if (children == null) {
             System.out.println("Either dir does not exist or is not a directory");
         } else {
             for (String filename : children){
+                importFiles(sqlCon, tableName,path,filename);
                 disableTrigger(sqlCon,tableName);
-                readOnFile(path, filename, tableName + "_DEST", sqlCon);
-                executeQuery(sqlCon, updateTableDest("", "DR_No", tableName, tableName + "_DEST",filename,unibase));
-
-                executeQuery(sqlCon,insertTmpTable (tableName,tableName+"_DEST","cbMarqSource,DatabaseSource",filename,0,0,"","",""));
+                executeQuery(sqlCon,insertTmpTable (tableName,tableName+"_DEST","cbMarq,DatabaseSource",filename,0,1,"","cbMarq",""));
                 executeQuery(sqlCon,deleteEmptyDocEntete());
+                executeQuery(sqlCon, updateTableDest("cbMarqSource,DatabaseSource", "DR_No", tableName, tableName + "_TMP",filename,unibase,0,""));
                 executeQuery(sqlCon,insertTable (tableName,tableName+"_TMP","cbMarqSource,DatabaseSource",filename,1,0,"DR_No","DR_No",""));
-               // deleteTempTable(sqlCon, tableName+"_DEST");
                 enableTrigger(sqlCon,tableName);
 
             }

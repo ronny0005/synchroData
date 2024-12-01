@@ -10,6 +10,7 @@ public class FJournaux extends Table {
 
     public static void sendDataElement(Connection sqlCon, String path,int unibase)
     {
+        deleteAllTable(sqlCon,tableName);
         File dir = new File(path);
         FilenameFilter filter = (dir1, name) -> name.startsWith(file);
         String[] children = dir.list(filter);
@@ -17,8 +18,8 @@ public class FJournaux extends Table {
             System.out.println("Either dir does not exist or is not a directory");
         } else {
             for (String filename : children) {
-                readOnFile(path, filename, tableName + "_DEST", sqlCon);
-                executeQuery(sqlCon, updateTableDest("JO_Num,JO_Type", "JO_Num,JO_Type,CG_Num,JO_IFRS", tableName, tableName + "_DEST", filename,unibase));
+                importFiles(sqlCon, tableName,path,filename);
+                executeQuery(sqlCon, updateTableDest("JO_Num,JO_Type", "JO_Num,JO_Type,CG_Num,JO_IFRS", tableName, tableName + "_DEST", filename,unibase,0,""));
                 executeQuery(sqlCon,insertTable (tableName,tableName+"_DEST","JO_Num",filename,0,0,"","",""));
 
                 deleteTempTable(sqlCon, tableName + "_DEST");

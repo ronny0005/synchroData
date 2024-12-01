@@ -48,6 +48,15 @@ public class Table {
                 "\n" +
                 "END";
     }
+
+    public static void importFiles(Connection sqlCon, String tableName,String path,String filename){
+        readOnFile(path, filename, tableName + "_DEST", sqlCon);
+    }
+
+    public static void deleteAllTable(Connection sqlCon, String tableName){
+        deleteTempTable(sqlCon,tableName + "_DEST");
+        deleteTempTable(sqlCon,tableName + "_SUPPR");
+    }
     public static String selectSourceTable(String table,String dataSource,boolean existsCbModification,String sourceColumn){
         return "BEGIN \n" +
                 "\nDECLARE @TableName AS VARCHAR(100) = '"+table+"'; \n" +
@@ -580,7 +589,7 @@ public class Table {
                 "\t);\n" +
                 "END CATCH\n";
     }
-    public static String updateTableDest(String key,String exclude,String tableName,String tableNameDest,String filename,int unibase){
+    public static String updateTableDest(String key,String exclude,String tableName,String tableNameDest,String filename,int unibase,int isSource,String keySource){
         StringBuilder sql = new StringBuilder("\n" +
         "BEGIN TRY\n" +
                 "\n" +
@@ -589,7 +598,9 @@ public class Table {
                 "DECLARE @keyJoin VARCHAR(150) = '"+ key +"'\n" +
                 "DECLARE @exclusionColumn VARCHAR(MAX) = '"+ exclude +"'\n" +
                 "DECLARE @filename VARCHAR(150) = '"+ filename +"'\n" +
+                "DECLARE @keySource VARCHAR(150) = '"+ keySource +"'\n" +
                 "DECLARE @columnsSource NVARCHAR(MAX);\n" +
+                "DECLARE @isSource INT  = "+ isSource +";\n" +
                 "DECLARE @columnsDest NVARCHAR(MAX);\n" +
                 "DECLARE @sql NVARCHAR(MAX);\n" +
                 "DECLARE @columns NVARCHAR(MAX);\n" +
@@ -637,11 +648,14 @@ public class Table {
                 "WHERE tab.name = @tableName\n" +
                 "AND t.name NOT IN ('varbinary')\n" +
                 "AND col.is_identity <> 1\n" +
+                "AND col.name NOT IN (SELECT value FROM #keyJoin)\n" +
+                "AND (col.name NOT LIKE '%Source')\n" +
+                "AND (col.name NOT LIKE 'cb%')\n" +
                 ")\n" +
                 "SELECT @columnsDest = STRING_AGG(CAST(col AS VARCHAR(MAX)),',')\n" +
                 "    FROM _Source_;\n" +
                 "\t\n" +
-                "SELECT @keyValue = STRING_AGG(  CAST('src.'+col.name + ' = dest.' + col.name  AS VARCHAR(MAX)), ' AND ')\n" +
+                "SELECT @keyValue = STRING_AGG( CAST(CASE WHEN @isSource = 1 AND col.name = @keySource THEN 'dest.'+ @keySource + ' = src.' + @keySource + 'Source' ELSE 'src.'+col.name + ' = dest.' + col.name END AS VARCHAR(MAX)), ' AND ')\n" +
                 "FROM sys.tables tab\n" +
                 "INNER JOIN sys.columns col\n" +
                 "    ON tab.object_id = col.object_id\n" +

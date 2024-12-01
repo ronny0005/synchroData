@@ -23,8 +23,7 @@ public class Depot extends Table{
     }
     public static void sendDataElement(Connection sqlCon, String path,int unibase)
     {
-
-
+        deleteAllTable(sqlCon,tableName);
         File dir = new File(path);
         FilenameFilter filter = (dir1, name) -> name.startsWith(file);
         String[] children = dir.list(filter);
@@ -32,10 +31,11 @@ public class Depot extends Table{
             System.out.println("Either dir does not exist or is not a directory");
         } else {
             for (String filename : children) {
-                readOnFile(path, filename, tableName + "_DEST", sqlCon);
-                executeQuery(sqlCon, updateTableDest("", "DE_No,DP_NoDefaut,DE_Code,DE_NoSource,DatabaseSource,DE_Intitule", tableName, tableName + "_DEST", filename,unibase));
+
                 disableTrigger(sqlCon,tableName);
+                importFiles(sqlCon, tableName,path,filename);
                 executeQuery(sqlCon,insertTable (tableName,tableName+"_DEST","DE_No,DatabaseSource",filename,1,1,"DE_No","DE_No","DP_NoDefaut,DE_Code"));
+                executeQuery(sqlCon, updateTableDest("DE_No,DatabaseSource", "DE_No,DP_NoDefaut,DE_Code,DE_NoSource,DatabaseSource,DE_Intitule", tableName, tableName + "_DEST", filename,unibase,1,"DE_No"));
                 enableTrigger(sqlCon,tableName);
                 DepotEmpl.sendDataElement(sqlCon, path,unibase);
                 linkDepot(sqlCon);

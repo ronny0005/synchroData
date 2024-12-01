@@ -11,7 +11,7 @@ public class CatTarif extends Table {
 
     public static void sendDataElement(Connection sqlCon, String path,int unibase)
     {
-
+        deleteAllTable(sqlCon,tableName);
         File dir = new File(path);
         FilenameFilter filter = (dir1, name) -> name.startsWith(file);
         String[] children = dir.list(filter);
@@ -20,9 +20,8 @@ public class CatTarif extends Table {
         } else {
             for (String filename : children) {
                 readOnFile(path, filename, tableName + "_DEST", sqlCon);
-                executeQuery(sqlCon, updateTableDest(keyColumns, "cbIndice", tableName, tableName + "_DEST", filename,unibase));
-                deleteTempTable(sqlCon, tableName + "_DEST");
-
+                executeQuery(sqlCon, updateTableDest(keyColumns, "cbIndice", tableName, tableName + "_DEST", filename,unibase,0,""));
+                executeQuery(sqlCon, updateTableDest("cbIndice", "", tableName, tableName + "_DEST", filename,0,0,""));
             }
         }
         loadDeleteFile(path,sqlCon,file,tableName,"","cbIndice");

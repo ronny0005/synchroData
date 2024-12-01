@@ -8,8 +8,19 @@ public class FTarifCond extends Table{
     public static String tableName = "F_TARIFCOND";
     public static String configList = "listFTarifCond";
 
+    public static String updateCONoInsert(){
+
+        return " UPDATE dest SET CO_No = ISNULL(con.CO_No,dest.[CO_No])\n" +
+                " FROM F_TARIFCOND_DEST dest "+
+                " LEFT JOIN (SELECT CO_NoSource,DatabaseSource,CO_No FROM F_CONDITION) con \n" +
+                " ON ISNULL(con.CO_NoSource,0) = ISNULL(dest.CO_No,0) \n" +
+                " AND ISNULL(con.DataBaseSource,'') = ISNULL(dest.DataBaseSource,'') " +
+                "\n";
+    }
+
     public static void sendDataElement(Connection sqlCon, String path,int unibase)
     {
+        deleteAllTable(sqlCon,tableName);
         File dir = new File(path);
         FilenameFilter filter = (dir1, name) -> name.startsWith(file);
         String[] children = dir.list(filter);
@@ -17,11 +28,10 @@ public class FTarifCond extends Table{
             System.out.println("Either dir does not exist or is not a directory");
         } else {
             for (String filename : children) {
-                readOnFile(path, filename, tableName + "_DEST", sqlCon);
-                executeQuery(sqlCon, updateTableDest("AR_Ref,CO_No", "AR_Ref,CO_No,TC_RefCF", tableName, tableName + "_DEST", filename,unibase));
+                importFiles(sqlCon, tableName,path,filename);
+                executeQuery(sqlCon,updateCONoInsert());
                 executeQuery(sqlCon,insertTable (tableName,tableName+"_DEST","AR_Ref,CO_No",filename,0,0,"","",""));
-
-
+                executeQuery(sqlCon, updateTableDest("AR_Ref,CO_No", "AR_Ref,CO_No,TC_RefCF", tableName, tableName + "_DEST", filename,unibase,0,""));
             }
         }
         loadDeleteFile(path,sqlCon,file,tableName,"","AR_Ref,CO_No");

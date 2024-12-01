@@ -29,6 +29,15 @@ public class Reglement extends Table {
                 " AND ISNULL(cai.dataBaseSource,'') = ISNULL(dest.dataBaseSource,'')  \n";
     }
 
+    public static String supprRgNoInReglEch(){
+        return  "\n" +
+                "\t\t\tDELETE suppr\n" +
+                "\t\t\tFROM F_CREGLEMENT_SUPPR suppr\n" +
+                "\t\t\tLEFT JOIN F_CREGLEMENT src ON\tISNULL(src.dataBaseSource, '') = ISNULL(suppr.dataBaseSource, '')\n" +
+                "\t\t\tAND ISNULL(src.RG_NoSource, '') = ISNULL(suppr.RG_No, '')\n" +
+                "\t\t\tWHERE src.RG_No IS NOT NULL";
+    }
+
     public static void sendDataElement(Connection sqlCon, String path,String database,int unibase)
     {
         dbSource = database;
@@ -39,18 +48,19 @@ public class Reglement extends Table {
     }
 
     public static void loadFile(String path,Connection sqlCon){
+        deleteAllTable(sqlCon,tableName);
         String [] children = getFile(path,file);
         if (children == null) {
             System.out.println("Either dir does not exist or is not a directory");
         } else {
             for (String filename : children){
-                readOnFile(path, filename, tableName + "_DEST", sqlCon);
+                importFiles(sqlCon, tableName,path,filename);
                 disableTrigger(sqlCon,tableName);
                 executeQuery(sqlCon,insertTmpTable (tableName,tableName+"_DEST","RG_No,dataBaseSource",filename,0,1,"","RG_No","CA_No"));
                 executeQuery(sqlCon,updateCaisse());
                 executeQuery(sqlCon,insertTable (tableName,tableName+"_TMP","RG_No,dataBaseSource",filename,1,1,"RG_No","RG_No",""));
+                executeQuery(sqlCon, updateTableDest("RG_No,DatabaSource", "", tableName, tableName + "_TMP",filename,0,1,"RG_No"));
                 enableTrigger(sqlCon,tableName);
-
             }
         }
     }

@@ -10,7 +10,7 @@ public class Condition extends Table{
 
     public static void sendDataElement(Connection sqlCon, String path,int unibase)
     {
-
+        deleteAllTable(sqlCon,tableName);
         File dir = new File(path);
         FilenameFilter filter = (dir1, name) -> name.startsWith(file);
         String[] children = dir.list(filter);
@@ -18,9 +18,10 @@ public class Condition extends Table{
             System.out.println("Either dir does not exist or is not a directory");
         } else {
             for (String filename : children) {
-                readOnFile(path, filename, tableName + "_DEST", sqlCon);
-                executeQuery(sqlCon, updateTableDest("CO_No,AR_Ref,EC_Enumere", "CO_No,AR_Ref", tableName, tableName + "_DEST", filename,unibase));
-                executeQuery(sqlCon,insertTable (tableName,tableName+"_DEST","CO_No,AR_Ref,EC_Enumere",filename,0,0,"","",""));
+                importFiles(sqlCon, tableName,path,filename);
+                executeQuery(sqlCon,insertTmpTable (tableName,tableName+"_DEST","AR_Ref,EC_Enumere",filename,0,1,"","CO_No","CO_Ref,CO_CodeBarre"));
+                executeQuery(sqlCon,insertTable (tableName,tableName+"_TMP","AR_Ref,EC_Enumere",filename,1,1,"CO_No","CO_No","CO_Ref,CO_CodeBarre"));
+                executeQuery(sqlCon, updateTableDest("AR_Ref,EC_Enumere", "CO_No,AR_Ref", tableName, tableName + "_DEST", filename,unibase,1,"CO_No"));
 
             }
         }

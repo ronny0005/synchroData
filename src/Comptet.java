@@ -20,7 +20,7 @@ public class Comptet extends Table {
 
     public static void sendDataElement(Connection sqlCon, String path,int unibase)
     {
-
+        deleteAllTable(sqlCon,tableName);
         File dir = new File(path);
         FilenameFilter filter = (dir1, name) -> name.startsWith(file);
         String[] children = dir.list(filter);
@@ -28,15 +28,12 @@ public class Comptet extends Table {
             System.out.println("Either dir does not exist or is not a directory");
         } else {
             for (String filename : children) {
-                readOnFile(path, filename, tableName + "_DEST", sqlCon);
-
+                importFiles(sqlCon, tableName,path,filename);
                 disableTrigger(sqlCon,tableName);
-                executeQuery(sqlCon, updateTableDest("CT_Num,CT_Type", "CT_Num,CT_Type,DE_No", tableName, tableName + "_DEST", filename,unibase));
+                executeQuery(sqlCon, updateTableDest("CT_Num,CT_Type", "CT_Num,CT_Type,DE_No", tableName, tableName + "_DEST", filename,unibase,0,""));
                 executeQuery(sqlCon,insertTmpTable (tableName,tableName+"_DEST","CT_Num,CT_Type",filename,0,0,"","","DE_No"));
                 executeQuery(sqlCon,updateDepotInsert());
                 executeQuery(sqlCon,insertTable (tableName,tableName+"_TMP","CT_Num,CT_Type",filename,0,0,"","",""));
-
-                //             deleteTempTable(sqlCon, tableName + "_DEST");
                 enableTrigger(sqlCon,tableName);
 
             }
