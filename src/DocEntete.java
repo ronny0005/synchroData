@@ -47,9 +47,12 @@ public class DocEntete extends Table {
         }
 
         disableTrigger(sqlCon,tableName);
-        loadDeleteFile(path,sqlCon,file,tableName,"cbMarq","DatabaseSource");
         enableTrigger(sqlCon,tableName);
 
+    }
+
+    public static void deleteFile(String path,Connection sqlCon){
+        loadDeleteFile(path,sqlCon,file,tableName,"cbMarq","DatabaseSource");
     }
 
     public static void getDataElement(Connection sqlCon, String path,String database,String time,JSONObject type)

@@ -71,7 +71,7 @@ public class UpdateData {
                         System.out.println("--Démarrage Application--");
                         System.out.println("Base de données : " + list.get("database") + "\n Chemin : " + path + "\n");
                         System.out.println("Serveur : " + list.get("servername"));
-                        String database = (String) list.get("database");
+                        String database = (String) (list.containsKey("sourcesystem") ? list.get("sourcesystem") : list.get("database"));
     //            DocLigne.sendDataElement(sqlCon, path,list.get(1));
 
                         if ((list.get("taxe")).equals("1")) {
@@ -125,10 +125,17 @@ public class UpdateData {
                         }
 
                         if ((list.get("reglement")).equals("1")) {
-                            System.out.println("--Chargement Reglement--");
-                            Reglement.sendDataElement(sqlCon, path, database,unibase);
                             System.out.println("--Chargement ReglEch--");
                             ReglEch.sendDataElement(sqlCon, path, database,unibase);
+                            System.out.println("--Chargement Reglement--");
+                            Reglement.sendDataElement(sqlCon, path, database,unibase);
+                        }
+
+                        if ((list.get("entete")).equals("1")) {
+                            System.out.println("--Suppression DocRegl--");
+                            DocRegl.loadDeleteFile(path,sqlCon);
+                            System.out.println("--Suppression Entete--");
+                            DocEntete.deleteFile(path,sqlCon);
                         }
 
                         if ((list.get("artstock")).equals("1")) {

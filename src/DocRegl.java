@@ -14,7 +14,7 @@ public class DocRegl extends Table {
     {
         dbSource = database;
         loadFile( path, sqlCon,unibase);
-        loadDeleteFile(path,sqlCon);
+        //loadDeleteFile(path,sqlCon);
 //        DocEntete.loadDeleteFile(path,sqlCon);
     }
 
@@ -36,7 +36,7 @@ public class DocRegl extends Table {
             for (String filename : children){
                 importFiles(sqlCon, tableName,path,filename);
                 disableTrigger(sqlCon,tableName);
-                executeQuery(sqlCon,insertTmpTable (tableName,tableName+"_DEST","cbMarq,DatabaseSource",filename,0,1,"","cbMarq",""));
+                executeQuery(sqlCon,insertTmpTable (tableName,tableName+"_DEST","cbMarqSource,DatabaseSource",filename,0,0,"","",""));
                 executeQuery(sqlCon,deleteEmptyDocEntete());
                 executeQuery(sqlCon, updateTableDest("cbMarqSource,DatabaseSource", "DR_No", tableName, tableName + "_TMP",filename,unibase,0,""));
                 executeQuery(sqlCon,insertTable (tableName,tableName+"_TMP","cbMarqSource,DatabaseSource",filename,1,0,"DR_No","DR_No",""));

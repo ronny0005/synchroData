@@ -55,7 +55,13 @@ public class CsvConverter {
                             String stringValue = value.toString().replace(";", ",");
                             fileWriter.append(stringValue);
                         } else {
-                            fileWriter.append("null");
+                            // Vérifie si la colonne est de type chaîne vide ""
+                            String stringValue = rs.getString(i);
+                            if (stringValue != null && stringValue.isEmpty()) {
+                                fileWriter.append("");
+                            } else {
+                                fileWriter.append("null");
+                            }
                         }
                         if (i < columnCount) fileWriter.append(";");
                     }

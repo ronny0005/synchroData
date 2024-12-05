@@ -40,7 +40,7 @@ public class ReglEch extends Table {
         dbSource = database;
         loadFile(path,sqlCon,unibase);
         disableTrigger(sqlCon,tableName);
-        loadDeleteFile(path,sqlCon,file,tableName,"cbMarq","dataBaseSource");
+        loadDeleteFile(path,sqlCon,file,tableName,"cbMarq","RG_No,DR_No");
         enableTrigger(sqlCon,tableName);
 
     }

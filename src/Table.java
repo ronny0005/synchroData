@@ -30,6 +30,26 @@ public class Table {
     private static String extension = ".csv";
     private static Statement stmt;
 
+    public static String initSelectTable(String table,boolean existsCbModification){
+        return "BEGIN \n" +
+                "\nDECLARE @TableName AS VARCHAR(100) = '"+table+"'; \n" +
+                "\nDECLARE @cbModification DATETIME = "+ ((!existsCbModification) ? "NULL" : "ISNULL((SELECT CONVERT(NVARCHAR(100),(SELECT MAX(cbModification) FROM " + table + "),25)),'1901-01-01');\n") +
+
+                "IF NOT EXISTS(SELECT 1 FROM config.SelectTable WHERE tableName = @TableName) \n" +
+                "             INSERT INTO config.SelectTable(tableName,lastSynchro,isLoaded) VALUES(@TableName,CONVERT(DATETIME,@cbModification,20),0); \n"+
+
+                "IF NOT EXISTS(SELECT 1 FROM config.SelectTable WHERE tableName = @TableName AND lastSynchro < @cbModification) \n" +
+                " UPDATE config.SelectTable " +
+                "     SET lastSynchro =  CONVERT(DATETIME,@cbModification,20) \n" +
+                "     , isLoaded =  CASE WHEN CONVERT(DATETIME,@cbModification,20) = lastSynchro THEN " +
+                "                               CASE WHEN ISNULL(isLoaded,0) < 2 THEN  ISNULL(isLoaded,0) + 1 ELSE  ISNULL(isLoaded,0) END" +
+                "                       ELSE 0 END\n" +
+                " WHERE tableName = @TableName; \n" +
+
+                "\n" +
+                "END";
+    }
+
     public static String updateSelectTable(String table,boolean existsCbModification){
         return "BEGIN \n" +
                 "\nDECLARE @TableName AS VARCHAR(100) = '"+table+"'; \n" +
@@ -69,15 +89,6 @@ public class Table {
                 "INTO #sourceColumn\n" +
                 "FROM STRING_SPLIT(@sourceColumn,',')\n" +
                 "WHERE value <> '';\n"+
-        /*"IF EXISTS(SELECT 1 FROM config.SelectTable WHERE tableName = @TableName) \n" +
-                " UPDATE config.SelectTable " +
-                "     SET lastSynchro =  CONVERT(DATETIME,@cbModification,20) \n" +
-                "     , isLoaded =  CASE WHEN CONVERT(DATETIME,@cbModification,20) = lastSynchro THEN " +
-                "                               CASE WHEN ISNULL(isLoaded,0) < 2 THEN  ISNULL(isLoaded,0) + 1 ELSE  ISNULL(isLoaded,0) END" +
-                "                       ELSE 0 END\n" +
-                " WHERE tableName = @TableName; \n" +
-                "         ELSE \n" +
-                "             INSERT INTO config.SelectTable(tableName,lastSynchro,isLoaded) VALUES(@TableName,CONVERT(DATETIME,@cbModification,20),0); \n"+*/
                 "DECLARE @MaColonne AS VARCHAR(250);\n" +
                 "DECLARE @MonSQL AS VARCHAR(MAX)=''; \n" +
                 "DECLARE @databaseSource AS VARCHAR(150) = '"+dataSource+"'; \n" +
@@ -149,6 +160,7 @@ public class Table {
                 "DECLARE @MaColonne AS VARCHAR(250);\n" +
                 "DECLARE @MonSQL AS VARCHAR(MAX)=''; \n" +
                 "DECLARE @facturevente AS VARCHAR(1) = "+ type.get("facturedevente") +"; \n" +
+                "DECLARE @ticket AS VARCHAR(1) = "+ ((type.containsKey("ticket")) ? type.get("ticket") : "0") +"; \n" +
                 "DECLARE @vente AS VARCHAR(1) = "+ type.get("vente") +"; \n" +
                 "DECLARE @stock AS VARCHAR(1) = "+ type.get("stock") +"; \n" +
                 "DECLARE @devis AS VARCHAR(1) = "+type.get("devis")+"; \n" +
@@ -191,6 +203,7 @@ public class Table {
                 "  WHERE cbModification > CONVERT(DATETIME,''' + @lastSynchro +''',20) \n" +
                 "  AND CASE WHEN ' + @vente + ' = 1 AND DO_Domaine = 0 THEN 1 \n" +
                 "           WHEN ' + @facturevente + ' = 1 AND DO_Domaine = 0 AND DO_Type IN (6,7) THEN 1 \n" +
+                "           WHEN ' + @ticket + ' = 1 AND DO_Domaine = 3 AND DO_Type IN (30) THEN 1 \n" +
                 "           WHEN ' + @devis + ' = 1 AND DO_Domaine = 0 AND DO_Type = 0 THEN 1 \n" +
                 "           WHEN ' + @bonlivraison + ' = 1 AND DO_Domaine = 0 AND DO_Type = 3 THEN 1 \n" +
                 "           WHEN ' + @factureachat + ' = 1 AND DO_Domaine = 1 THEN 1 \n" +
@@ -468,7 +481,11 @@ public class Table {
                 "DECLARE @keySource AS VARCHAR(100) = '"+keySource+"';\n" +
                 "DECLARE @listKeys AS VARCHAR(100) = '"+listKeys+"';\n" +
                 "DECLARE @listKeysQuery AS VARCHAR(MAX) = '';\n" +
+                "DECLARE @listSourceQuery AS VARCHAR(MAX) = '';\n" +
                 "\n" +
+                "\n" +
+                "SELECT @listSourceQuery = STRING_AGG(CONCAT('ISNULL(src.',value,'Source,'''') = ISNULL(suppr.' , value,' ,'''')'),' AND ')\n" +
+                "FROM STRING_SPLIT(@keySource,',') \n" +
                 "SELECT @listKeysQuery = STRING_AGG (CAST('ISNULL(src.'+[value] +','''') = ISNULL(suppr.'+[value]+','''')'  AS VARCHAR(MAX)), ' AND ')\n" +
                 "FROM STRING_SPLIT(@listKeys,',')\n" +
                 "\n" +
@@ -479,7 +496,7 @@ public class Table {
                 "\t\t\t\t\t\t\t\t\tFROM '+@TableName+'_SUPPR suppr\n" +
                 "\t\t\t\t\t\t\t\t\tWHERE 1=1'\n" +
                 "\t\t\t\t\t\t\t\t\t+ CASE WHEN ISNULL(@listKeysQuery,'') <> '' THEN ' AND '+ @listKeysQuery ELSE '' END \n" +
-                "\t\t\t\t\t\t\t\t\t+ CASE WHEN ISNULL(@keySource,'') <> '' THEN ' AND '+ ('ISNULL(src.'+ @keySource +'Source,'''') = ISNULL(suppr.' + @keySource+' ,'''')') ELSE '' END\n" +
+                "\t\t\t\t\t\t\t\t\t+ CASE WHEN ISNULL(@keySource,'') <> '' THEN ' AND ' + @listSourceQuery ELSE '' END\n" +
                 "\t\t\t\t\t\t\t\t\t+')'\n" +
                 "\n" +
                 "\n" +
@@ -638,7 +655,9 @@ public class Table {
                 "            WHERE t.name = @tableNameDest\n" +
                 "            AND c.name = col.name\n" +
                 "        ) AND col.name NOT IN (SELECT value FROM #keyJoin) AND col.name NOT IN (SELECT value FROM #exclusionColumn)\n" +
-                "        THEN ''+col.name +' = dest.' + col.name   /* Si la colonne existe, on l'inclut*/\n" +
+                "        THEN \n" +
+                "           CASE WHEN col.name = 'cbModification' THEN  ''+col.name +' = GETDATE() '  /* Si la colonne existe, on l'inclut*/\n" +
+                "                WHEN col.name = 'cbCreateur' THEN  ''+col.name +' = ''DATA'' ' ELSE ''+col.name +' = dest.' + col.name END   /* Si la colonne existe, on l'inclut*/\n" +
                 "    END AS Col\n" +
                 "FROM sys.tables tab\n" +
                 "INNER JOIN sys.columns col\n" +
@@ -650,7 +669,8 @@ public class Table {
                 "AND col.is_identity <> 1\n" +
                 "AND col.name NOT IN (SELECT value FROM #keyJoin)\n" +
                 "AND (col.name NOT LIKE '%Source')\n" +
-                "AND (col.name NOT LIKE 'cb%')\n" +
+                "AND (col.name NOT LIKE 'cb%' OR col.name IN ('cbMarqSource','cbCreateur'))\n" +
+                "\n" +
                 ")\n" +
                 "SELECT @columnsDest = STRING_AGG(CAST(col AS VARCHAR(MAX)),',')\n" +
                 "    FROM _Source_;\n" +
@@ -759,6 +779,8 @@ public class Table {
                 "        THEN CASE WHEN @increment  = 1 AND col.name = @incrementValue THEN '(SELECT ISNULL((SELECT MAX('+@incrementValue+') FROM '+@tableName+'),0)) + ROW_NUMBER() OVER(ORDER BY dest.' + @incrementValue + ' ) AS ' + col.name\n" +
                 "\t\t\t\t\tWHEN @isSource = 1 AND col.name = @keySource+'Source' THEN  'dest.'+@keySource +' AS ' + col.name\n" +
                 "\t\t\t\t\tWHEN col.name IN (SELECT [value] FROM #setToNull) THEN  'NULL AS ' + col.name \n" +
+                "\t\t\t\t\tWHEN col.name = 'cbModification' THEN  'GETDATE() AS ' + col.name \n" +
+                "\t\t\t\t\tWHEN col.name = 'cbCreateur' THEN  'DATA AS ' + col.name \n" +
                 "\t\t\t\t\tELSE  'dest.' + col.name  END /* Si la colonne existe, on l'inclut */\n" +
                 "        ELSE 'NULL AS ' + col.name  /* Si elle n'existe pas, on met NULL */\n" +
                 "    END AS Col\n" +
@@ -851,7 +873,7 @@ public class Table {
                 "\tWHERE tab.name = @tableName\n" +
                 "\tAND t.name NOT IN ('varbinary')\n" +
                 "\tAND col.is_identity <> 1\n" +
-                "\tAND (col.name NOT LIKE 'cb%' OR col.name = 'cbMarqSource')\n" +
+                "\tAND (col.name NOT LIKE 'cb%' OR col.name IN ('cbMarqSource','cbCreateur'))\n" +
                 "\n" +
                 ";\n" +
                 "WITH _Source_ AS (\n" +
@@ -868,6 +890,8 @@ public class Table {
                 "        THEN CASE WHEN @increment  = 1 AND col.name = @incrementValue THEN '(SELECT ISNULL((SELECT MAX('+@incrementValue+') FROM '+@tableName+'),0)) + ROW_NUMBER() OVER(ORDER BY dest.' + @incrementValue + ' ) AS ' + col.name\n" +
                 "\t\t\t\t\tWHEN @isSource = 1 AND col.name = @keySource+'Source' THEN  'dest.'+@keySource +' AS ' + col.name\n" +
                 "\t\t\t\t\tWHEN col.name IN (SELECT [value] FROM #setToNull) THEN  'NULL AS ' + col.name \n" +
+                "\t\t\t\t\tWHEN col.name = 'cbModification' THEN  'GETDATE() AS ' + col.name \n" +
+                "\t\t\t\t\tWHEN col.name = 'cbCreateur' THEN  '''DATA'' AS ' + col.name \n" +
                 "\t\t\t\t\tELSE  'dest.' + col.name  END /* Si la colonne existe, on l'inclut */\n" +
                 "        ELSE 'NULL AS ' + col.name  /* Si elle n'existe pas, on met NULL */\n" +
                 "    END AS Col \n" +
@@ -879,7 +903,7 @@ public class Table {
                 "WHERE tab.name = @tableName\n" +
                 "AND t.name NOT IN ('varbinary')\n" +
                 "AND col.is_identity <> 1\n" +
-                "AND (col.name NOT LIKE 'cb%' OR col.name = 'cbMarqSource')\n" +
+                "AND (col.name NOT LIKE 'cb%' OR col.name IN ('cbMarqSource','cbCreateur'))\n" +
                 ")\n" +
                 "SELECT @columnsDest = STRING_AGG(CAST(col AS VARCHAR(MAX)),',')\n" +
                 "    FROM _Source_;\n" +

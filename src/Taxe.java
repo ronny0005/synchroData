@@ -18,7 +18,6 @@ public class Taxe extends Table {
                 readOnFile(path, filename, tableName + "_DEST", sqlCon);
                 executeQuery(sqlCon,insertTable (tableName,tableName+"_DEST","TA_Code",filename,0,0,"","",""));
                 executeQuery(sqlCon, updateTableDest("TA_Code", "TA_Code", tableName, tableName + "_DEST", filename,unibase,0,""));
-                deleteTempTable(sqlCon, tableName + "_DEST");
 
             }
         }

@@ -79,12 +79,12 @@ public class BackupData {
                         properties.put("user", list.get("username"));
                         properties.put("password", list.get("password"));
                         configInfo = new ConfigInfo((String) list.get("servername"),(String) list.get("username"),(String) list.get("password"),(String) list.get("database"));
-
+                        String limitDate = (String) list.get("datemaj");
                         Connection sqlCon = DriverManager.getConnection(dbURL, properties);
                         sqlCon.setAutoCommit(true);
 
           //            ReglEch.getDataElement(sqlCon, path,list.get(1));
-                        String database = (String) list.get("database");
+                        String database = (String) (list.containsKey("sourcesystem") ? list.get("sourcesystem") : list.get("database"));
                         Object valueSelect = list.get("taxe");
 
                         valueSelect = list.get("taxe");
