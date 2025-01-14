@@ -1,5 +1,5 @@
 Manifest-Version: 1.0
-Main-Class: UploadFileFTP
+Main-Class: UploadFileSFTP
 Class-Path: json-simple-1.1.1.jar mssql-jdbc-8.2.2.jre13.jar mssql-jdbc-
  8.2.2.jre11.jar mssql-jdbc-8.2.2.jre8.jar opencsv-5.2.jar jsch-0.1.55.j
  ar avro-1.11.1.jar jackson-core-2.17.2.jar jackson-annotations-2.17.2.j

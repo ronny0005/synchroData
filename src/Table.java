@@ -30,26 +30,6 @@ public class Table {
     private static String extension = ".csv";
     private static Statement stmt;
 
-    public static String initSelectTable(String table,boolean existsCbModification){
-        return "BEGIN \n" +
-                "\nDECLARE @TableName AS VARCHAR(100) = '"+table+"'; \n" +
-                "\nDECLARE @cbModification DATETIME = "+ ((!existsCbModification) ? "NULL" : "ISNULL((SELECT CONVERT(NVARCHAR(100),(SELECT MAX(cbModification) FROM " + table + "),25)),'1901-01-01');\n") +
-
-                "IF NOT EXISTS(SELECT 1 FROM config.SelectTable WHERE tableName = @TableName) \n" +
-                "             INSERT INTO config.SelectTable(tableName,lastSynchro,isLoaded) VALUES(@TableName,CONVERT(DATETIME,@cbModification,20),0); \n"+
-
-                "IF NOT EXISTS(SELECT 1 FROM config.SelectTable WHERE tableName = @TableName AND lastSynchro < @cbModification) \n" +
-                " UPDATE config.SelectTable " +
-                "     SET lastSynchro =  CONVERT(DATETIME,@cbModification,20) \n" +
-                "     , isLoaded =  CASE WHEN CONVERT(DATETIME,@cbModification,20) = lastSynchro THEN " +
-                "                               CASE WHEN ISNULL(isLoaded,0) < 2 THEN  ISNULL(isLoaded,0) + 1 ELSE  ISNULL(isLoaded,0) END" +
-                "                       ELSE 0 END\n" +
-                " WHERE tableName = @TableName; \n" +
-
-                "\n" +
-                "END";
-    }
-
     public static String updateSelectTable(String table,boolean existsCbModification){
         return "BEGIN \n" +
                 "\nDECLARE @TableName AS VARCHAR(100) = '"+table+"'; \n" +
@@ -78,62 +58,76 @@ public class Table {
         deleteTempTable(sqlCon,tableName + "_SUPPR");
     }
     public static String selectSourceTable(String table,String dataSource,boolean existsCbModification,String sourceColumn){
-        return "BEGIN \n" +
+        return
+
+        " BEGIN  \n" +
                 "\nDECLARE @TableName AS VARCHAR(100) = '"+table+"'; \n" +
                 "DECLARE @sourceColumn AS VARCHAR(100) = '"+sourceColumn+"'; \n" +
-                "DECLARE @querySourceColumn AS NVARCHAR(MAX) = ''; \n" +
-                "\nDECLARE @cbModification VARCHAR(100) = "+ ((!existsCbModification) ? "NULL" : "ISNULL((SELECT CONVERT(NVARCHAR(100),(SELECT MAX(cbModification) FROM " + table + "),25)),'1901-01-01');\n") +
-                "\nDECLARE @lastSynchro VARCHAR(100) = ISNULL((SELECT CONVERT(NVARCHAR(100),(SELECT CASE WHEN ISNULL(isLoaded,0) = 2 THEN lastSynchro ELSE DATEADD(HOUR,-1,lastSynchro) END FROM config.SelectTable WHERE tableName = @TableName),25)),'1901-01-01');" +
-                "\nDROP TABLE IF EXISTS #sourceColumn\n" +
-                "SELECT\t[value]\n" +
-                "INTO #sourceColumn\n" +
-                "FROM STRING_SPLIT(@sourceColumn,',')\n" +
-                "WHERE value <> '';\n"+
-                "DECLARE @MaColonne AS VARCHAR(250);\n" +
-                "DECLARE @MonSQL AS VARCHAR(MAX)=''; \n" +
+                " DECLARE @querySourceColumn AS NVARCHAR(MAX) = '';  \n" +
+                " DECLARE @cbModification VARCHAR(100) = NULL;\n" +
+                " DECLARE @lastSynchro VARCHAR(100) = ISNULL((SELECT CONVERT(NVARCHAR(100),(SELECT CASE WHEN ISNULL(isLoaded,0) = 2 THEN lastSynchro ELSE DATEADD(HOUR,-1,lastSynchro) END FROM config.SelectTable WHERE tableName = @TableName),25)),'1901-01-01');  \n" +
+                "  \n" +
+                " DROP TABLE IF EXISTS #sourceColumn \n" +
+                " SELECT [value] \n" +
+                " INTO #sourceColumn \n" +
+                " FROM STRING_SPLIT(@sourceColumn,',') \n" +
+                " WHERE value <> ''; \n" +
+                " DECLARE @MaColonne AS VARCHAR(250); \n" +
+                " DECLARE @MonSQL AS VARCHAR(MAX)='';  \n" +
                 "DECLARE @databaseSource AS VARCHAR(150) = '"+dataSource+"'; \n" +
-                "DECLARE @getid CURSOR\n" +
+                " DECLARE @getid CURSOR \n" +
+                "  \n" +
+                "  \n" +
+                " IF EXISTS (\n" +
+                " SELECT 1\n" +
+                " FROM sys.tables tab\n" +
+                " INNER JOIN sys.columns col \n" +
+                " ON tab.object_id = col.object_id \n" +
+                " WHERE tab.name = @TableName \n" +
+                " AND col.name = 'cbModification')\n" +
+                "\tSET @cbModification = ''\n" +
                 "\n" +
-                "SET @getid = CURSOR FOR\n" +
-                "SELECT col.name\n" +
-                "FROM sys.tables tab\n" +
-                "INNER JOIN sys.columns col\n" +
-                "\tON tab.object_id = col.object_id\n" +
-                "INNER JOIN sys.types t\n" +
-                "    ON col.user_type_id = t.user_type_id\n" +
-                "WHERE tab.name = @TableName\n" +
-                "AND col.name NOT IN ('DataBaseSource','cbMarqSource','cbMarq')\n" +
-                "AND t.name NOT IN ('varbinary')\n" +
-                "AND col.name NOT IN (SELECT CONCAT([value],'Source') FROM #sourceColumn)\n" +
+                " SET @getid = CURSOR FOR \n" +
+                " SELECT col.name \n" +
+                " FROM sys.tables tab \n" +
+                " INNER JOIN sys.columns col \n" +
+                " ON tab.object_id = col.object_id \n" +
+                " INNER JOIN sys.types t \n" +
+                "     ON col.user_type_id = t.user_type_id \n" +
+                " WHERE tab.name = @TableName \n" +
+                " AND col.name NOT IN ('DataBaseSource','cbMarqSource','cbMarq') \n" +
+                " AND t.name NOT IN ('varbinary') \n" +
+                " AND col.name NOT IN (SELECT CONCAT([value],'Source') FROM #sourceColumn) \n" +
+                "  \n" +
+                " OPEN @getid \n" +
+                " FETCH NEXT \n" +
+                " FROM @getid INTO @MaColonne \n" +
+                " WHILE @@FETCH_STATUS = 0 \n" +
+                " BEGIN \n" +
+                "  SELECT @MonSQL = @MonSQL+ ',' + @MaColonne  \n" +
+                "  \n" +
+                "  FETCH NEXT \n" +
+                "     FROM @getid INTO @MaColonne /*, @name*/ \n" +
+                " END \n" +
+                " CLOSE @getid \n" +
+                " DEALLOCATE @getid \n" +
+                " SELECT @MonSQL = SUBSTRING(@MonSQL,2,LEN(@MonSQL))  \n" +
+                "  \n" +
+                "  SELECT @querySourceColumn = STRING_AGG(CAST(CONCAT([value],'Source = ',[value]) AS VARCHAR(MAX)),',') \n" +
+                " FROM #sourceColumn \n" +
+                " SELECT @MonSQL = 'DECLARE @databaseSource AS VARCHAR (150) = '''+@databaseSource+'''; SELECT ' + @MonSQL  \n" +
+                " +',cbMarqSource = [cbMarq],[DataBaseSource] = @databaseSource '+(CASE WHEN ISNULL(@querySourceColumn,'')<> '' THEN ','+ @querySourceColumn ELSE '' END)+' FROM ' \n" +
+                " + @TableName +  CASE WHEN @cbModification IS NOT NULL THEN ' WHERE cbModification > CONVERT(DATETIME,''' + @lastSynchro +''',20)' ELSE '' END \n" +
+                " IF EXISTS ( SELECT col.name   \n" +
+                "   FROM sys.tables tab   \n" +
+                "   INNER JOIN sys.columns col ON tab.object_id = col.object_id   \n" +
+                "   WHERE tab.name = @TableName   \n" +
+                "   AND  col.name = 'DataBaseSource')  \n" +
+                "  SELECT @MonSQL = @MonSQL + ' AND ISNULL(DataBaseSource,''' + @databaseSource +''') = ''' + @databaseSource +'''' \n" +
                 "\n" +
-                "OPEN @getid\n" +
-                "FETCH NEXT\n" +
-                "FROM @getid INTO @MaColonne\n" +
-                "WHILE @@FETCH_STATUS = 0\n" +
-                "BEGIN\n" +
-                " SELECT @MonSQL = @MonSQL+ ',' + @MaColonne \n" +
-                "\n" +
-                " FETCH NEXT\n" +
-                "    FROM @getid INTO @MaColonne /*, @name*/\n" +
-                "END\n" +
-                "CLOSE @getid\n" +
-                "DEALLOCATE @getid\n" +
-                "SELECT @MonSQL = SUBSTRING(@MonSQL,2,LEN(@MonSQL)) \n" +
-                "\n" +
-                "\nSELECT @querySourceColumn = STRING_AGG(CAST(CONCAT([value],'Source = ',[value]) AS VARCHAR(MAX)),',')\n" +
-                "FROM #sourceColumn\n"+
-                "SELECT @MonSQL = 'DECLARE @databaseSource AS VARCHAR (150) = '''+@databaseSource+'''; SELECT ' + @MonSQL \n" +
-                "+',cbMarqSource = [cbMarq],[DataBaseSource] = @databaseSource '+(CASE WHEN ISNULL(@querySourceColumn,'')<> '' THEN ','+ @querySourceColumn ELSE '' END)+' FROM '\n" +
-                "+ @TableName +  CASE WHEN @cbModification IS NOT NULL THEN ' WHERE cbModification > CONVERT(DATETIME,''' + @lastSynchro +''',20)' ELSE '' END\n" +
-                "IF EXISTS (\tSELECT\tcol.name  \n" +
-                "\t\t\tFROM\tsys.tables tab  \n" +
-                "\t\t\tINNER JOIN sys.columns col\tON\ttab.object_id = col.object_id  \n" +
-                "\t\t\tWHERE\ttab.name = @TableName  \n" +
-                "\t\t\tAND\t\tcol.name = 'DataBaseSource') \n" +
-                "\t SELECT @MonSQL = @MonSQL + ' AND ISNULL(DataBaseSource,''' + @databaseSource +''') = ''' + @databaseSource +''''\n" +
-                "EXEC(@MonSQL)\n" +
-                "\n" +
-                "END";
+                " EXEC(@MonSQL) \n" +
+                "  \n" +
+                " END ";
     }
 
     public static String selectSourceTable(String table, String dataSource, JSONObject type,String sourceColumn){
@@ -780,7 +774,7 @@ public class Table {
                 "\t\t\t\t\tWHEN @isSource = 1 AND col.name = @keySource+'Source' THEN  'dest.'+@keySource +' AS ' + col.name\n" +
                 "\t\t\t\t\tWHEN col.name IN (SELECT [value] FROM #setToNull) THEN  'NULL AS ' + col.name \n" +
                 "\t\t\t\t\tWHEN col.name = 'cbModification' THEN  'GETDATE() AS ' + col.name \n" +
-                "\t\t\t\t\tWHEN col.name = 'cbCreateur' THEN  'DATA AS ' + col.name \n" +
+                "\t\t\t\t\tWHEN col.name = 'cbCreateur' THEN  '''DATA'' AS ' + col.name \n" +
                 "\t\t\t\t\tELSE  'dest.' + col.name  END /* Si la colonne existe, on l'inclut */\n" +
                 "        ELSE 'NULL AS ' + col.name  /* Si elle n'existe pas, on met NULL */\n" +
                 "    END AS Col\n" +
